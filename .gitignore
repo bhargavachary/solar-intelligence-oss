@@ -49,3 +49,6 @@ htmlcov/
 # Temporary files
 /tmp/
 *.tmp
+credentials.txt
+
+test_solarman.py

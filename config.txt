@@ -1,0 +1,20 @@
+# Configuration for Waaree Solar Monitor
+
+# MODE: Set to 'mock' for simulation, 'real' for actual connection
+MODE=mock
+
+# INVERTER DETAILS (Required for 'real' mode)
+# IP Address of the Solarman/Waaree WiFi Stick
+INVERTER_IP=192.168.1.50
+
+# Serial Number of the WiFi Stick
+# Note: Solarman V5 protocol usually requires the integer Serial Number (e.g. 23xxxxxxx)
+# If your stick has an alphanumeric SN (e.g. B09...), try to find the integer one on the label.
+# However, we will support alphanumeric in config just in case.
+INVERTER_SN=B09W6DUF584A114
+
+# Port usually 8899 for Solarman V5
+INVERTER_PORT=8899
+
+# DASHBOARD SETTINGS
+REFRESH_RATE=5
