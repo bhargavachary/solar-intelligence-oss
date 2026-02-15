@@ -1066,43 +1066,81 @@
         trendEl.textContent = icons[dir] || '● stable';
     }
 
-    function updateInsights(records, m, analytics) {
+    function updateInsights(records, m, analytics, metaRef) {
         var items = [];
         var l = m.latest;
+        var cap = num((metaRef && metaRef.plant_capacity_kw) || 2.32);
         function ico(emoji, text) { return '<div class="insight-item"><span class="insight-icon">' + emoji + '</span><span>' + text + '</span></div>'; }
         if (!l) { items.push(ico('📭', 'No telemetry records found yet.')); }
         else {
-            var cap = num(meta.plant_capacity_kw || 2.32);
-            var capPct = (l.power / cap * 100).toFixed(0);
-            items.push(ico('⚡', 'Current output: <strong>' + l.power.toFixed(2) + ' kW</strong> (' + capPct + '% of ' + cap.toFixed(2) + ' kW capacity)'));
-            var dailyTarget = num(meta.daily_realistic_max_kwh || 12);
-            if (l.daily > 0) items.push(ico('📈', "Today's yield: <strong>" + l.daily.toFixed(2) + ' kWh</strong> — ' + (l.daily / dailyTarget * 100).toFixed(0) + '% of ' + dailyTarget.toFixed(0) + ' kWh target'));
-            if (l.weather) items.push(ico('🌤️', 'Weather: <strong>' + l.weather + '</strong>'));
-            var trend = analytics ? analytics.power_trend : null;
-            if (trend && trend.direction === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> (slope: +' + trend.slope_kw_per_sample + ' kW/sample, R²=' + trend.r_squared + ')'));
-            else if (trend && trend.direction === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline'));
+            // Peak power from model/history
+            var peakPow = m.peakPower;
+            var peakPct = (peakPow / cap * 100).toFixed(0);
+            items.push(ico('⚡', 'Peak output today: <strong>' + peakPow.toFixed(2) + ' kW</strong> (' + peakPct + '% of ' + cap.toFixed(2) + ' kW capacity)'));
+
+            // Daily yield vs expected
+            var dailyStats = (analytics && analytics.statistics && analytics.statistics.daily_yield) || {};
+            var expected = dailyStats.expected_today || num((metaRef && metaRef.daily_realistic_max_kwh) || 11);
+            if (l.daily > 0) {
+                var yieldPct = (l.daily / expected * 100).toFixed(0);
+                var yieldEmoji = yieldPct >= 95 ? '🎯' : yieldPct >= 80 ? '📈' : '📉';
+                items.push(ico(yieldEmoji, "Today's yield: <strong>" + l.daily.toFixed(2) + ' kWh</strong> — ' + yieldPct + '% of expected ' + expected.toFixed(1) + ' kWh'));
+            }
+
+            // Performance ratio with interpretation
             var perf = analytics ? analytics.performance : null;
             if (perf && perf.performance_ratio_pct) {
                 var prVal = perf.performance_ratio_pct;
-                var prLabel = prVal >= 75 ? 'excellent' : prVal >= 60 ? 'good' : prVal >= 40 ? 'moderate' : 'low';
-                items.push(ico('🎯', 'Performance Ratio: <strong>' + prVal + '%</strong> (' + prLabel + ')'));
+                var prLabel = prVal >= 90 ? 'excellent — near-optimal output' : prVal >= 75 ? 'good — healthy system' : prVal >= 60 ? 'moderate — check for soiling' : 'low — inspect panels';
+                items.push(ico('🏆', 'Performance Ratio: <strong>' + prVal + '%</strong> (' + prLabel + ')'));
             }
+
+            // Capacity factor with interpretation
+            if (perf && perf.capacity_factor_pct) {
+                var cfVal = perf.capacity_factor_pct;
+                var cfLabel = cfVal >= 18 ? 'above average for India' : cfVal >= 15 ? 'typical for the region' : 'below expected — check shading';
+                items.push(ico('📊', 'Capacity Factor: <strong>' + cfVal + '%</strong> — ' + cfLabel));
+            }
+
+            // Power trend
+            var trend = analytics ? analytics.power_trend : null;
+            if (trend && trend.direction === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> — morning ramp-up'));
+            else if (trend && trend.direction === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline (normal solar behavior)'));
+            else if (trend) items.push(ico('➡️', 'Power trend <strong>stable</strong> — near solar noon'));
+
+            // Grid voltage
             if (m.avgVolt > 0) {
-                if (m.avgVolt >= 210 && m.avgVolt <= 250) items.push(ico('✅', 'Grid voltage stable at <strong>' + m.avgVolt.toFixed(1) + 'V</strong> — healthy range'));
+                if (m.avgVolt >= 210 && m.avgVolt <= 250) items.push(ico('✅', 'Grid voltage stable at <strong>' + m.avgVolt.toFixed(1) + 'V</strong> — healthy range (210–250V)'));
                 else items.push(ico('⚠️', 'Grid voltage at ' + m.avgVolt.toFixed(1) + 'V — outside recommended range'));
             }
-            if (l.temperature > 0) {
-                var tempNote = l.temperature > 35 ? '⚠️ high temp may reduce efficiency' : 'within optimal range';
-                items.push(ico('🌡️', 'Panel temperature: <strong>' + l.temperature.toFixed(1) + '°C</strong> — ' + tempNote));
+
+            // Temperature
+            var peakRec = records.reduce(function(a, b) { return a.power > b.power ? a : b; });
+            if (peakRec && peakRec.temperature > 0) {
+                var tempNote = peakRec.temperature > 45 ? '⚠️ high — may reduce efficiency by ~' + ((peakRec.temperature - 25) * 0.4).toFixed(0) + '%' : 'within optimal range';
+                items.push(ico('🌡️', 'Panel temperature at peak: <strong>' + peakRec.temperature.toFixed(1) + '°C</strong> — ' + tempNote));
             }
-            var anomalyCount = (analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0;
-            if (anomalyCount > 0) items.push(ico('🔍', anomalyCount + ' anomalies detected'));
-            else items.push(ico('✨', 'No anomalies — system operating normally'));
-            if (trend && trend.forecast_next_kw > 0) items.push(ico('🔮', 'EWMA forecast: <strong>' + trend.forecast_next_kw + ' kW</strong>'));
+
+            // Production monitoring
+            var pm = analytics ? analytics.production_monitoring : null;
+            if (pm && pm.status === 'normal') items.push(ico('✨', 'Production on track — no anomalies detected'));
+            else if (pm && pm.alerts && pm.alerts.length > 0) items.push(ico('⚠️', pm.alerts[0].message));
+            else items.push(ico('✨', 'System operating normally'));
+
+            // Degradation
+            var deg = perf && perf.degradation;
+            if (deg) items.push(ico('🔧', 'Estimated degradation: <strong>~' + deg.degradation_pct_year + '%/yr</strong> — ' + (deg.note || 'industry standard')));
+
+            // EWMA forecast
+            if (trend && trend.forecast_next_kw > 0) items.push(ico('🔮', 'Next interval forecast (EWMA): <strong>' + trend.forecast_next_kw + ' kW</strong>'));
         }
         document.getElementById('insights-list').innerHTML = items.join('');
-        setText('badge-anomalies', ((analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0) + ' anomalies');
-        setText('badge-method', (m.latest && m.latest.method) ? m.latest.method : 'awaiting');
+        var anomalyCount = (analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0;
+        setText('badge-anomalies', anomalyCount > 0 ? anomalyCount + ' anomalies' : 'All clear');
+        var methodLabel = 'awaiting';
+        if (records.some(function(r) { return r.method === 'deterministic_model'; })) methodLabel = 'Physics Model';
+        else if (m.latest && m.latest.method) methodLabel = m.latest.method;
+        setText('badge-method', methodLabel);
     }
 
     function updateHealthRing(analytics) {
@@ -1134,7 +1172,7 @@
         setText('pb-dq', dq + '%'); document.getElementById('pb-dq-fill').style.width = dq + '%';
         var deg = perf.degradation;
         if (deg && deg.confidence === 'high') setText('degradation-est', deg.degradation_pct_year + '%/yr');
-        else if (deg && deg.confidence === 'medium') setText('degradation-est', '~' + deg.degradation_pct_year + '%/yr (est.)');
+        else if (deg && (deg.confidence === 'medium' || deg.confidence === 'estimated')) setText('degradation-est', '~' + deg.degradation_pct_year + '%/yr (est.)');
         else setText('degradation-est', 'Needs more data');
     }
 
@@ -1153,15 +1191,25 @@
 
     function updateOperational(meta, records, m) {
         var l = m.latest;
-        setText('op-status', l ? l.status : '--');
-        setText('op-voltage', l ? l.voltage.toFixed(1) + ' V' : '--');
-        setText('op-current', l ? l.current.toFixed(2) + ' A' : '--');
-        setText('op-freq', l ? l.frequency.toFixed(2) + ' Hz' : '--');
-        setText('op-temp', l ? l.temperature.toFixed(1) + ' °C' : '--');
+        // For operational display, find the peak-power record (most representative)
+        var peakRec = l;
+        if (records.length > 1) {
+            peakRec = records.reduce(function(a, b) { return a.power > b.power ? a : b; });
+        }
+        // Use peak record for voltage/current/temp to show representative values
+        var op = (peakRec && peakRec.power > 0) ? peakRec : l;
+        // For status, prefer any Online record
+        var statusRec = records.find(function(r) { return r.status === 'Online'; }) || l;
+        setText('op-status', statusRec ? statusRec.status : '--');
+        setText('op-voltage', op && op.voltage > 0 ? op.voltage.toFixed(1) + ' V' : '--');
+        setText('op-current', op && op.current > 0 ? op.current.toFixed(2) + ' A' : '--');
+        setText('op-freq', op && op.frequency > 0 ? op.frequency.toFixed(2) + ' Hz' : '--');
+        setText('op-temp', op && op.temperature > 0 ? op.temperature.toFixed(1) + ' °C' : '--');
         setText('op-samples', records.length);
         setText('op-location', meta.location || 'Berhampur, Odisha');
         setText('footer-plant', (l ? l.plant_id : null) || meta.plant_id || '--');
-        setText('badge-voltage', l ? l.voltage.toFixed(0) + 'V · ' + l.current.toFixed(1) + 'A' : '--');
+        var vBadge = op && op.voltage > 0 ? op.voltage.toFixed(0) + 'V · ' + op.current.toFixed(1) + 'A' : '--';
+        setText('badge-voltage', vBadge);
         setText('badge-records', records.length + ' records');
     }
 
@@ -1351,22 +1399,21 @@
         var causesList = document.getElementById('likely-causes-list');
         var severityBadge = document.getElementById('alert-severity');
 
-        if (monitoring.status === 'drop_detected' && monitoring.alerts && monitoring.alerts.length > 0) {
-            var nowHour = new Date().getHours();
-            var isSolarHours = nowHour >= 7 && nowHour <= 17;
-            var significant = monitoring.alerts.filter(function(a) { return a.deficit_pct > 30 && isSolarHours; });
-            if (significant.length === 0) { section.style.display = 'none'; return; }
+        var hasAlerts = monitoring.alerts && monitoring.alerts.length > 0;
+        var isDeficit = monitoring.status === 'drop_detected' || monitoring.status === 'minor_deficit';
 
+        if (isDeficit && hasAlerts) {
             section.style.display = 'block';
             var sevColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
-            severityBadge.textContent = monitoring.severity.toUpperCase();
-            severityBadge.style.background = sevColors[monitoring.severity] || 'var(--orange)';
+            var sev = monitoring.severity || 'low';
+            severityBadge.textContent = sev.toUpperCase();
+            severityBadge.style.background = sevColors[sev] || 'var(--orange)';
             severityBadge.style.color = '#fff';
 
-            content.innerHTML = significant.map(function(alert) {
+            content.innerHTML = monitoring.alerts.map(function(alert) {
                 return '<div style="padding:12px;margin-bottom:8px;background:var(--surface-elevated);border-radius:var(--radius-xs)">' +
                     '<div style="font-weight:600;margin-bottom:4px">' + alert.message + '</div>' +
-                    '<div style="font-size:12px;color:var(--text-secondary)">Expected: ' + alert.expected + ' kW | Actual: ' + alert.actual + ' kW | Deficit: ' + alert.deficit_pct + '%</div></div>';
+                    '<div style="font-size:12px;color:var(--text-secondary)">Expected: ' + (alert.expected || '--') + ' kWh | Actual: ' + (alert.actual || '--') + ' kWh | Deficit: ' + (alert.deficit_pct || '--') + '%</div></div>';
             }).join('');
 
             causesList.innerHTML = (monitoring.likely_causes || []).map(function(cause) {
@@ -1424,7 +1471,7 @@
 
             updateHeader(meta, m);
             updateKPIs(meta, records, m, analytics);
-            updateInsights(records, m, analytics);
+            updateInsights(records, m, analytics, meta);
             updateHealthRing(analytics);
             updatePerformance(summary, analytics);
             updateStats(analytics);
@@ -1436,11 +1483,16 @@
             // Detect data source from meta (tagged by update_data.py)
             var source = meta.data_source || '';
             if (!source) {
-                // Fallback: synthetic data has weather field + engine 4.1
+                var hasModel = records.some(function(r) { return r.method === 'deterministic_model'; });
                 var hasWeather = records.some(function(r) { return r.weather && r.weather.length > 0; });
-                source = hasWeather ? 'simulated' : 'live_portal';
+                source = hasModel ? 'live_plus_model' : (hasWeather ? 'simulated' : 'live_portal');
             }
-            setText('footer-source', source === 'live_portal' ? '🟢 Live Portal' : '🧪 Simulated');
+            var sourceLabels = {
+                'live_portal': '🟢 Live Portal',
+                'live_plus_model': '🟢 Live + Physics Model',
+                'simulated': '🧪 Simulated'
+            };
+            setText('footer-source', sourceLabels[source] || '🟢 Live Portal');
             renderMonthlyChart(forecast);
 
             if (analytics && analytics.daily_progress) renderDailyProgressChart(analytics.daily_progress);
