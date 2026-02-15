@@ -496,6 +496,12 @@
             <div class="kpi-detail">Target: 10–12 kWh on a good day</div>
         </div>
         <div class="kpi">
+            <div class="kpi-icon" style="background:var(--cyan-bg)">📅</div>
+            <div class="kpi-label">Monthly Yield</div>
+            <div class="kpi-value"><span id="kpi-monthly">--</span><span class="kpi-unit" id="kpi-monthly-unit">kWh</span></div>
+            <div class="kpi-detail">This month's total generation</div>
+        </div>
+        <div class="kpi">
             <div class="kpi-icon" style="background:var(--purple-bg)">🔋</div>
             <div class="kpi-label">Lifetime Yield</div>
             <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit" id="kpi-total-unit">MWh</span></div>
@@ -967,6 +973,7 @@
                 plant_id: r.plant_id || meta.plant_id || '--',
                 power: num(r.current_power_kw != null ? r.current_power_kw : r.current_power),
                 daily: num(r.daily_yield_kwh != null ? r.daily_yield_kwh : r.daily_yield),
+                monthly: num(r.monthly_yield_kwh != null ? r.monthly_yield_kwh : r.monthly_yield),
                 total: num(r.total_yield_kwh != null ? r.total_yield_kwh : r.total_yield),
                 income: num(r.income_inr != null ? r.income_inr : r.income),
                 voltage: num(r.voltage_v != null ? r.voltage_v : r.voltage_sample),
@@ -1036,6 +1043,9 @@
         setText('kpi-cap', num(meta.plant_capacity_kw || 2.32).toFixed(2));
         setText('kpi-daily', l ? l.daily.toFixed(2) : '--');
         if (l) {
+            var mt = fmtEnergy(l.monthly || 0);
+            setText('kpi-monthly', mt.value);
+            setText('kpi-monthly-unit', mt.unit);
             var lt = fmtEnergy(l.total);
             setText('kpi-total', lt.value);
             setText('kpi-total-unit', lt.unit);
@@ -1519,10 +1529,16 @@
     }
 
     function updateSolarBankFlow(records, meta) {
-        // Use actual daily yield data to populate the Solar Bank flow
-        var dailies = records.map(function(r) { return r.daily; }).filter(function(d) { return d > 0; });
-        var avgDaily = dailies.length > 0 ? dailies.reduce(function(a,b){return a+b;},0) / dailies.length : 8;
-        var monthlyGen = Math.round(avgDaily * 30);
+        var l = records.length ? records[records.length - 1] : null;
+        // Use actual monthly yield from portal if available, else estimate from daily
+        var monthlyGen;
+        if (l && l.monthly > 0) {
+            monthlyGen = Math.round(l.monthly);
+        } else {
+            var dailies = records.map(function(r) { return r.daily; }).filter(function(d) { return d > 0; });
+            var avgDaily = dailies.length > 0 ? dailies.reduce(function(a,b){return a+b;},0) / dailies.length : 8;
+            monthlyGen = Math.round(avgDaily * 30);
+        }
         var selfUsePct = 60;
         var selfUse = Math.round(monthlyGen * selfUsePct / 100);
         var exported = monthlyGen - selfUse;

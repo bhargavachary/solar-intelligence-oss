@@ -1259,6 +1259,7 @@ class DataExtractor:
             "plant_id": PLANT_ID,
             "current_power": "0",
             "daily_yield": "0",
+            "monthly_yield": "0",
             "total_yield": "0",
             "income": "0",
             "voltage_sample": "0",
@@ -1356,6 +1357,7 @@ class DataExtractor:
 
             log("DATA", f"Power={packet['current_power']}kW | "
                         f"Daily={packet['daily_yield']}kWh | "
+                        f"Monthly={packet['monthly_yield']}kWh | "
                         f"Total={packet['total_yield']}kWh | "
                         f"V={packet['voltage_sample']} A={packet['current_sample']}")
 
@@ -1380,19 +1382,51 @@ class DataExtractor:
                 except StaleElementReferenceException:
                     continue
 
+            # Portal .plant-money span order (verified from HTML):
+            #   [0] Today Yield (kW·h)
+            #   [1] Monthly Yield (kW·h)
+            #   [2] Total Yield (kW·h)
+            #   [3] Accumulated Income (INR)
+            # Current power is NOT in these spans — it's in the sites table.
             if len(values) >= 4:
-                result["current_power"] = values[0]
-                result["daily_yield"] = values[1]
+                result["daily_yield"] = values[0]
+                result["monthly_yield"] = values[1]
                 result["total_yield"] = values[2]
                 result["income"] = values[3]
             elif len(values) >= 3:
-                result["current_power"] = values[0]
-                result["daily_yield"] = values[1]
+                result["daily_yield"] = values[0]
+                result["monthly_yield"] = values[1]
                 result["total_yield"] = values[2]
             elif len(values) >= 1:
-                result["current_power"] = values[0]
+                result["daily_yield"] = values[0]
 
             log("DIAG", f"CSS money values found: {values}")
+
+            # Extract current power from the sites table column "Power Generating(kW)"
+            try:
+                table_cells = driver.find_elements(By.CSS_SELECTOR, ".el-table__body td .cell")
+                for cell in table_cells:
+                    txt = cell.text.strip()
+                    if txt and re.match(r"^[\d.,]+$", txt):
+                        val = float(txt.replace(",", ""))
+                        # The power column typically shows small values (< capacity)
+                        # while yield columns show larger values.
+                        # Power Generating is the 10th column (0-indexed: 9)
+                        # We find it by checking parent column class for column_10
+                        pass
+                # More reliable: use the table header/cell mapping
+                power_cells = driver.find_elements(
+                    By.CSS_SELECTOR, ".el-table_1_column_10 .cell"
+                )
+                for cell in power_cells:
+                    txt = cell.text.strip()
+                    if txt and re.match(r"^[\d.,]+$", txt):
+                        result["current_power"] = txt
+                        log("DIAG", f"Power from sites table: {txt} kW")
+                        break
+            except Exception as e:
+                log("DIAG", f"Could not extract power from table: {e}")
+
         except Exception as e:
             log("WARN", f"CSS extraction error: {e}")
 
@@ -1525,6 +1559,7 @@ class DataSanitizer:
 
         power = to_float(packet.get("current_power"))
         daily = to_float(packet.get("daily_yield"))
+        monthly = to_float(packet.get("monthly_yield"))
         total = to_float(packet.get("total_yield"))
         income = to_float(packet.get("income"))
         voltage = to_float(packet.get("voltage_sample"))
@@ -1576,6 +1611,7 @@ class DataSanitizer:
         return {
             "current_power_kw": round(max(0.0, power), 3),
             "daily_yield_kwh": round(max(0.0, daily), 3),
+            "monthly_yield_kwh": round(max(0.0, monthly), 3),
             "total_yield_kwh": round(max(0.0, total), 3),
             "income_inr": round(max(0.0, income), 2),
             "voltage_v": round(max(0.0, voltage), 1),
@@ -1592,7 +1628,7 @@ class DataSanitizer:
 class DataStore:
     CSV_FIELDS = [
         "timestamp", "plant_id", "current_power_kw", "daily_yield_kwh",
-        "total_yield_kwh", "income_inr", "voltage_v", "current_a",
+        "monthly_yield_kwh", "total_yield_kwh", "income_inr", "voltage_v", "current_a",
         "frequency_hz", "temperature_c", "status", "portal_loaded",
         "portal_validation_score", "extraction_method", "anomaly_notes"
     ]
@@ -1605,6 +1641,7 @@ class DataStore:
             "plant_id": raw.get("plant_id", PLANT_ID),
             "current_power_kw": cleaned["current_power_kw"],
             "daily_yield_kwh": cleaned["daily_yield_kwh"],
+            "monthly_yield_kwh": cleaned["monthly_yield_kwh"],
             "total_yield_kwh": cleaned["total_yield_kwh"],
             "income_inr": cleaned["income_inr"],
             "voltage_v": cleaned["voltage_v"],
@@ -1705,6 +1742,7 @@ class DataStore:
             "latest_timestamp": last.get("timestamp"),
             "latest_power_kw": last.get("current_power_kw", 0.0),
             "latest_daily_yield_kwh": last.get("daily_yield_kwh", 0.0),
+            "latest_monthly_yield_kwh": last.get("monthly_yield_kwh", 0.0),
             "latest_total_yield_kwh": last.get("total_yield_kwh", 0.0),
             "data_quality_score": round(
                 (min(100, (len(portal_ok) / max(1, len(norm_history))) * 100) * 0.5) +

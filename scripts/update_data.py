@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 """
-Solar Data Update Pipeline — PRODUCTION
-========================================
-Tries to fetch REAL data from the Waaree digital portal first.
-Falls back to simulated data only if the live scrape is unavailable.
+Solar Data Update Pipeline — PRODUCTION (Live Portal Only)
+===========================================================
+Fetches REAL data from the Waaree digital portal.
+No simulation fallback — all data must come from the live portal.
 
-Priority order:
+The crawler (waaree_deep_crawler.py) writes to root `dashboard_data.json`.
+This script copies the result to `data/dashboard_data.json` (consumed by
+the GitHub Pages dashboard), then runs the analytics engine for enrichment.
+
+Priority:
   1. Scraper API  →  POST http://localhost:8006/trigger_scrape  (if running)
   2. Live scrape  →  waaree_deep_crawler.py  (Chrome + undetected-chromedriver)
-  3. Simulation   →  scripts/generate_data.py  (tagged as "simulated" in output)
-
-After data is fetched (by any method), the analytics engine runs to enrich
-data/dashboard_data.json with statistics, forecasts, and health scores.
 
 Usage:
-    python scripts/update_data.py                      # auto: live → fallback sim
-    python scripts/update_data.py --source live        # live only (fail if unavailable)
-    python scripts/update_data.py --source simulate    # simulation only (for testing)
-    python scripts/update_data.py --days 7             # simulation days (fallback only)
+    python scripts/update_data.py                 # auto: try API → live scrape
+    python scripts/update_data.py --source live   # live only (explicit)
 """
 import json
+import shutil
 import sys
 import argparse
 import subprocess
@@ -27,7 +26,8 @@ from pathlib import Path
 from datetime import datetime
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_FILE = ROOT / "data" / "dashboard_data.json"
+DATA_FILE = ROOT / "data" / "dashboard_data.json"           # dashboard reads this
+CRAWLER_OUTPUT = ROOT / "dashboard_data.json"                # crawler writes here
 CRAWLER = ROOT / "waaree_deep_crawler.py"
 SCRAPER_API_URL = "http://localhost:8006/trigger_scrape"
 
@@ -52,60 +52,54 @@ def try_scraper_api() -> bool:
 def try_live_scrape() -> bool:
     """Run waaree_deep_crawler.py directly (needs Chrome + credentials)."""
     if not CRAWLER.exists():
-        print("  ⚠ waaree_deep_crawler.py not found")
+        print("  ✗ waaree_deep_crawler.py not found")
         return False
     cred_file = ROOT / "credentials.json"
     if not cred_file.exists():
-        print("  ⚠ credentials.json not found — skipping live scrape")
+        print("  ✗ credentials.json not found — cannot scrape")
         return False
     print("  🔄 Starting live scrape from Waaree portal…")
     try:
         result = subprocess.run(
-            [sys.executable, str(CRAWLER), "--validate", "--fresh-cycles", "1", "--reuse-cycles", "0"],
+            [sys.executable, str(CRAWLER),
+             "--validate", "--fresh-cycles", "1", "--reuse-cycles", "0"],
             capture_output=True, text=True, timeout=300, cwd=str(ROOT)
         )
         if result.returncode == 0:
             print("  ✓ Live scrape succeeded")
-            for line in (result.stdout or "").strip().split("\n")[-3:]:
+            for line in (result.stdout or "").strip().split("\n")[-5:]:
                 print(f"    {line}")
             return True
         else:
-            print(f"  ⚠ Scrape exited with code {result.returncode}")
-            for line in (result.stderr or "").strip().split("\n")[-3:]:
+            print(f"  ✗ Scrape exited with code {result.returncode}")
+            stderr = (result.stderr or "").strip()
+            stdout = (result.stdout or "").strip()
+            for line in (stderr or stdout).split("\n")[-5:]:
                 print(f"    {line}")
             return False
     except subprocess.TimeoutExpired:
-        print("  ⚠ Live scrape timed out (5 min)")
+        print("  ✗ Live scrape timed out (5 min)")
         return False
     except Exception as e:
-        print(f"  ⚠ Scrape error: {e}")
+        print(f"  ✗ Scrape error: {e}")
         return False
 
 
-# ─── Data source: Simulation ──────────────────────────────
-def run_simulation(days: int = 1) -> bool:
-    """Generate synthetic data with scripts/generate_data.py."""
-    gen_script = ROOT / "scripts" / "generate_data.py"
-    if not gen_script.exists():
-        print("  ⚠ generate_data.py not found")
-        return False
-    print(f"  🧪 Generating simulated data ({days} day{'s' if days > 1 else ''})…")
-    result = subprocess.run(
-        [sys.executable, str(gen_script), "--days", str(days)],
-        capture_output=True, text=True, cwd=str(ROOT)
-    )
-    if result.returncode == 0:
-        print("  ✓ Simulation complete")
-        for line in (result.stdout or "").strip().split("\n")[-3:]:
-            print(f"    {line}")
+# ─── Copy crawler output to data/ ──────────────────────────
+def sync_crawler_output() -> bool:
+    """Copy root dashboard_data.json → data/dashboard_data.json."""
+    if CRAWLER_OUTPUT.exists():
+        DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(CRAWLER_OUTPUT, DATA_FILE)
+        print(f"  ✓ Synced crawler output → {DATA_FILE.relative_to(ROOT)}")
         return True
     else:
-        print(f"  ⚠ Simulation failed: {(result.stderr or '')[:200]}")
+        print(f"  ✗ Crawler output not found at {CRAWLER_OUTPUT.relative_to(ROOT)}")
         return False
 
 
 # ─── Analytics & Validation ──────────────────────────────
-def run_analytics():
+def enrich_analytics():
     """Run the analytics engine to enrich the dashboard JSON."""
     try:
         from solar_analytics import run_analytics as _run
@@ -136,22 +130,36 @@ def tag_data_source(source: str):
 
 
 def validate_output() -> bool:
-    """Quick validation of the generated data."""
+    """Validate the dashboard data has expected structure and sane values."""
     try:
         with open(DATA_FILE) as f:
             data = json.load(f)
+        history = data.get("history", [])
+        meta = data.get("meta", {})
         checks = {
-            "has_meta": "meta" in data,
-            "has_history": "history" in data and len(data["history"]) > 0,
+            "has_meta": bool(meta),
+            "has_history": len(history) > 0,
             "has_summary": "summary" in data,
-            "has_analytics": "analytics" in data,
         }
-        n = len(data.get("history", []))
-        source = data.get("meta", {}).get("data_source", "?")
+        n = len(history)
+        source = meta.get("data_source", "?")
+
+        # Sanity checks on values
+        if history:
+            latest = history[-1]
+            total = latest.get("total_yield_kwh", 0)
+            daily = latest.get("daily_yield_kwh", 0)
+            power = latest.get("current_power_kw", 0)
+            checks["total_yield_reasonable"] = 0 <= total <= 50000  # under 50 MWh for a 2kW system
+            checks["daily_yield_reasonable"] = 0 <= daily <= 25     # max ~20 kWh/day for 2.32kW
+            checks["power_reasonable"] = 0 <= power <= 5            # under 5 kW
+
         all_ok = all(checks.values())
         status = "✓" if all_ok else "✗"
-        print(f"  {status} Validation: {n} records, source={source}, "
-              f"schema={data.get('meta', {}).get('schema_version', '?')}")
+        failed = [k for k, v in checks.items() if not v]
+        print(f"  {status} Validation: {n} records, source={source}")
+        if failed:
+            print(f"    Failed checks: {', '.join(failed)}")
         return all_ok
     except Exception as e:
         print(f"  ✗ Validation error: {e}")
@@ -160,57 +168,40 @@ def validate_output() -> bool:
 
 # ─── Main ─────────────────────────────────────────────────
 def main():
-    parser = argparse.ArgumentParser(description="Solar data update pipeline")
-    parser.add_argument("--source", choices=["live", "simulate", "auto"], default="auto",
-                        help="Data source: live (portal only), simulate (test data), auto (try live → fallback)")
-    parser.add_argument("--days", type=int, default=1,
-                        help="Days of simulated data (only used in simulate/fallback)")
+    parser = argparse.ArgumentParser(description="Solar data update — live portal only")
+    parser.add_argument("--source", choices=["live", "auto"], default="auto",
+                        help="Data source (both try live portal)")
     args = parser.parse_args()
 
     print(f"\n{'═'*50}")
     print(f"☀️  Solar Data Pipeline — {datetime.now().strftime('%Y-%m-%d %H:%M IST')}")
     print(f"{'═'*50}\n")
 
-    success = False
-
-    if args.source == "live":
-        print("═══ Live Data (portal only) ═══")
-        success = try_scraper_api() or try_live_scrape()
-        if success:
-            tag_data_source("live_portal")
-        else:
-            print("\n❌ Live scrape failed and --source=live was specified. No fallback.")
-            sys.exit(1)
-
-    elif args.source == "simulate":
-        print("═══ Simulated Data (testing) ═══")
-        success = run_simulation(args.days)
-        if success:
-            tag_data_source("simulated")
-
-    else:  # auto
-        print("═══ Attempting Live Data ═══")
-        success = try_scraper_api()
-        if success:
-            tag_data_source("live_portal")
-        if not success:
-            success = try_live_scrape()
-            if success:
-                tag_data_source("live_portal")
-        if not success:
-            print("\n  📡 Live scrape unavailable — falling back to simulation\n")
-            print("═══ Fallback: Simulated Data ═══")
-            success = run_simulation(args.days)
-            if success:
-                tag_data_source("simulated")
+    # Try scraper API first, then direct live scrape
+    print("═══ Fetching Live Portal Data ═══")
+    success = try_scraper_api()
+    if not success:
+        success = try_live_scrape()
 
     if not success:
-        print("\n❌ All data sources failed")
+        print("\n❌ Could not fetch live data from Waaree portal.")
+        print("   Ensure Chrome is available and credentials.json is valid.")
         sys.exit(1)
 
-    # Always enrich with analytics
+    # Sync crawler output to data/ directory
+    print("\n═══ Syncing Data ═══")
+    if not sync_crawler_output():
+        # Crawler may have written directly to data/ via modified path
+        if not DATA_FILE.exists():
+            print("\n❌ No data file found after scrape")
+            sys.exit(1)
+
+    # Tag source
+    tag_data_source("live_portal")
+
+    # Enrich with analytics
     print("\n═══ Analytics Engine ═══")
-    run_analytics()
+    enrich_analytics()
 
     # Validate
     print("\n═══ Validation ═══")
@@ -223,14 +214,14 @@ def main():
         latest = data.get("history", [{}])[-1]
         source = data.get("meta", {}).get("data_source", "unknown")
         total = latest.get("total_yield_kwh", 0)
-        total_str = f"{total/1000:.2f} MWh" if total >= 1000 else f"{total:.1f} kWh"
+        daily = latest.get("daily_yield_kwh", 0)
         print(f"\n{'═'*50}")
         print(f"📊 Dashboard updated  •  Source: {source}")
         print(f"   {len(data.get('history', []))} records  •  "
               f"Latest: {latest.get('timestamp', '--')}")
         print(f"   Power: {latest.get('current_power_kw', '--')} kW  •  "
-              f"Daily: {latest.get('daily_yield_kwh', '--')} kWh  •  "
-              f"Lifetime: {total_str}")
+              f"Daily: {daily} kWh  •  "
+              f"Lifetime: {total} kWh")
         print(f"{'═'*50}\n")
 
     sys.exit(0 if ok else 1)
