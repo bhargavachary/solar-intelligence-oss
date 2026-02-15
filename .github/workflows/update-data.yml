@@ -1,0 +1,37 @@
+name: Update Solar Data
+
+on:
+  schedule:
+    # Runs at 6:00 AM, 12:00 PM, and 6:00 PM IST (UTC+5:30)
+    - cron: '30 0,6,12 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate solar data
+        run: python scripts/generate_data.py --days 1
+
+      - name: Run analytics engine
+        run: python scripts/update_data.py --days 1
+
+      - name: Commit & push updated data
+        run: |
+          git config user.name "Solar Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/dashboard_data.json
+          git diff --staged --quiet || git commit -m "☀️ Auto-update solar data — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
