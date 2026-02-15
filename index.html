@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,161 +11,166 @@
     <meta property="og:title" content="Bhargav's Solar Dashboard" />
     <meta property="og:description" content="Live solar monitoring for a 2.32 kW rooftop plant in Berhampur, Odisha." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://bhargavachary.in/waaree_api_access/" />
-    <meta property="og:image" content="https://bhargavachary.in/waaree_api_access/assets/og-image.png" />
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Fonts & Libraries -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
     <style>
-        /* ═══════════════════════════════════════════════════════════
-           DESIGN SYSTEM — "Solar Intelligence" Apple-inspired theme
-           ═══════════════════════════════════════════════════════════ */
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-        :root {
-            --bg: #f5f5f7;
-            --surface: rgba(255,255,255,0.72);
-            --surface-solid: #ffffff;
-            --surface-elevated: rgba(255,255,255,0.85);
-            --surface-secondary: #f2f2f7;
-            --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
-            --text-tertiary: #aeaeb2;
-            --separator: rgba(0,0,0,0.06);
-            --accent: #0071e3;
-            --accent-light: rgba(0,113,227,0.08);
-            --green: #30d158;
-            --green-bg: rgba(48,209,88,0.12);
-            --orange: #ff9f0a;
-            --orange-bg: rgba(255,159,10,0.12);
-            --red: #ff453a;
-            --red-bg: rgba(255,69,58,0.12);
-            --purple: #bf5af2;
-            --purple-bg: rgba(191,90,242,0.12);
-            --cyan: #64d2ff;
-            --cyan-bg: rgba(100,210,255,0.12);
-            --yellow: #ffd60a;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03);
-            --shadow-lg: 0 12px 48px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.03);
-            --radius: 20px;
-            --radius-sm: 14px;
+        /* ═══════════════════════════════════════
+           DESIGN TOKENS — LIGHT THEME (warm, clean)
+           ═══════════════════════════════════════ */
+        :root,
+        [data-theme="light"] {
+            --bg: #faf8f5;
+            --bg-secondary: #f2efe9;
+            --surface: rgba(255, 255, 255, 0.88);
+            --surface-secondary: #f5f2ec;
+            --surface-elevated: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5c5c5c;
+            --text-tertiary: #8c8c8c;
+            --separator: rgba(0, 0, 0, 0.06);
+            --accent: #d97706;
+            --accent-light: rgba(217, 119, 6, 0.08);
+            --accent-hover: #b45309;
+            --green: #16a34a;
+            --green-bg: rgba(22, 163, 74, 0.08);
+            --red: #dc2626;
+            --red-bg: rgba(220, 38, 38, 0.06);
+            --orange: #ea580c;
+            --orange-bg: rgba(234, 88, 12, 0.08);
+            --purple: #7c3aed;
+            --purple-bg: rgba(124, 58, 237, 0.08);
+            --cyan: #0891b2;
+            --cyan-bg: rgba(8, 145, 178, 0.08);
+            --yellow: #ca8a04;
+            --yellow-bg: rgba(202, 138, 4, 0.08);
+            --blue: #2563eb;
+            --blue-bg: rgba(37, 99, 235, 0.08);
+            --blur: blur(20px);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
             --radius-xs: 10px;
-            --blur: blur(20px) saturate(180%);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #000000;
-                --surface: rgba(28,28,30,0.72);
-                --surface-solid: #1c1c1e;
-                --surface-elevated: rgba(44,44,46,0.80);
-                --surface-secondary: rgba(44,44,46,0.6);
-                --text-primary: #f5f5f7;
-                --text-secondary: #98989d;
-                --text-tertiary: #48484a;
-                --separator: rgba(255,255,255,0.07);
-                --accent: #0a84ff;
-                --accent-light: rgba(10,132,255,0.18);
-                --green: #30d158;
-                --green-bg: rgba(48,209,88,0.18);
-                --orange-bg: rgba(255,159,10,0.18);
-                --red-bg: rgba(255,69,58,0.18);
-                --purple-bg: rgba(191,90,242,0.18);
-                --cyan-bg: rgba(100,210,255,0.18);
-                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-                --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-                --shadow-lg: 0 12px 48px rgba(0,0,0,0.5);
-            }
+        /* ═══════════════════════════════════════
+           DARK THEME
+           ═══════════════════════════════════════ */
+        [data-theme="dark"] {
+            --bg: #0d0d0d;
+            --bg-secondary: #141414;
+            --surface: rgba(28, 28, 30, 0.72);
+            --surface-secondary: #1c1c1e;
+            --surface-elevated: #2c2c2e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #98989d;
+            --text-tertiary: #636366;
+            --separator: rgba(255, 255, 255, 0.06);
+            --accent: #ff9f0a;
+            --accent-light: rgba(255, 159, 10, 0.1);
+            --accent-hover: #ffb340;
+            --green: #30d158;
+            --green-bg: rgba(48, 209, 88, 0.1);
+            --red: #ff453a;
+            --red-bg: rgba(255, 69, 58, 0.1);
+            --orange: #ff9f0a;
+            --orange-bg: rgba(255, 159, 10, 0.1);
+            --purple: #bf5af2;
+            --purple-bg: rgba(191, 90, 242, 0.1);
+            --cyan: #64d2ff;
+            --cyan-bg: rgba(100, 210, 255, 0.1);
+            --yellow: #ffd60a;
+            --yellow-bg: rgba(255, 214, 10, 0.1);
+            --blue: #0a84ff;
+            --blue-bg: rgba(10, 132, 255, 0.1);
+            --blur: blur(24px) saturate(180%);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.35);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* ═══════════════════════════════════════
+           BASE RESET & TYPOGRAPHY
+           ═══════════════════════════════════════ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
             min-height: 100vh;
-            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.3s ease;
         }
+        .container { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
 
-        /* Ambient gradient background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(ellipse at 20% 50%, rgba(255,159,10,0.06) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 20%, rgba(0,113,227,0.05) 0%, transparent 50%),
-                        radial-gradient(ellipse at 50% 80%, rgba(48,209,88,0.04) 0%, transparent 50%);
-            z-index: -1;
-            animation: ambientShift 20s ease-in-out infinite alternate;
-        }
-        @keyframes ambientShift { 0%{transform:translate(0,0) rotate(0deg)} 100%{transform:translate(-3%,-3%) rotate(3deg)} }
-
-        .container { max-width: 1420px; margin: 0 auto; padding: 16px 20px; }
-
-        /* ── Header ── */
+        /* ═══════════════════════════════════════
+           HEADER
+           ═══════════════════════════════════════ */
         .header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 0 20px; flex-wrap: wrap; gap: 16px;
+            gap: 16px; padding: 16px 0 20px; flex-wrap: wrap;
         }
         .header-brand { display: flex; align-items: center; gap: 14px; }
-        .header-brand .logo {
-            width: 48px; height: 48px; border-radius: 14px;
-            background: linear-gradient(135deg, #ff9f0a, #ff6723);
+        .logo {
+            width: 44px; height: 44px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--orange));
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: white;
-            box-shadow: 0 6px 20px rgba(255,149,0,0.35);
-            position: relative; overflow: hidden;
+            font-size: 22px; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
         }
-        .logo::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
-            animation: logoShine 3s ease-in-out infinite;
-        }
-        @keyframes logoShine { 0%,100%{transform:translateX(-100%)} 50%{transform:translateX(100%)} }
-        .header-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
-        .header-subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 400; margin-top: 2px; }
-        .header-nav {
-            display: flex; align-items: center; gap: 10px;
-        }
+        .header-title { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
+        .header-subtitle { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+        .header-nav { display: flex; align-items: center; gap: 12px; }
         .header-link {
-            font-size: 12px; font-weight: 600; padding: 7px 16px;
-            border-radius: 100px; background: var(--surface);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--separator);
-            color: var(--text-primary); text-decoration: none;
-            transition: all 0.2s ease;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+            text-decoration: none; padding: 6px 12px;
+            border-radius: 8px; transition: all 0.2s;
         }
-        .header-link:hover { background: var(--accent-light); color: var(--accent); }
-        .header-meta {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--surface);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border-radius: var(--radius-sm);
-            padding: 10px 18px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--separator);
+        .header-link:hover { color: var(--accent); background: var(--accent-light); }
+        .header-meta { display: flex; align-items: center; gap: 10px; }
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            animation: pulse 2s infinite; flex-shrink: 0;
         }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .status-dot.live { background: var(--green); box-shadow: 0 0 12px rgba(48,209,88,0.6); animation: pulse 2s infinite; }
-        .status-dot.stale { background: var(--orange); box-shadow: 0 0 8px rgba(255,159,10,0.4); }
-        .status-dot.offline { background: var(--red); }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.9)} }
-        .status-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-        .status-time { font-size: 11px; color: var(--text-secondary); }
+        .status-dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .status-dot.stale { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        .status-dot.offline { background: var(--text-tertiary); animation: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .status-label { font-size: 12px; font-weight: 600; }
+        .status-time { font-size: 11px; color: var(--text-tertiary); }
 
-        /* ── Glass Card ── */
+        /* ── Theme Toggle ── */
+        .theme-toggle {
+            width: 48px; height: 26px; border-radius: 13px;
+            background: var(--surface-secondary);
+            border: 1.5px solid var(--separator);
+            position: relative; cursor: pointer;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            display: flex; align-items: center; padding: 0 3px;
+            outline: none;
+        }
+        .theme-toggle:hover { border-color: var(--accent); }
+        .theme-toggle:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+        .theme-toggle-knob {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--accent);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; line-height: 1;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        [data-theme="dark"] .theme-toggle-knob { transform: translateX(22px); }
+        [data-theme="light"] .theme-toggle-knob { transform: translateX(0); }
+
+        /* ═══════════════════════════════════════
+           CARDS
+           ═══════════════════════════════════════ */
         .card {
             background: var(--surface);
             backdrop-filter: var(--blur);
@@ -174,7 +179,7 @@
             padding: 22px;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--separator);
-            transition: box-shadow 0.3s ease, transform 0.2s ease;
+            transition: box-shadow 0.3s ease, transform 0.2s ease, background 0.4s ease, border-color 0.3s ease;
         }
         .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -185,24 +190,18 @@
         }
 
         /* ── Alert Card ── */
-        #production-alerts-section {
-            margin-bottom: 16px;
-            animation: slideDown 0.4s ease-out;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #production-alerts-section { margin-bottom: 16px; animation: slideDown 0.4s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ── KPI Hero Cards ── */
+        /* ═══════════════════════════════════════
+           KPI HERO CARDS
+           ═══════════════════════════════════════ */
         .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
         @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-
         .kpi {
             background: var(--surface);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow-sm);
@@ -213,22 +212,20 @@
         .kpi:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px) scale(1.01); }
         .kpi::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: var(--radius) var(--radius) 0 0;
+            height: 3px; border-radius: var(--radius) var(--radius) 0 0;
         }
         .kpi:nth-child(1)::before { background: linear-gradient(90deg, #ff9f0a, #ff6723); }
         .kpi:nth-child(2)::before { background: linear-gradient(90deg, #30d158, #34c759); }
         .kpi:nth-child(3)::before { background: linear-gradient(90deg, #bf5af2, #af52de); }
         .kpi:nth-child(4)::before { background: linear-gradient(90deg, #0a84ff, #0071e3); }
         .kpi:nth-child(5)::before { background: linear-gradient(90deg, #64d2ff, #32ade6); }
-
         .kpi-icon {
             width: 40px; height: 40px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             font-size: 20px; margin-bottom: 14px;
         }
         .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-        .kpi-value { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; transition: color 0.3s; }
+        .kpi-value { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
         .kpi-unit { font-size: 15px; font-weight: 500; color: var(--text-tertiary); margin-left: 3px; }
         .kpi-detail { font-size: 11px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; }
         .kpi-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
@@ -236,18 +233,25 @@
         .kpi-trend.down { color: var(--red); background: var(--red-bg); }
         .kpi-trend.stable { color: var(--text-secondary); background: var(--surface-secondary); }
 
-        /* ── Layout Grids ── */
+        /* ═══════════════════════════════════════
+           LAYOUT GRIDS
+           ═══════════════════════════════════════ */
         .grid-2 { display: grid; grid-template-columns: 5fr 3fr; gap: 16px; margin-bottom: 16px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
         .grid-2-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         @media (max-width: 900px) { .grid-2, .grid-3, .grid-2-equal { grid-template-columns: 1fr; } }
 
-        /* ── Chart ── */
+        /* ── Section Labels ── */
+        .section-label {
+            font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+            text-transform: uppercase; letter-spacing: 0.12em;
+            margin-bottom: 12px; padding-left: 2px;
+        }
+
         .chart-container { position: relative; width: 100%; }
         .chart-container.h-64 { height: 280px; }
         .chart-container.h-48 { height: 210px; }
 
-        /* ── Insights ── */
         .insight-item {
             display: flex; align-items: flex-start; gap: 10px;
             padding: 12px 14px; border-radius: var(--radius-xs);
@@ -258,7 +262,6 @@
         .insight-item:hover { background: var(--accent-light); }
         .insight-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
 
-        /* ── Health Ring ── */
         .health-ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 16px 0; }
         .health-ring { position: relative; width: 150px; height: 150px; }
         .health-ring svg { transform: rotate(-90deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1)); }
@@ -266,7 +269,6 @@
         .health-score { font-size: 40px; font-weight: 900; letter-spacing: -0.04em; }
         .health-grade { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
 
-        /* ── Stat Rows ── */
         .stat-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 0; border-bottom: 1px solid var(--separator); font-size: 13px;
@@ -275,7 +277,6 @@
         .stat-label { color: var(--text-secondary); font-weight: 400; }
         .stat-value { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-        /* ── Performance Bars ── */
         .perf-bar-wrap { margin-bottom: 16px; }
         .perf-bar-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
         .perf-bar-label { color: var(--text-secondary); font-weight: 500; }
@@ -283,7 +284,6 @@
         .perf-bar-track { height: 8px; background: var(--surface-secondary); border-radius: 4px; overflow: hidden; }
         .perf-bar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* ── Data Table ── */
         .table-wrap { max-height: 340px; overflow-y: auto; border-radius: var(--radius-xs); }
         .table-wrap::-webkit-scrollbar { width: 5px; }
         .table-wrap::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 10px; }
@@ -297,7 +297,6 @@
         td { padding: 10px 14px; border-bottom: 1px solid var(--separator); font-variant-numeric: tabular-nums; }
         tr:hover td { background: var(--accent-light); }
 
-        /* ── Mode Badge ── */
         .mode-badge {
             font-size: 10px; font-weight: 700; padding: 3px 10px;
             border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
@@ -305,14 +304,10 @@
         .mode-badge.readonly { background: var(--cyan-bg); color: var(--cyan); }
         .mode-badge.local { background: var(--green-bg); color: var(--green); }
 
-        /* ── Empty State ── */
-        .empty-state {
-            text-align: center; padding: 80px 20px; color: var(--text-secondary);
-        }
+        .empty-state { text-align: center; padding: 80px 20px; color: var(--text-secondary); }
         .empty-state h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
         .empty-state p { font-size: 0.9rem; }
 
-        /* ── Footer ── */
         .footer {
             text-align: center; padding: 28px 0 16px;
             font-size: 12px; color: var(--text-tertiary); line-height: 1.6;
@@ -335,6 +330,9 @@
         <div class="header-nav">
             <a class="header-link" href="https://bhargavachary.in/">← Home</a>
             <span id="mode-badge" class="mode-badge readonly">👁️ Read Only</span>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Switch light/dark mode">
+                <div class="theme-toggle-knob" id="theme-icon">☀️</div>
+            </button>
         </div>
         <div class="header-meta">
             <div id="status-dot" class="status-dot offline"></div>
@@ -345,7 +343,21 @@
         </div>
     </header>
 
-    <!-- ═══ KPI ROW ═══ -->
+    <!-- ═══ PRODUCTION ALERTS (conditionally shown) ═══ -->
+    <div id="production-alerts-section" style="display:none;" class="card">
+        <div class="card-header">
+            <span class="card-title">⚠️ Production Alert</span>
+            <span class="card-badge" id="alert-severity">--</span>
+        </div>
+        <div id="alerts-content" style="padding:0 16px 16px"></div>
+        <div style="padding:0 16px 16px">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--text-primary)">Likely Causes:</div>
+            <div id="likely-causes-list"></div>
+        </div>
+    </div>
+
+    <!-- ═══ KPI HERO ROW ═══ -->
+    <div class="section-label">Overview</div>
     <div class="kpi-grid">
         <div class="kpi">
             <div class="kpi-icon" style="background:var(--orange-bg)">⚡</div>
@@ -366,7 +378,7 @@
             <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span></div>
         </div>
         <div class="kpi">
-            <div class="kpi-icon" style="background:var(--accent-light)">🛡️</div>
+            <div class="kpi-icon" style="background:var(--blue-bg)">🛡️</div>
             <div class="kpi-label">Health Score</div>
             <div class="kpi-value"><span id="kpi-health">--</span><span class="kpi-unit" id="kpi-grade"></span></div>
             <div class="kpi-detail">Quality: <span id="kpi-quality">--</span>%</div>
@@ -379,24 +391,30 @@
         </div>
     </div>
 
-    <!-- ═══ PRODUCTION ALERTS ═══ -->
-    <div id="production-alerts-section" style="display:none;" class="card" style="background:var(--red-bg);border-left:4px solid var(--red);">
-        <div class="card-header">
-            <span class="card-title">⚠️ Production Alert</span>
-            <span class="card-badge" id="alert-severity">--</span>
-        </div>
-        <div id="alerts-content" style="padding:0 16px 16px"></div>
-        <div style="padding:0 16px 16px">
-            <div style="font-weight:600;margin-bottom:8px;color:var(--text-primary)">Likely Causes:</div>
-            <div id="likely-causes-list"></div>
-        </div>
-    </div>
+    <!-- ═══ SECTION: GENERATION TRENDS ═══ -->
+    <div class="section-label">Generation Trends</div>
 
-    <!-- ═══ DAILY PROGRESS + ANNUAL PROJECTION ═══ -->
     <div class="grid-2">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">Daily Progress (Last 30 Days)</span>
+                <span class="card-title">Power Generation Curve</span>
+                <span class="card-badge" id="badge-method">--</span>
+            </div>
+            <div class="chart-container h-64"><canvas id="powerChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Smart Insights</span>
+                <span class="card-badge" id="badge-anomalies">0 anomalies</span>
+            </div>
+            <div id="insights-list" style="max-height:280px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Daily Yield History (30 Days)</span>
                 <span class="card-badge" id="badge-daily-avg">--</span>
             </div>
             <div class="chart-container h-64"><canvas id="dailyProgressChart"></canvas></div>
@@ -409,7 +427,7 @@
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Annual Projection</span>
-                <span class="card-badge">Based on seasonal model</span>
+                <span class="card-badge">Seasonal Model</span>
             </div>
             <div style="padding:24px 16px">
                 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:24px">
@@ -436,29 +454,13 @@
         </div>
     </div>
 
-    <!-- ═══ POWER CHART + INSIGHTS ═══ -->
-    <div class="grid-2">
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Power Generation Trend</span>
-                <span class="card-badge" id="badge-method">--</span>
-            </div>
-            <div class="chart-container h-64"><canvas id="powerChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Smart Insights</span>
-                <span class="card-badge" id="badge-anomalies">0 anomalies</span>
-            </div>
-            <div id="insights-list" style="max-height:280px; overflow-y:auto;"></div>
-        </div>
-    </div>
+    <!-- ═══ SECTION: SYSTEM HEALTH ═══ -->
+    <div class="section-label">System Health &amp; Performance</div>
 
-    <!-- ═══ VOLTAGE + HEALTH RING + PERFORMANCE ═══ -->
     <div class="grid-3">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">Voltage & Current</span>
+                <span class="card-title">Voltage &amp; Current</span>
                 <span class="card-badge" id="badge-voltage">--</span>
             </div>
             <div class="chart-container h-48"><canvas id="voltageChart"></canvas></div>
@@ -495,7 +497,9 @@
         </div>
     </div>
 
-    <!-- ═══ MONTHLY FORECAST + OPERATIONAL ═══ -->
+    <!-- ═══ SECTION: FORECASTING ═══ -->
+    <div class="section-label">Forecasting &amp; Operations</div>
+
     <div class="grid-2">
         <div class="card">
             <div class="card-header">
@@ -521,7 +525,9 @@
         </div>
     </div>
 
-    <!-- ═══ STATISTICS + TABLE ═══ -->
+    <!-- ═══ SECTION: DATA & ANALYTICS ═══ -->
+    <div class="section-label">Data &amp; Analytics</div>
+
     <div class="grid-2-equal">
         <div class="card">
             <div class="card-header">
@@ -556,7 +562,7 @@
     </div>
 
     <footer class="footer">
-        Solar Intelligence v4.0 · Auto-refresh every 10s · Maintained with Love by Bhargav and Copilot<br>
+        Solar Intelligence v4.1 · Auto-refresh every 10s · Maintained with Love by Bhargav and Copilot<br>
         <span style="font-size:11px">
             <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
@@ -572,111 +578,158 @@
 (function () {
     'use strict';
 
-    // ── State ──
-    const S = { powerChart: null, voltageChart: null, monthlyChart: null, dailyProgressChart: null };
-    const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].indexOf(window.location.hostname) !== -1;
+    // ══════════════════════════════
+    // THEME ENGINE
+    // ══════════════════════════════
+    function getTheme() {
+        const stored = localStorage.getItem('solar-theme');
+        if (stored) return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('solar-theme', theme);
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+    applyTheme(getTheme());
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        var next = getTheme() === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        // Rebuild charts with new colors
+        destroyCharts();
+        refresh();
+    });
 
-    // ── Helpers ──
-    const num = v => {
+    // ══════════════════════════════
+    // STATE
+    // ══════════════════════════════
+    var S = { powerChart: null, voltageChart: null, monthlyChart: null, dailyProgressChart: null };
+    var isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].indexOf(window.location.hostname) !== -1;
+
+    function destroyCharts() {
+        ['powerChart', 'voltageChart', 'monthlyChart', 'dailyProgressChart'].forEach(function(k) {
+            if (S[k]) { S[k].destroy(); S[k] = null; }
+        });
+    }
+
+    // Theme-aware chart colors
+    function tc() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            dark: dark,
+            grid: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+            tick: dark ? '#636366' : '#8c8c8c',
+            primary: dark ? '#0a84ff' : '#d97706',
+            primaryArea: dark ? 'rgba(10,132,255,0.15)' : 'rgba(217,119,6,0.12)',
+            secondary: dark ? '#ff9f0a' : '#2563eb',
+            barHi: dark ? 'rgba(10,132,255,0.9)' : 'rgba(217,119,6,0.85)',
+            barLo: dark ? 'rgba(10,132,255,0.2)' : 'rgba(217,119,6,0.18)',
+            ttBg: dark ? '#2c2c2e' : '#fff',
+            ttTitle: dark ? '#f5f5f7' : '#1a1a1a',
+            ttBody: dark ? '#98989d' : '#5c5c5c',
+            ttBorder: dark ? '#48484a' : '#e5e5e5',
+            pointBg: dark ? '#1c1c1e' : '#ffffff',
+        };
+    }
+
+    // ══════════════════════════════
+    // HELPERS
+    // ══════════════════════════════
+    function num(v) {
         if (typeof v === 'number' && Number.isFinite(v)) return v;
-        const m = String(v ?? '').match(/-?\d+(\.\d+)?/);
+        var m = String(v == null ? '' : v).match(/-?\d+(\.\d+)?/);
         return m ? parseFloat(m[0]) : 0;
-    };
-    const parseTs = v => { if (!v) return null; const d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? null : d; };
-    const fmtTime = v => { const d = parseTs(v); return d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--'; };
-    const fmtDateTime = v => { const d = parseTs(v); return d ? d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--'; };
-    const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    }
+    function parseTs(v) { if (!v) return null; var d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? null : d; }
+    function fmtTime(v) { var d = parseTs(v); return d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--'; }
+    function fmtDateTime(v) { var d = parseTs(v); return d ? d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--'; }
+    function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
 
-    // ── Chart defaults ──
     Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
     Chart.defaults.font.size = 11;
     Chart.defaults.plugins.legend.display = false;
 
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
-    const tickColor = isDark ? '#636366' : '#98989d';
-
-    // ── Mode Detection ──
     function detectMode() {
-        const badge = document.getElementById('mode-badge');
-        if (isLocal) {
-            badge.textContent = '✏️ Local Dev';
-            badge.className = 'mode-badge local';
-        } else {
-            badge.textContent = '👁️ Read Only';
-            badge.className = 'mode-badge readonly';
-        }
+        var badge = document.getElementById('mode-badge');
+        if (isLocal) { badge.textContent = '✏️ Local Dev'; badge.className = 'mode-badge local'; }
+        else { badge.textContent = '👁️ Read Only'; badge.className = 'mode-badge readonly'; }
     }
 
-    // ── Data path: prefer `data/dashboard_data.json` for both local & GH Pages
-    function dataPath() {
-        // root `dashboard_data.json` was removed during cleanup — always use `data/`
-        return 'data/dashboard_data.json';
-    }
+    function dataPath() { return 'data/dashboard_data.json'; }
 
-    // ── Normalize Records ──
+    // ══════════════════════════════
+    // DATA NORMALIZATION
+    // ══════════════════════════════
     function normalizeRecords(payload) {
-        const meta = (payload && typeof payload === 'object' && !Array.isArray(payload)) ? (payload.meta || {}) : {};
-        const raw = Array.isArray(payload) ? payload : (payload?.history || []);
-        const analytics = payload?.analytics || null;
-        const summary = payload?.summary || {};
+        var meta = (payload && typeof payload === 'object' && !Array.isArray(payload)) ? (payload.meta || {}) : {};
+        var raw = Array.isArray(payload) ? payload : (payload && payload.history ? payload.history : []);
+        var analytics = (payload && payload.analytics) || null;
+        var summary = (payload && payload.summary) || {};
 
-        const records = raw.map(r => ({
-            timestamp: r.timestamp || null,
-            ts: parseTs(r.timestamp),
-            plant_id: r.plant_id || meta.plant_id || '--',
-            power: num(r.current_power_kw ?? r.current_power),
-            daily: num(r.daily_yield_kwh ?? r.daily_yield),
-            total: num(r.total_yield_kwh ?? r.total_yield),
-            income: num(r.income_inr ?? r.income),
-            voltage: num(r.voltage_v ?? r.voltage_sample),
-            current: num(r.current_a ?? r.current_sample),
-            frequency: num(r.frequency_hz),
-            temperature: num(r.temperature_c),
-            status: r.status || 'Unknown',
-            portal_loaded: Boolean(r.portal_loaded),
-            portal_score: num(r.portal_validation_score),
-            method: r.extraction_method || '',
-            anomalies: Array.isArray(r.anomaly_notes) ? r.anomaly_notes : []
-        })).filter(r => r.timestamp).sort((a, b) => (a.ts?.getTime() || 0) - (b.ts?.getTime() || 0));
+        var records = raw.map(function(r) {
+            return {
+                timestamp: r.timestamp || null,
+                ts: parseTs(r.timestamp),
+                plant_id: r.plant_id || meta.plant_id || '--',
+                power: num(r.current_power_kw != null ? r.current_power_kw : r.current_power),
+                daily: num(r.daily_yield_kwh != null ? r.daily_yield_kwh : r.daily_yield),
+                total: num(r.total_yield_kwh != null ? r.total_yield_kwh : r.total_yield),
+                income: num(r.income_inr != null ? r.income_inr : r.income),
+                voltage: num(r.voltage_v != null ? r.voltage_v : r.voltage_sample),
+                current: num(r.current_a != null ? r.current_a : r.current_sample),
+                frequency: num(r.frequency_hz),
+                temperature: num(r.temperature_c),
+                status: r.status || 'Unknown',
+                portal_loaded: Boolean(r.portal_loaded),
+                portal_score: num(r.portal_validation_score),
+                method: r.extraction_method || '',
+                anomalies: Array.isArray(r.anomaly_notes) ? r.anomaly_notes : [],
+                weather: r.weather || ''
+            };
+        }).filter(function(r) { return r.timestamp; }).sort(function(a, b) {
+            return (a.ts ? a.ts.getTime() : 0) - (b.ts ? b.ts.getTime() : 0);
+        });
 
-        return { meta, records, analytics, summary };
+        return { meta: meta, records: records, analytics: analytics, summary: summary };
     }
 
     function computeMetrics(records) {
-        const latest = records.at(-1) || null;
-        const powers = records.map(r => r.power);
-        const volts = records.map(r => r.voltage).filter(v => v > 0);
-        const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-        const peak = powers.length ? Math.max(...powers) : 0;
-        return { latest, avgPower: avg(powers), peakPower: peak, avgVolt: avg(volts) };
+        var latest = records.length ? records[records.length - 1] : null;
+        var powers = records.map(function(r) { return r.power; });
+        var volts = records.map(function(r) { return r.voltage; }).filter(function(v) { return v > 0; });
+        function avg(arr) { return arr.length ? arr.reduce(function(a, b) { return a + b; }, 0) / arr.length : 0; }
+        var peak = powers.length ? Math.max.apply(null, powers) : 0;
+        return { latest: latest, avgPower: avg(powers), peakPower: peak, avgVolt: avg(volts) };
     }
 
-    // ── Client-side Forecast Fallback ──
     function clientForecast(records, meta) {
-        const maxDaily = num(meta?.daily_realistic_max_kwh) || 12;
-        const factors = [0.88, 0.92, 1.0, 1.08, 1.12, 0.95, 0.72, 0.68, 0.78, 0.90, 0.96, 0.90];
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const now = new Date();
-        const cm = now.getMonth();
-        const observed = records.length ? Math.max(...records.map(r => r.daily)) : maxDaily * 0.75;
-        const base = Math.min(Math.max(observed, maxDaily * 0.5), maxDaily * 1.1);
-        const monthly = factors.map((f, i) => {
-            const d = new Date(now.getFullYear(), i + 1, 0).getDate();
+        var maxDaily = num(meta && meta.daily_realistic_max_kwh ? meta.daily_realistic_max_kwh : 12);
+        var factors = [0.88, 0.92, 1.0, 1.08, 1.12, 0.95, 0.72, 0.68, 0.78, 0.90, 0.96, 0.90];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var now = new Date();
+        var cm = now.getMonth();
+        var dailies = records.map(function(r) { return r.daily; });
+        var observed = dailies.length ? Math.max.apply(null, dailies) : maxDaily * 0.75;
+        var base = Math.min(Math.max(observed, maxDaily * 0.5), maxDaily * 1.1);
+        var monthly = factors.map(function(f, i) {
+            var d = new Date(now.getFullYear(), i + 1, 0).getDate();
             return Math.max(0, +(base * f * d).toFixed(1));
         });
-        const annual = monthly.reduce((a, b) => a + b, 0);
-        const monsoonDrop = Math.round((1 - factors[7] / Math.max(...factors)) * 100);
-        return { monthly, months, annual, current: monthly[cm], cm, monsoonDrop };
+        var annual = monthly.reduce(function(a, b) { return a + b; }, 0);
+        var monsoonDrop = Math.round((1 - factors[7] / Math.max.apply(null, factors)) * 100);
+        return { monthly: monthly, months: months, annual: annual, current: monthly[cm], cm: cm, monsoonDrop: monsoonDrop };
     }
 
-    // ── Update Functions ──
+    // ══════════════════════════════
+    // UPDATE FUNCTIONS
+    // ══════════════════════════════
     function updateHeader(meta, m) {
-        const dot = document.getElementById('status-dot');
-        const label = document.getElementById('status-label');
-        const time = document.getElementById('status-time');
-        if (!m.latest?.ts) { dot.className = 'status-dot offline'; label.textContent = 'No Data'; time.textContent = '--'; return; }
-        const age = (Date.now() - m.latest.ts.getTime()) / 60000;
+        var dot = document.getElementById('status-dot');
+        var label = document.getElementById('status-label');
+        var time = document.getElementById('status-time');
+        if (!m.latest || !m.latest.ts) { dot.className = 'status-dot offline'; label.textContent = 'No Data'; time.textContent = '--'; return; }
+        var age = (Date.now() - m.latest.ts.getTime()) / 60000;
         if (age <= 5) { dot.className = 'status-dot live'; label.textContent = 'Live'; }
         else if (age <= 30) { dot.className = 'status-dot stale'; label.textContent = 'Stale'; }
         else { dot.className = 'status-dot offline'; label.textContent = 'Offline'; }
@@ -684,178 +737,186 @@
     }
 
     function updateKPIs(meta, records, m, analytics) {
-        const l = m.latest;
+        var l = m.latest;
         setText('kpi-power', l ? l.power.toFixed(2) : '--');
         setText('kpi-peak', m.peakPower.toFixed(2));
         setText('kpi-cap', num(meta.plant_capacity_kw || 2.32).toFixed(2));
         setText('kpi-daily', l ? l.daily.toFixed(2) : '--');
-        setText('kpi-total', l ? l.total.toFixed(1) : '--');
+        if (l) {
+            setText('kpi-total', l.total.toLocaleString('en-IN', {maximumFractionDigits: 0}));
+        }
         setText('kpi-income', l ? l.income.toLocaleString('en-IN', {maximumFractionDigits:0}) : '--');
-        const h = analytics?.health || {};
-        setText('kpi-health', h.score ?? '--');
-        setText('kpi-grade', h.grade ? ` ${h.grade}` : '');
-        setText('kpi-quality', analytics?.performance?.performance_ratio_pct ?? '--');
-        const pr = analytics?.performance?.performance_ratio_pct ?? '--';
+        var h = (analytics && analytics.health) || {};
+        setText('kpi-health', h.score != null ? h.score : '--');
+        setText('kpi-grade', h.grade ? ' ' + h.grade : '');
+        setText('kpi-quality', (analytics && analytics.performance) ? analytics.performance.performance_ratio_pct : '--');
+        var pr = (analytics && analytics.performance) ? analytics.performance.performance_ratio_pct : '--';
         setText('kpi-pr', pr);
-        const trendEl = document.getElementById('kpi-trend');
-        const dir = analytics?.power_trend?.direction || 'stable';
-        const icons = { rising: '↑ rising', falling: '↓ falling', stable: '● stable' };
-        const cls = { rising: 'up', falling: 'down', stable: 'stable' };
-        trendEl.className = `kpi-trend ${cls[dir] || 'stable'}`;
+        var trendEl = document.getElementById('kpi-trend');
+        var dir = (analytics && analytics.power_trend) ? analytics.power_trend.direction : 'stable';
+        var icons = { rising: '↑ rising', falling: '↓ falling', stable: '● stable' };
+        var cls = { rising: 'up', falling: 'down', stable: 'stable' };
+        trendEl.className = 'kpi-trend ' + (cls[dir] || 'stable');
         trendEl.textContent = icons[dir] || '● stable';
     }
 
     function updateInsights(records, m, analytics) {
-        const items = [];
-        const l = m.latest;
-        const ico = (emoji, text) => `<div class="insight-item"><span class="insight-icon">${emoji}</span><span>${text}</span></div>`;
+        var items = [];
+        var l = m.latest;
+        function ico(emoji, text) { return '<div class="insight-item"><span class="insight-icon">' + emoji + '</span><span>' + text + '</span></div>'; }
         if (!l) { items.push(ico('📭', 'No telemetry records found yet.')); }
         else {
-            const capPct = (l.power / num(2.32) * 100).toFixed(0);
-            items.push(ico('⚡', `Current output: <strong>${l.power.toFixed(2)} kW</strong> (${capPct}% of capacity)`));
-            if (l.daily > 0) items.push(ico('📈', `Today's yield: <strong>${l.daily.toFixed(2)} kWh</strong> — ${(l.daily / 12 * 100).toFixed(0)}% of daily target`));
-            const trend = analytics?.power_trend;
-            if (trend?.direction === 'rising') items.push(ico('🔺', `Power trend <strong>rising</strong> (slope: +${trend.slope_kw_per_sample} kW/sample, R²=${trend.r_squared})`));
-            else if (trend?.direction === 'falling') items.push(ico('🌅', `Power trend <strong>falling</strong> — afternoon decline (slope: ${trend.slope_kw_per_sample} kW/sample)`));
-            const pr = analytics?.performance?.performance_ratio_pct;
-            if (pr) {
-                const prLabel = pr >= 75 ? 'excellent' : pr >= 60 ? 'good' : pr >= 40 ? 'moderate' : 'low';
-                items.push(ico('🎯', `Performance Ratio: <strong>${pr}%</strong> (${prLabel})`));
+            var capPct = (l.power / num(2.32) * 100).toFixed(0);
+            items.push(ico('⚡', 'Current output: <strong>' + l.power.toFixed(2) + ' kW</strong> (' + capPct + '% of capacity)'));
+            if (l.daily > 0) items.push(ico('📈', "Today's yield: <strong>" + l.daily.toFixed(2) + ' kWh</strong> — ' + (l.daily / 12 * 100).toFixed(0) + '% of daily target'));
+            if (l.weather) items.push(ico('🌤️', 'Weather: <strong>' + l.weather + '</strong>'));
+            var trend = analytics ? analytics.power_trend : null;
+            if (trend && trend.direction === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> (slope: +' + trend.slope_kw_per_sample + ' kW/sample, R²=' + trend.r_squared + ')'));
+            else if (trend && trend.direction === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline'));
+            var perf = analytics ? analytics.performance : null;
+            if (perf && perf.performance_ratio_pct) {
+                var prVal = perf.performance_ratio_pct;
+                var prLabel = prVal >= 75 ? 'excellent' : prVal >= 60 ? 'good' : prVal >= 40 ? 'moderate' : 'low';
+                items.push(ico('🎯', 'Performance Ratio: <strong>' + prVal + '%</strong> (' + prLabel + ')'));
             }
             if (m.avgVolt > 0) {
-                if (m.avgVolt >= 210 && m.avgVolt <= 250) items.push(ico('✅', `Grid voltage stable at <strong>${m.avgVolt.toFixed(1)}V</strong> — healthy range`));
-                else items.push(ico('⚠️', `Grid voltage at ${m.avgVolt.toFixed(1)}V — outside recommended range`));
+                if (m.avgVolt >= 210 && m.avgVolt <= 250) items.push(ico('✅', 'Grid voltage stable at <strong>' + m.avgVolt.toFixed(1) + 'V</strong> — healthy range'));
+                else items.push(ico('⚠️', 'Grid voltage at ' + m.avgVolt.toFixed(1) + 'V — outside recommended range'));
             }
             if (l.temperature > 0) {
-                const tempNote = l.temperature > 35 ? '⚠️ high temp may reduce efficiency' : 'within optimal range';
-                items.push(ico('🌡️', `Panel temperature: <strong>${l.temperature.toFixed(1)}°C</strong> — ${tempNote}`));
+                var tempNote = l.temperature > 35 ? '⚠️ high temp may reduce efficiency' : 'within optimal range';
+                items.push(ico('🌡️', 'Panel temperature: <strong>' + l.temperature.toFixed(1) + '°C</strong> — ' + tempNote));
             }
-            const anomalyCount = analytics?.anomalies?.total_count || 0;
-            if (anomalyCount > 0) items.push(ico('🔍', `${anomalyCount} anomalies detected by ML engine`));
-            else items.push(ico('✨', 'No anomalies detected — system operating normally'));
-            if (trend?.forecast_next_kw > 0) items.push(ico('🔮', `EWMA forecast for next sample: <strong>${trend.forecast_next_kw} kW</strong>`));
+            var anomalyCount = (analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0;
+            if (anomalyCount > 0) items.push(ico('🔍', anomalyCount + ' anomalies detected'));
+            else items.push(ico('✨', 'No anomalies — system operating normally'));
+            if (trend && trend.forecast_next_kw > 0) items.push(ico('🔮', 'EWMA forecast: <strong>' + trend.forecast_next_kw + ' kW</strong>'));
         }
         document.getElementById('insights-list').innerHTML = items.join('');
-        setText('badge-anomalies', `${analytics?.anomalies?.total_count || 0} anomalies`);
-        setText('badge-method', m.latest?.method || 'awaiting');
+        setText('badge-anomalies', ((analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0) + ' anomalies');
+        setText('badge-method', (m.latest && m.latest.method) ? m.latest.method : 'awaiting');
     }
 
     function updateHealthRing(analytics) {
-        const h = analytics?.health || { score: 0, grade: 'N/A' };
-        const score = h.score || 0;
-        const arc = document.getElementById('health-arc');
-        const circumference = 2 * Math.PI * 62;
-        arc.setAttribute('stroke-dasharray', `${(score / 100) * circumference} ${circumference}`);
+        var h = (analytics && analytics.health) || { score: 0, grade: 'N/A' };
+        var score = h.score || 0;
+        var arc = document.getElementById('health-arc');
+        var circumference = 2 * Math.PI * 62;
+        arc.setAttribute('stroke-dasharray', (score / 100) * circumference + ' ' + circumference);
         arc.setAttribute('stroke', score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)');
         setText('health-score-text', score);
-        setText('health-grade-text', `Grade ${h.grade || 'N/A'}`);
-        const factors = h.factors || {};
-        document.getElementById('health-factors').innerHTML = Object.entries(factors).map(([k, v]) => {
-            const label = k.replace(/_/g, ' ').replace(/\bpct\b/, '%');
-            return `<div class="stat-row"><span class="stat-label" style="text-transform:capitalize">${label}</span><span class="stat-value">${v}${typeof v === 'number' && v <= 100 ? '%' : ''}</span></div>`;
+        setText('health-grade-text', 'Grade ' + (h.grade || 'N/A'));
+        var factors = h.factors || {};
+        document.getElementById('health-factors').innerHTML = Object.keys(factors).map(function(k) {
+            var v = factors[k];
+            var label = k.replace(/_/g, ' ').replace(/\bpct\b/, '%');
+            return '<div class="stat-row"><span class="stat-label" style="text-transform:capitalize">' + label + '</span><span class="stat-value">' + v + (typeof v === 'number' && v <= 100 ? '%' : '') + '</span></div>';
         }).join('');
     }
 
     function updatePerformance(summary, analytics) {
-        const perf = analytics?.performance || {};
-        const pr = perf.performance_ratio_pct || 0;
-        const cf = perf.capacity_factor_pct || 0;
-        const up = summary?.uptime_pct || 0;
-        const dq = summary?.data_quality_score || 0;
-        setText('pb-pr', `${pr}%`); document.getElementById('pb-pr-fill').style.width = `${pr}%`;
-        setText('pb-cf', `${cf}%`); document.getElementById('pb-cf-fill').style.width = `${cf}%`;
-        setText('pb-uptime', `${up}%`); document.getElementById('pb-uptime-fill').style.width = `${up}%`;
-        setText('pb-dq', `${dq}%`); document.getElementById('pb-dq-fill').style.width = `${dq}%`;
-        const deg = perf.degradation;
-        if (deg && deg.confidence !== 'insufficient_data') setText('degradation-est', `${deg.degradation_pct_year}%/yr (${deg.confidence})`);
+        var perf = (analytics && analytics.performance) || {};
+        var pr = perf.performance_ratio_pct || 0;
+        var cf = perf.capacity_factor_pct || 0;
+        var up = (summary && summary.uptime_pct) || 0;
+        var dq = (summary && summary.data_quality_score) || 0;
+        setText('pb-pr', pr + '%'); document.getElementById('pb-pr-fill').style.width = pr + '%';
+        setText('pb-cf', cf + '%'); document.getElementById('pb-cf-fill').style.width = Math.min(cf * 5, 100) + '%';
+        setText('pb-uptime', up + '%'); document.getElementById('pb-uptime-fill').style.width = up + '%';
+        setText('pb-dq', dq + '%'); document.getElementById('pb-dq-fill').style.width = dq + '%';
+        var deg = perf.degradation;
+        if (deg && deg.confidence !== 'insufficient_data') setText('degradation-est', deg.degradation_pct_year + '%/yr (' + deg.confidence + ')');
         else setText('degradation-est', 'Collecting data…');
     }
 
     function updateStats(analytics) {
-        const s = analytics?.statistics; if (!s) return;
-        const p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
-        setText('st-power-mean', `${p.mean ?? '--'} kW`);
-        setText('st-power-median', `${p.median ?? '--'} kW`);
-        setText('st-power-std', `${p.std ?? '--'} kW`);
-        setText('st-power-iqr', `${p.q25 ?? '--'} — ${p.q75 ?? '--'} kW`);
-        setText('st-power-range', `${p.min ?? '--'} — ${p.max ?? '--'} kW`);
-        setText('st-voltage', `${v.mean ?? '--'} ± ${v.std ?? '--'} V`);
-        setText('st-daily-max', `${d.max_observed ?? '--'} kWh`);
-        setText('st-ewma', `${analytics?.power_trend?.forecast_next_kw ?? '--'} kW`);
+        var s = analytics ? analytics.statistics : null; if (!s) return;
+        var p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
+        setText('st-power-mean', (p.mean != null ? p.mean : '--') + ' kW');
+        setText('st-power-median', (p.median != null ? p.median : '--') + ' kW');
+        setText('st-power-std', (p.std != null ? p.std : '--') + ' kW');
+        setText('st-power-iqr', (p.q25 != null ? p.q25 : '--') + ' — ' + (p.q75 != null ? p.q75 : '--') + ' kW');
+        setText('st-power-range', (p.min != null ? p.min : '--') + ' — ' + (p.max != null ? p.max : '--') + ' kW');
+        setText('st-voltage', (v.mean != null ? v.mean : '--') + ' ± ' + (v.std != null ? v.std : '--') + ' V');
+        setText('st-daily-max', (d.max_observed != null ? d.max_observed : '--') + ' kWh');
+        setText('st-ewma', ((analytics.power_trend && analytics.power_trend.forecast_next_kw != null) ? analytics.power_trend.forecast_next_kw : '--') + ' kW');
     }
 
     function updateOperational(meta, records, m) {
-        const l = m.latest;
-        setText('op-status', l?.status || '--');
-        setText('op-voltage', l ? `${l.voltage.toFixed(1)} V` : '--');
-        setText('op-current', l ? `${l.current.toFixed(2)} A` : '--');
-        setText('op-freq', l ? `${l.frequency.toFixed(2)} Hz` : '--');
-        setText('op-temp', l ? `${l.temperature.toFixed(1)} °C` : '--');
+        var l = m.latest;
+        setText('op-status', l ? l.status : '--');
+        setText('op-voltage', l ? l.voltage.toFixed(1) + ' V' : '--');
+        setText('op-current', l ? l.current.toFixed(2) + ' A' : '--');
+        setText('op-freq', l ? l.frequency.toFixed(2) + ' Hz' : '--');
+        setText('op-temp', l ? l.temperature.toFixed(1) + ' °C' : '--');
         setText('op-samples', records.length);
         setText('op-location', meta.location || 'Berhampur, Odisha');
-        setText('footer-plant', l?.plant_id || meta.plant_id || '--');
-        setText('badge-voltage', l ? `${l.voltage.toFixed(0)}V · ${l.current.toFixed(1)}A` : '--');
-        setText('badge-records', `${records.length} records`);
+        setText('footer-plant', (l ? l.plant_id : null) || meta.plant_id || '--');
+        setText('badge-voltage', l ? l.voltage.toFixed(0) + 'V · ' + l.current.toFixed(1) + 'A' : '--');
+        setText('badge-records', records.length + ' records');
     }
 
     function updateTable(records) {
-        const tbody = document.getElementById('data-table');
-        const recent = [...records].reverse().slice(0, 20);
-        tbody.innerHTML = recent.map(r => {
-            const isOnline = r.status.toLowerCase() === 'online' || r.status.toLowerCase() === 'normal';
-            const statusColor = isOnline ? 'var(--green)' : 'var(--orange)';
-            const statusDot = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${statusColor};margin-right:5px;vertical-align:middle"></span>`;
-            return `<tr>
-                <td style="font-weight:500">${fmtTime(r.timestamp)}</td>
-                <td style="text-align:right;font-weight:700">${r.power.toFixed(2)} kW</td>
-                <td style="text-align:right">${r.daily.toFixed(1)} kWh</td>
-                <td style="text-align:right">${r.voltage > 0 ? r.voltage.toFixed(0) + ' V' : '—'}</td>
-                <td style="text-align:right;font-weight:500">${statusDot}${r.status}</td>
-            </tr>`;
+        var tbody = document.getElementById('data-table');
+        var recent = records.slice().reverse().slice(0, 20);
+        tbody.innerHTML = recent.map(function(r) {
+            var isOnline = r.status.toLowerCase() === 'online' || r.status.toLowerCase() === 'normal';
+            var statusColor = isOnline ? 'var(--green)' : 'var(--orange)';
+            var statusDot = '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + statusColor + ';margin-right:5px;vertical-align:middle"></span>';
+            return '<tr>' +
+                '<td style="font-weight:500">' + fmtTime(r.timestamp) + '</td>' +
+                '<td style="text-align:right;font-weight:700">' + r.power.toFixed(2) + ' kW</td>' +
+                '<td style="text-align:right">' + r.daily.toFixed(1) + ' kWh</td>' +
+                '<td style="text-align:right">' + (r.voltage > 0 ? r.voltage.toFixed(0) + ' V' : '—') + '</td>' +
+                '<td style="text-align:right;font-weight:500">' + statusDot + r.status + '</td>' +
+                '</tr>';
         }).join('');
     }
 
-    // ── Charts ──
+    // ══════════════════════════════
+    // CHARTS
+    // ══════════════════════════════
     function renderPowerChart(records, analytics, cap) {
-        const labels = records.map(r => fmtTime(r.timestamp));
-        const values = records.map(r => r.power);
-        const ewma = analytics?.power_trend?.ewma || [];
-        const ctx = document.getElementById('powerChart').getContext('2d');
-        const maxY = Math.max(cap * 1.35, ...values, 1);
-        const gradient = ctx.createLinearGradient(0, 0, 0, 280);
-        gradient.addColorStop(0, isDark ? 'rgba(10,132,255,0.25)' : 'rgba(0,113,227,0.15)');
-        gradient.addColorStop(1, isDark ? 'rgba(10,132,255,0)' : 'rgba(0,113,227,0)');
+        var c = tc();
+        var labels = records.map(function(r) { return fmtTime(r.timestamp); });
+        var values = records.map(function(r) { return r.power; });
+        var ewma = (analytics && analytics.power_trend) ? (analytics.power_trend.ewma || []) : [];
+        var ctx = document.getElementById('powerChart').getContext('2d');
+        var maxY = Math.max(cap * 1.35, Math.max.apply(null, values.concat([1])));
+        var gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, c.primaryArea);
+        gradient.addColorStop(1, 'transparent');
 
-        const datasets = [{
+        var datasets = [{
             label: 'Power (kW)', data: values,
-            borderColor: isDark ? '#0a84ff' : '#0071e3',
-            backgroundColor: gradient, borderWidth: 2.5, fill: true, tension: 0.4,
-            pointRadius: values.length > 20 ? 0 : 4,
-            pointBackgroundColor: isDark ? '#0a84ff' : '#0071e3',
-            pointBorderColor: isDark ? '#1c1c1e' : '#ffffff', pointBorderWidth: 2,
+            borderColor: c.primary, backgroundColor: gradient,
+            borderWidth: 2.5, fill: true, tension: 0.4,
+            pointRadius: values.length > 40 ? 0 : 3,
+            pointBackgroundColor: c.primary,
+            pointBorderColor: c.pointBg, pointBorderWidth: 2,
         }];
         if (ewma.length > 0) {
-            const padded = new Array(Math.max(0, values.length - ewma.length)).fill(null).concat(ewma);
+            var padded = new Array(Math.max(0, values.length - ewma.length)).fill(null).concat(ewma);
             datasets.push({
                 label: 'EWMA Trend', data: padded,
-                borderColor: '#ff9f0a', borderWidth: 2, borderDash: [6, 3],
+                borderColor: c.secondary, borderWidth: 2, borderDash: [6, 3],
                 fill: false, tension: 0.4, pointRadius: 0
             });
         }
 
         if (!S.powerChart) {
             S.powerChart = new Chart(ctx, {
-                type: 'line', data: { labels, datasets },
+                type: 'line', data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
                         legend: { display: true, labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, weight: 500 } } },
-                        tooltip: { backgroundColor: isDark ? '#2c2c2e' : '#fff', titleColor: isDark ? '#f5f5f7' : '#1d1d1f', bodyColor: isDark ? '#98989d' : '#6e6e73', borderColor: isDark ? '#48484a' : '#e0e0e0', borderWidth: 1, cornerRadius: 12, padding: 12, displayColors: true }
+                        tooltip: { backgroundColor: c.ttBg, titleColor: c.ttTitle, bodyColor: c.ttBody, borderColor: c.ttBorder, borderWidth: 1, cornerRadius: 12, padding: 12, displayColors: true }
                     },
                     scales: {
-                        x: { ticks: { color: tickColor, maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } },
-                        y: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true, suggestedMax: maxY }
+                        x: { ticks: { color: c.tick, maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: c.tick, font: { size: 10 } }, grid: { color: c.grid }, beginAtZero: true, suggestedMax: maxY }
                     }
                 }
             });
@@ -868,14 +929,15 @@
     }
 
     function renderVoltageChart(records) {
-        const labels = records.map(r => fmtTime(r.timestamp));
-        const volts = records.map(r => r.voltage || null);
-        const amps = records.map(r => r.current || null);
-        const ctx = document.getElementById('voltageChart').getContext('2d');
+        var c = tc();
+        var labels = records.map(function(r) { return fmtTime(r.timestamp); });
+        var volts = records.map(function(r) { return r.voltage || null; });
+        var amps = records.map(function(r) { return r.current || null; });
+        var ctx = document.getElementById('voltageChart').getContext('2d');
         if (!S.voltageChart) {
             S.voltageChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets: [
+                data: { labels: labels, datasets: [
                     { label: 'Voltage (V)', data: volts, borderColor: '#bf5af2', backgroundColor: 'rgba(191,90,242,0.08)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
                     { label: 'Current (A)', data: amps, borderColor: '#30d158', borderWidth: 1.5, fill: false, tension: 0.3, pointRadius: 0, yAxisID: 'y1' }
                 ] },
@@ -884,9 +946,9 @@
                     interaction: { intersect: false, mode: 'index' },
                     plugins: { legend: { display: true, labels: { usePointStyle: true, pointStyle: 'circle', padding: 14, font: { size: 10 } } } },
                     scales: {
-                        x: { ticks: { color: tickColor, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
-                        y: { position: 'left', ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
-                        y1: { position: 'right', ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } }
+                        x: { ticks: { color: c.tick, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+                        y: { position: 'left', ticks: { color: c.tick, font: { size: 10 } }, grid: { color: c.grid } },
+                        y1: { position: 'right', ticks: { color: c.tick, font: { size: 10 } }, grid: { display: false } }
                     }
                 }
             });
@@ -899,11 +961,9 @@
     }
 
     function renderMonthlyChart(forecast) {
-        const ctx = document.getElementById('monthlyChart').getContext('2d');
-        const colors = forecast.months.map((_, i) => {
-            if (i === forecast.cm) return isDark ? 'rgba(10,132,255,0.9)' : 'rgba(0,113,227,0.85)';
-            return isDark ? 'rgba(10,132,255,0.2)' : 'rgba(0,113,227,0.18)';
-        });
+        var c = tc();
+        var ctx = document.getElementById('monthlyChart').getContext('2d');
+        var colors = forecast.months.map(function(_, i) { return i === forecast.cm ? c.barHi : c.barLo; });
         if (!S.monthlyChart) {
             S.monthlyChart = new Chart(ctx, {
                 type: 'bar',
@@ -911,8 +971,8 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     scales: {
-                        x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } },
-                        y: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } }
+                        x: { ticks: { color: c.tick, font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: c.tick, font: { size: 10 } }, grid: { color: c.grid } }
                     }
                 }
             });
@@ -921,109 +981,90 @@
             S.monthlyChart.data.datasets[0].backgroundColor = colors;
             S.monthlyChart.update('none');
         }
-        setText('forecast-annual', `${forecast.annual.toFixed(0)}`);
-        setText('forecast-month', `${forecast.current.toFixed(0)}`);
-        setText('forecast-monsoon', `~${forecast.monsoonDrop}% lower`);
+        setText('forecast-annual', forecast.annual.toFixed(0));
+        setText('forecast-month', forecast.current.toFixed(0));
+        setText('forecast-monsoon', '~' + forecast.monsoonDrop + '% lower');
     }
 
     function renderDailyProgressChart(dailyProgress) {
         if (!dailyProgress || dailyProgress.length === 0) return;
-
-        const ctx = document.getElementById('dailyProgressChart').getContext('2d');
-        const labels = dailyProgress.map(d => {
-            const date = new Date(d.date);
-            return `${date.getMonth() + 1}/${date.getDate()}`;
+        var c = tc();
+        var ctx = document.getElementById('dailyProgressChart').getContext('2d');
+        var labels = dailyProgress.map(function(d) {
+            var date = new Date(d.date);
+            return (date.getMonth() + 1) + '/' + date.getDate();
         });
-        const data = dailyProgress.map(d => d.yield);
+        var data = dailyProgress.map(function(d) { return d.yield; });
 
-        // Calculate stats
-        const avg = data.reduce((a, b) => a + b, 0) / data.length;
-        const best = Math.max(...data);
-        const recent = data.slice(-7);
-        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
-        const trend = recentAvg > avg ? '📈 improving' : recentAvg < avg * 0.9 ? '📉 declining' : '➡️ stable';
+        var sum = data.reduce(function(a, b) { return a + b; }, 0);
+        var avg = sum / data.length;
+        var best = Math.max.apply(null, data);
+        var recent = data.slice(-7);
+        var recentSum = recent.reduce(function(a, b) { return a + b; }, 0);
+        var recentAvg = recentSum / recent.length;
+        var trend = recentAvg > avg * 1.05 ? '📈 improving' : recentAvg < avg * 0.9 ? '📉 declining' : '➡️ stable';
 
-        setText('daily-avg', avg.toFixed(2));
-        setText('daily-best', best.toFixed(2));
+        setText('daily-avg', avg.toFixed(1));
+        setText('daily-best', best.toFixed(1));
         setText('daily-trend', trend);
-        setText('badge-daily-avg', `${avg.toFixed(1)} kWh avg`);
+        setText('badge-daily-avg', avg.toFixed(1) + ' kWh avg');
+
+        var barColors = data.map(function(v) {
+            if (v >= avg * 1.1) return c.dark ? 'rgba(48,209,88,0.7)' : 'rgba(22,163,74,0.65)';
+            if (v >= avg * 0.7) return c.dark ? 'rgba(10,132,255,0.6)' : 'rgba(217,119,6,0.5)';
+            return c.dark ? 'rgba(255,69,58,0.5)' : 'rgba(220,38,38,0.4)';
+        });
 
         if (!S.dailyProgressChart) {
             S.dailyProgressChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Daily Yield (kWh)',
-                        data: data,
-                        borderColor: isDark ? 'rgba(48,209,88,0.8)' : 'rgba(48,209,88,1)',
-                        backgroundColor: isDark ? 'rgba(48,209,88,0.1)' : 'rgba(48,209,88,0.08)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    }]
-                },
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Daily Yield (kWh)', data: data, backgroundColor: barColors, borderRadius: 6, borderSkipped: false }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
-                        x: { ticks: { color: tickColor, font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: tickColor, callback: v => `${v} kWh` }, grid: { color: gridColor } }
+                        x: { ticks: { color: c.tick, font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: c.tick }, grid: { color: c.grid }, beginAtZero: true }
                     },
-                    plugins: {
-                        tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(2)} kWh` } }
-                    }
+                    plugins: { tooltip: { callbacks: { label: function(ctx) { return ctx.parsed.y.toFixed(1) + ' kWh'; } } } }
                 }
             });
         } else {
             S.dailyProgressChart.data.labels = labels;
             S.dailyProgressChart.data.datasets[0].data = data;
+            S.dailyProgressChart.data.datasets[0].backgroundColor = barColors;
             S.dailyProgressChart.update('none');
         }
     }
 
     function renderProductionAlerts(monitoring) {
-        const section = document.getElementById('production-alerts-section');
-        const content = document.getElementById('alerts-content');
-        const causesList = document.getElementById('likely-causes-list');
-        const severityBadge = document.getElementById('alert-severity');
+        var section = document.getElementById('production-alerts-section');
+        var content = document.getElementById('alerts-content');
+        var causesList = document.getElementById('likely-causes-list');
+        var severityBadge = document.getElementById('alert-severity');
 
-        if (monitoring.status === 'drop_detected' && monitoring.alerts.length > 0) {
+        if (monitoring.status === 'drop_detected' && monitoring.alerts && monitoring.alerts.length > 0) {
+            var significant = monitoring.alerts.filter(function(a) { return a.deficit_pct > 30; });
+            if (significant.length === 0) { section.style.display = 'none'; return; }
+
             section.style.display = 'block';
-            
-            // Update severity badge
-            const sevColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
+            var sevColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
             severityBadge.textContent = monitoring.severity.toUpperCase();
             severityBadge.style.background = sevColors[monitoring.severity] || 'var(--orange)';
             severityBadge.style.color = '#fff';
 
-            // Render alerts
-            let alertsHTML = monitoring.alerts.map(alert => `
-                <div style="padding:12px;margin-bottom:8px;background:var(--surface-elevated);border-radius:var(--radius-xs)">
-                    <div style="font-weight:600;margin-bottom:4px">${alert.message}</div>
-                    <div style="font-size:12px;color:var(--text-secondary)">
-                        Expected: ${alert.expected} | Actual: ${alert.actual} | Deficit: ${alert.deficit_pct}%
-                    </div>
-                </div>
-            `).join('');
-            content.innerHTML = alertsHTML;
-
-            // Render likely causes
-            let causesHTML = monitoring.likely_causes.map(cause => {
-                const probColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
-                const probColor = probColors[cause.probability] || 'var(--text-secondary)';
-                return `
-                    <div style="padding:10px;margin-bottom:6px;background:var(--surface);border-radius:var(--radius-xs);border-left:3px solid ${probColor}">
-                        <div style="font-weight:600;font-size:13px;margin-bottom:2px">${cause.cause}</div>
-                        <div style="font-size:11px;color:var(--text-secondary)">
-                            Probability: <span style="color:${probColor};font-weight:600">${cause.probability}</span> • ${cause.action}
-                        </div>
-                    </div>
-                `;
+            content.innerHTML = significant.map(function(alert) {
+                return '<div style="padding:12px;margin-bottom:8px;background:var(--surface-elevated);border-radius:var(--radius-xs)">' +
+                    '<div style="font-weight:600;margin-bottom:4px">' + alert.message + '</div>' +
+                    '<div style="font-size:12px;color:var(--text-secondary)">Expected: ' + alert.expected + ' kW | Actual: ' + alert.actual + ' kW | Deficit: ' + alert.deficit_pct + '%</div></div>';
             }).join('');
-            causesList.innerHTML = causesHTML;
+
+            causesList.innerHTML = (monitoring.likely_causes || []).map(function(cause) {
+                var probColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
+                var probColor = probColors[cause.probability] || 'var(--text-secondary)';
+                return '<div style="padding:10px;margin-bottom:6px;background:var(--surface);border-radius:var(--radius-xs);border-left:3px solid ' + probColor + '">' +
+                    '<div style="font-weight:600;font-size:13px;margin-bottom:2px">' + cause.cause + '</div>' +
+                    '<div style="font-size:11px;color:var(--text-secondary)">Probability: <span style="color:' + probColor + ';font-weight:600">' + cause.probability + '</span> • ' + cause.action + '</div></div>';
+            }).join('');
         } else {
             section.style.display = 'none';
         }
@@ -1031,59 +1072,44 @@
 
     function renderAnnualProjection(forecast) {
         setText('annual-projection', Math.round(forecast.annual).toLocaleString());
-        
-        // Calculate quarterly totals
-        const q1 = forecast.monthly[0] + forecast.monthly[1] + forecast.monthly[2];
-        const q2 = forecast.monthly[3] + forecast.monthly[4] + forecast.monthly[5];
-        const q3 = forecast.monthly[6] + forecast.monthly[7] + forecast.monthly[8];
-        const q4 = forecast.monthly[9] + forecast.monthly[10] + forecast.monthly[11];
-        
-        const quarters = [
+        var q1 = forecast.monthly[0] + forecast.monthly[1] + forecast.monthly[2];
+        var q2 = forecast.monthly[3] + forecast.monthly[4] + forecast.monthly[5];
+        var q3 = forecast.monthly[6] + forecast.monthly[7] + forecast.monthly[8];
+        var q4 = forecast.monthly[9] + forecast.monthly[10] + forecast.monthly[11];
+        var quarters = [
             { q: 'Q1', months: 'Jan-Mar', val: q1 },
             { q: 'Q2', months: 'Apr-Jun', val: q2 },
             { q: 'Q3', months: 'Jul-Sep', val: q3 },
             { q: 'Q4', months: 'Oct-Dec', val: q4 }
         ];
-        
-        const best = quarters.reduce((a, b) => a.val > b.val ? a : b);
-        const weak = quarters.reduce((a, b) => a.val < b.val ? a : b);
-        
-        setText('best-quarter', `${best.q}: ${Math.round(best.val)} kWh`);
+        var best = quarters.reduce(function(a, b) { return a.val > b.val ? a : b; });
+        var weak = quarters.reduce(function(a, b) { return a.val < b.val ? a : b; });
+        setText('best-quarter', best.q + ': ' + Math.round(best.val) + ' kWh');
         setText('best-quarter-months', best.months);
-        setText('weak-quarter', `${weak.q}: ${Math.round(weak.val)} kWh`);
+        setText('weak-quarter', weak.q + ': ' + Math.round(weak.val) + ' kWh');
         setText('weak-quarter-months', weak.months);
-        
-        // Revenue and CO2 (₹7/kWh, 0.82 kg CO2/kWh for India grid)
-        const revenue = Math.round(forecast.annual * 7);
-        const co2 = Math.round(forecast.annual * 0.82);
-        setText('annual-revenue', revenue.toLocaleString());
-        setText('annual-co2', co2.toLocaleString());
+        setText('annual-revenue', Math.round(forecast.annual * 7).toLocaleString());
+        setText('annual-co2', Math.round(forecast.annual * 0.82).toLocaleString());
     }
 
-    // ── Local Mode: Scraper Trigger ──
-    async function triggerScrape() {
-        if (!isLocal) return;
-        try {
-            const res = await fetch('http://localhost:8006/trigger_scrape', { method: 'POST' });
-            const data = await res.json();
-            console.log('[Scraper]', data.message);
-        } catch (err) {
-            console.debug('[Scraper] Not available (expected on GitHub Pages)');
-        }
-    }
+    // ══════════════════════════════
+    // MAIN REFRESH
+    // ══════════════════════════════
+    function refresh() {
+        fetch(dataPath() + '?t=' + Date.now())
+        .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+        .then(function(payload) {
+            var result = normalizeRecords(payload);
+            var meta = result.meta, records = result.records, analytics = result.analytics, summary = result.summary;
+            var m = computeMetrics(records);
 
-    // ── Main Refresh ──
-    async function refresh() {
-        try {
-            const res = await fetch(`${dataPath()}?t=${Date.now()}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const payload = await res.json();
-            const { meta, records, analytics, summary } = normalizeRecords(payload);
-            const m = computeMetrics(records);
-
-            const forecast = analytics?.seasonal_forecast
-                ? { monthly: analytics.seasonal_forecast.monthly_kwh, months: analytics.seasonal_forecast.month_names, annual: analytics.seasonal_forecast.annual_kwh, current: analytics.seasonal_forecast.current_month_kwh, cm: new Date().getMonth(), monsoonDrop: analytics.seasonal_forecast.monsoon_drop_pct }
-                : clientForecast(records, meta);
+            var forecast;
+            if (analytics && analytics.seasonal_forecast) {
+                var sf = analytics.seasonal_forecast;
+                forecast = { monthly: sf.monthly_kwh, months: sf.month_names, annual: sf.annual_kwh, current: sf.current_month_kwh, cm: new Date().getMonth(), monsoonDrop: sf.monsoon_drop_pct };
+            } else {
+                forecast = clientForecast(records, meta);
+            }
 
             updateHeader(meta, m);
             updateKPIs(meta, records, m, analytics);
@@ -1097,36 +1123,39 @@
             renderVoltageChart(records);
             renderMonthlyChart(forecast);
 
-            // New features
-            if (analytics?.daily_progress) {
-                renderDailyProgressChart(analytics.daily_progress);
-            }
-            if (analytics?.production_monitoring) {
-                renderProductionAlerts(analytics.production_monitoring);
-            }
-            if (forecast) {
-                renderAnnualProjection(forecast);
-            }
-        } catch (err) {
+            if (analytics && analytics.daily_progress) renderDailyProgressChart(analytics.daily_progress);
+            if (analytics && analytics.production_monitoring) renderProductionAlerts(analytics.production_monitoring);
+            if (forecast) renderAnnualProjection(forecast);
+        })
+        .catch(function(err) {
             console.error('Refresh error:', err);
             document.getElementById('status-dot').className = 'status-dot offline';
             document.getElementById('status-label').textContent = 'Data Error';
-
-            // Show helpful empty state on first load error
-            const insights = document.getElementById('insights-list');
+            var insights = document.getElementById('insights-list');
             if (insights && !insights.innerHTML) {
-                insights.innerHTML = '<div class="empty-state"><h2>No Data Available</h2><p>Waiting for solar telemetry data. Run the data generator locally or check the data pipeline.</p></div>';
+                insights.innerHTML = '<div class="empty-state"><h2>No Data Available</h2><p>Waiting for solar telemetry data.</p></div>';
             }
-        }
+        });
     }
 
-    // ── Bootstrap ──
+    // ══════════════════════════════
+    // BOOTSTRAP
+    // ══════════════════════════════
     detectMode();
     refresh();
-    setInterval(refresh, isLocal ? 10000 : 60000); // 10s local, 60s GitHub Pages
+    setInterval(refresh, isLocal ? 10000 : 60000);
+
     if (isLocal) {
-        triggerScrape();
-        setInterval(triggerScrape, 5 * 60 * 1000);
+        // Try triggering scraper
+        (function tryTrigger() {
+            fetch('http://localhost:8006/trigger_scrape', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { console.log('[Scraper]', d.message); })
+            .catch(function() {});
+        })();
+        setInterval(function() {
+            fetch('http://localhost:8006/trigger_scrape', { method: 'POST' }).catch(function(){});
+        }, 5 * 60 * 1000);
     }
 
 })();
