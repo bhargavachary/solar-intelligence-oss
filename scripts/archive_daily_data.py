@@ -105,7 +105,7 @@ def create_energy_log(data, target_date, force=False):
         "meta": {
             "plant_capacity_kw": meta.get("plant_capacity_kw"),
             "location": meta.get("location"),
-            "logged_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "archived_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "record_count": len(records),
             "sampling_interval": "hourly",
             "data_source": meta.get("data_source", "live_portal"),
