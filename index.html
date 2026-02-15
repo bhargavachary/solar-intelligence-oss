@@ -811,20 +811,25 @@
 
     <!-- Bill Calculator + Tariff -->
     <div class="grid-2">
-        <div class="card" data-tip="Interactive calculator: adjust your monthly consumption and solar generation to see bill impact. Uses TPSODL slab rates with net metering banking model (50% daytime self-use, 50% banked at 90% efficiency).">
+        <div class="card" data-tip="Interactive calculator: adjust monthly consumption, solar generation, and usage pattern (% consumed during active generation hours). Direct use during generation hours is 100% efficient. Usage during non-generation hours draws from banked units at 90% efficiency (10% wheeling loss).">
             <div class="card-header">
                 <span class="card-title">💡 Monthly Bill Calculator</span>
                 <span class="card-badge" id="calc-badge">250 units</span>
             </div>
             <div class="calc-input-row">
-                <label>Consumption</label>
+                <label>Monthly Consumption</label>
                 <input type="range" id="calc-slider" min="50" max="600" step="10" value="250">
                 <div class="calc-val"><span id="calc-units">250</span> <span style="font-size:11px;color:var(--text-secondary)">units</span></div>
             </div>
             <div class="calc-input-row">
-                <label>Solar Gen.</label>
+                <label>Solar Generation</label>
                 <input type="range" id="calc-solar-slider" min="0" max="500" step="10" value="300">
                 <div class="calc-val"><span id="calc-solar-units">300</span> <span style="font-size:11px;color:var(--text-secondary)">units</span></div>
+            </div>
+            <div class="calc-input-row">
+                <label>Usage During Generation Hours</label>
+                <input type="range" id="calc-genhours-slider" min="10" max="90" step="5" value="50">
+                <div class="calc-val"><span id="calc-genhours-pct">50</span><span style="font-size:11px;color:var(--text-secondary)">%</span></div>
             </div>
             <div class="bill-compare" id="bill-compare">
                 <div class="bill-col">
@@ -842,8 +847,8 @@
                 </div>
                 <div class="bill-col solar">
                     <div class="bill-col-title">✅ With Solar + Net Metering</div>
-                    <div class="bill-line"><span class="bill-line-label">Daytime self-use (free)</span><span class="bill-line-val" style="color:var(--green)" id="bc-selfuse">150 units</span></div>
-                    <div class="bill-line"><span class="bill-line-label">Night use from bank</span><span class="bill-line-val" id="bc-banked">135 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Direct use (gen. hours)</span><span class="bill-line-val" style="color:var(--green)" id="bc-selfuse">150 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">From bank (non-gen hours)</span><span class="bill-line-val" id="bc-banked">135 units</span></div>
                     <div class="bill-line"><span class="bill-line-label">Banking loss (10%)</span><span class="bill-line-val" style="color:var(--orange)" id="bc-bankloss">15 units</span></div>
                     <div class="bill-line"><span class="bill-line-label">Net billable units</span><span class="bill-line-val" id="bc-net-units">0 units</span></div>
                     <div class="bill-line"><span class="bill-line-label">Energy charge</span><span class="bill-line-val" style="color:var(--green)" id="bc-energy-solar">₹0</span></div>
@@ -854,7 +859,7 @@
             </div>
             <div class="info-callout" style="margin-top:14px">
                 <span>📐</span>
-                <span><strong>How it's calculated:</strong> 50% of your consumption happens during solar hours (fully free from self-use). The other 50% is drawn at night from banked solar units, but banking has a <strong>10% loss</strong> (wheeling/transmission charges). Net billable = max(0, consumption − self_use − banked_after_loss). Surplus units, if any, are <em>not</em> paid out monthly — they carry forward.</span>
+                <span><strong>How it's calculated:</strong> Usage during active generation hours draws directly from solar (100% efficient). Usage during non-generation hours (night/cloudy) draws from banked units with <strong>10% banking loss</strong> (wheeling/transmission charges). Net billable = max(0, consumption − direct_use − banked_after_loss). Adjust the slider to match your consumption pattern.</span>
             </div>
             <div class="info-callout warn" id="export-note" style="display:none">
                 <span>⚠️</span>
@@ -1656,7 +1661,7 @@
         return { s1: s1, s2: s2, s3: s3, s4: s4, total: s1 + s2 + s3 + s4 };
     }
 
-    function updateBillCalc(consumption, solarGen) {
+    function updateBillCalc(consumption, solarGen, genHoursPct) {
         // ── Without Solar ──
         var t = calcTariff(consumption);
         var fixedCharge = 40;
@@ -1667,24 +1672,24 @@
         var totalNoSolar = baseNoSolar + dutyNoSolar;
 
         // ── With Solar (Banking Model) ──
-        // 50% of consumption happens during solar hours → self-use (100% free)
-        var daytimeConsumption = consumption * 0.50;
-        var nightConsumption = consumption * 0.50;
+        // Usage split: genHoursPct% during generation hours, rest during non-generation hours
+        var genHoursConsumption = consumption * (genHoursPct / 100);
+        var nonGenHoursConsumption = consumption - genHoursConsumption;
 
-        // Self-use: min(daytime consumption, solar generation)
-        var selfUse = Math.min(daytimeConsumption, solarGen);
+        // Direct use during generation hours: min(generation hours consumption, solar generation)
+        var directUse = Math.min(genHoursConsumption, solarGen);
 
         // Surplus solar goes to bank
-        var surplusSolar = Math.max(0, solarGen - selfUse);
+        var surplusSolar = Math.max(0, solarGen - directUse);
 
-        // Night use draws from bank at 90% efficiency (10% banking/wheeling loss)
+        // Non-generation hours use draws from bank at 90% efficiency (10% banking/wheeling loss)
         var bankingEfficiency = 0.90;
         var usableFromBank = surplusSolar * bankingEfficiency;
         var bankingLoss = surplusSolar - usableFromBank;
-        var nightFromBank = Math.min(nightConsumption, usableFromBank);
+        var fromBank = Math.min(nonGenHoursConsumption, usableFromBank);
 
         // Net billable units
-        var netBillableUnits = Math.max(0, consumption - selfUse - nightFromBank);
+        var netBillableUnits = Math.max(0, consumption - directUse - fromBank);
         netBillableUnits = Math.round(netBillableUnits);
 
         var tSolar = calcTariff(netBillableUnits);
@@ -1709,8 +1714,8 @@
         setText('bc-total-nosolar', '₹' + Math.round(totalNoSolar).toLocaleString('en-IN'));
 
         // Update bill comparison — with solar (banking detail)
-        setText('bc-selfuse', Math.round(selfUse) + ' units');
-        setText('bc-banked', Math.round(nightFromBank) + ' units');
+        setText('bc-selfuse', Math.round(directUse) + ' units');
+        setText('bc-banked', Math.round(fromBank) + ' units');
         setText('bc-bankloss', Math.round(bankingLoss) + ' units');
         setText('bc-net-units', netBillableUnits + ' units');
         setText('bc-energy-solar', '₹' + Math.round(energySolar).toLocaleString('en-IN'));
@@ -1720,8 +1725,8 @@
         setText('bc-savings-pct', savingsPct + '% less');
 
         // Export surplus note
-        var totalUsed = selfUse + nightFromBank;
-        var residualSurplus = Math.max(0, solarGen - selfUse - surplusSolar + (usableFromBank - nightFromBank));
+        var totalUsed = directUse + fromBank;
+        var residualSurplus = Math.max(0, solarGen - directUse - surplusSolar + (usableFromBank - fromBank));
         // If solar gen > consumption needs after banking, there's residual
         var exportEl = document.getElementById('export-note');
         var exportText = document.getElementById('export-note-text');
@@ -1782,18 +1787,19 @@
             var avgDaily = dailies.length > 0 ? dailies.reduce(function(a,b){return a+b;},0) / dailies.length : 8;
             monthlyGen = Math.round(avgDaily * 30);
         }
-        // Consistent with bill calculator: 50% self-use during daytime, rest banked at 90% efficiency
-        var selfUsePct = 50;
-        var selfUse = Math.round(monthlyGen * selfUsePct / 100);
-        var exported = monthlyGen - selfUse;  // units sent to bank
+        // Use current slider value for generation hours percentage
+        var genHoursPct = calcGenHoursSlider ? parseInt(calcGenHoursSlider.value, 10) : 50;
+        var directUsePct = genHoursPct;  // % of consumption during gen hours = direct use %
+        var directUse = Math.round(monthlyGen * directUsePct / 100);
+        var exported = Math.max(0, monthlyGen - directUse);  // units sent to bank
         var bankingEfficiency = 0.90;
-        var nightUse = Math.round(exported * bankingEfficiency);  // usable from bank after 10% loss
-        var bankingLoss = exported - nightUse;
+        var fromBank = Math.round(exported * bankingEfficiency);  // usable from bank after 10% loss
+        var bankingLoss = exported - fromBank;
 
         setText('sb-generation', monthlyGen + ' kWh');
-        setText('sb-self-use', selfUsePct + '% · ' + selfUse + ' kWh');
+        setText('sb-self-use', directUsePct + '% · ' + directUse + ' kWh');
         setText('sb-banked', exported + ' kWh (−' + bankingLoss + ' loss)');
-        setText('sb-night', nightUse + ' kWh usable');
+        setText('sb-night', fromBank + ' kWh usable');
         setText('sb-net', '₹100 min (fixed)');
 
         // Also sync the solar slider default to actual monthly gen
@@ -1804,16 +1810,19 @@
         }
     }
 
-    // Wire up sliders (consumption + solar generation)
+    // Wire up sliders (consumption + solar generation + generation hours %)
     var calcSlider = document.getElementById('calc-slider');
     var calcSolarSlider = document.getElementById('calc-solar-slider');
+    var calcGenHoursSlider = document.getElementById('calc-genhours-slider');
 
     function syncBillCalc() {
         var consumption = parseInt(calcSlider ? calcSlider.value : 250, 10);
         var solarGen = parseInt(calcSolarSlider ? calcSolarSlider.value : 300, 10);
+        var genHoursPct = parseInt(calcGenHoursSlider ? calcGenHoursSlider.value : 50, 10);
         setText('calc-units', consumption);
         setText('calc-solar-units', solarGen);
-        updateBillCalc(consumption, solarGen);
+        setText('calc-genhours-pct', genHoursPct);
+        updateBillCalc(consumption, solarGen, genHoursPct);
     }
 
     if (calcSlider) {
@@ -1824,6 +1833,9 @@
             calcSolarSlider._userTouched = true;
             syncBillCalc();
         });
+    }
+    if (calcGenHoursSlider) {
+        calcGenHoursSlider.addEventListener('input', syncBillCalc);
     }
     syncBillCalc();  // initial
 
