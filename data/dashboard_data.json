@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-02-15 19:10:16",
+    "generated_at": "2026-02-15 19:14:14",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
@@ -77,10 +77,16 @@
   },
   "analytics": {
     "health": {
-      "overall_score": 92.5,
+      "overall_score": 97.8,
       "grade": "A+",
       "uptime_pct": 99.8,
-      "degradation_pct": 0.5
+      "degradation_pct": 0.5,
+      "factors": {
+        "performance_ratio": 98.1,
+        "capacity_factor": 20.4,
+        "consistency": 95.5,
+        "data_quality": 100
+      }
     },
     "capacity_factor_pct": 20.4,
     "performance_ratio_pct": 98.1,
@@ -110,8 +116,62 @@
         "yield_kwh": 11.1
       }
     ],
+    "power_trend": {
+      "ewma": [
+        0.103,
+        0.2245,
+        0.41935,
+        0.646345,
+        0.8697415,
+        1.0594190499999998,
+        1.1921933349999998,
+        1.2518353345,
+        1.2290847341499997,
+        1.1225593139049996,
+        0.9381915197334997,
+        0.6876340638134498,
+        0.49334384466941483
+      ],
+      "trend_direction": "stable"
+    },
+    "production_monitoring": {
+      "alerts": [],
+      "avg_daily_yield_kwh": 11.38,
+      "peak_power_kw": 1.525,
+      "consistency_score": 95.5
+    },
     "seasonal_forecast": {
-      "annual_kwh": 4154.9
+      "annual_kwh": 3768.5,
+      "monthly_kwh": [
+        310.5,
+        293.2,
+        352.9,
+        368.8,
+        395.2,
+        324.4,
+        254.1,
+        240.0,
+        266.4,
+        317.6,
+        327.8,
+        317.6
+      ],
+      "month_names": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
+      "current_month_kwh": 293.2,
+      "monsoon_drop_pct": 32
     }
   }
 }
