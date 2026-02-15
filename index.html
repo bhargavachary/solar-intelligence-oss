@@ -438,6 +438,113 @@
             font-size: 18px; font-weight: 800; min-width: 70px;
             text-align: right; color: var(--text-primary);
         }
+
+        /* ═══════════════════════════════════════
+           TOOLTIPS — hover descriptions on all blocks
+           ═══════════════════════════════════════ */
+        [data-tip] { position: relative; cursor: help; }
+        [data-tip]::after {
+            content: attr(data-tip);
+            position: absolute; bottom: calc(100% + 8px); left: 50%;
+            transform: translateX(-50%); white-space: normal;
+            max-width: 320px; min-width: 180px; width: max-content;
+            padding: 10px 14px; border-radius: 10px;
+            background: var(--surface-elevated); color: var(--text-primary);
+            font-size: 12px; font-weight: 400; line-height: 1.5;
+            box-shadow: var(--shadow-md); border: 1px solid var(--separator);
+            opacity: 0; pointer-events: none; z-index: 100;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: translateX(-50%) translateY(4px);
+        }
+        [data-tip]:hover::after {
+            opacity: 1; pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        /* Ensure tooltip stays on screen */
+        .kpi:first-child[data-tip]::after { left: 0; transform: translateX(0) translateY(4px); }
+        .kpi:first-child[data-tip]:hover::after { transform: translateX(0) translateY(0); }
+        .kpi:last-child[data-tip]::after { left: auto; right: 0; transform: translateX(0) translateY(4px); }
+        .kpi:last-child[data-tip]:hover::after { transform: translateX(0) translateY(0); }
+
+        /* ═══════════════════════════════════════
+           INFO CALLOUT (for notes/explanations)
+           ═══════════════════════════════════════ */
+        .info-callout {
+            display: flex; gap: 10px; padding: 14px 16px;
+            border-radius: var(--radius-xs);
+            background: var(--surface-secondary);
+            border-left: 3px solid var(--accent);
+            margin-top: 14px; font-size: 12px; line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .info-callout strong { color: var(--text-primary); }
+        .info-callout.warn { border-left-color: var(--orange); }
+        .info-callout.success { border-left-color: var(--green); }
+        .roi-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        @media (max-width: 700px) { .roi-info-grid { grid-template-columns: 1fr; } }
+
+        /* ═══════════════════════════════════════
+           ENHANCED RESPONSIVE DESIGN
+           ═══════════════════════════════════════ */
+        /* Tablet */
+        @media (max-width: 1100px) {
+            .container { padding: 16px 16px; }
+            .kpi-value { font-size: 26px; }
+            .roi-stat-value { font-size: 22px; }
+        }
+        /* Mobile */
+        @media (max-width: 700px) {
+            .container { padding: 12px 10px; }
+            .header { gap: 10px; padding: 10px 0 14px; }
+            .header-brand { gap: 10px; }
+            .header-title { font-size: 17px; }
+            .header-subtitle { font-size: 11px; }
+            .header-nav { gap: 6px; }
+            .header-link { font-size: 11px; padding: 4px 8px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi { padding: 14px; }
+            .kpi-icon { width: 32px; height: 32px; font-size: 16px; margin-bottom: 10px; }
+            .kpi-value { font-size: 24px; }
+            .kpi-label { font-size: 10px; }
+            .kpi-detail { font-size: 10px; }
+            .grid-2, .grid-3, .grid-2-equal { grid-template-columns: 1fr; gap: 10px; }
+            .card { padding: 16px; border-radius: 12px; }
+            .card-title { font-size: 14px; }
+            .chart-container.h-64 { height: 220px; }
+            .chart-container.h-48 { height: 180px; }
+            .section-label { font-size: 10px; margin-bottom: 8px; }
+            .roi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .roi-stat { padding: 12px 8px; }
+            .roi-stat-value { font-size: 20px; }
+            .roi-stat-label { font-size: 9px; }
+            .sb-flow { flex-direction: column; gap: 4px; padding: 4px 0 12px; }
+            .sb-node { flex-direction: row; gap: 10px; min-width: unset; width: 100%; padding: 10px 14px; }
+            .sb-node-icon { font-size: 22px; margin-bottom: 0; }
+            .sb-arrow { transform: rotate(90deg); padding: 2px 0; font-size: 16px; }
+            .bill-compare { grid-template-columns: 1fr; }
+            .bill-vs { padding: 14px; flex-direction: row; gap: 10px; border-left: none; border-right: none; border-top: 1px solid var(--separator); border-bottom: 1px solid var(--separator); }
+            .bill-col { padding: 14px; }
+            .stat-row { font-size: 12px; padding: 8px 0; }
+            .footer { font-size: 11px; padding: 20px 0 12px; }
+            [data-tip]::after { max-width: 220px; font-size: 11px; }
+            .calc-input-row { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+            .calc-input-row label { font-size: 12px; }
+            .calc-input-row .calc-val { font-size: 16px; min-width: 60px; }
+            .tariff-table { font-size: 11px; }
+            .tariff-table th, .tariff-table td { padding: 8px 6px; }
+            .health-ring { width: 120px; height: 120px; }
+            .health-ring svg { width: 120px; height: 120px; }
+            .health-score { font-size: 32px; }
+            .insight-item { font-size: 12px; padding: 10px 12px; }
+            .table-wrap { max-height: 260px; }
+            th, td { padding: 8px 10px; font-size: 12px; }
+        }
+        /* Small phones */
+        @media (max-width: 400px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+            .kpi-value { font-size: 28px; }
+            .roi-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -483,37 +590,37 @@
     <!-- ═══ KPI HERO ROW ═══ -->
     <div class="section-label">Overview</div>
     <div class="kpi-grid">
-        <div class="kpi">
+        <div class="kpi" data-tip="Instantaneous power output right now from the inverter. Peaks at solar noon (~1.5 kW for this 2.32 kW system). Shows 0 at night.">
             <div class="kpi-icon" style="background:var(--orange-bg)">⚡</div>
             <div class="kpi-label">Live Power</div>
             <div class="kpi-value"><span id="kpi-power">--</span><span class="kpi-unit">kW</span></div>
             <div class="kpi-detail">Peak today: <strong id="kpi-peak">--</strong> kW · Cap: <span id="kpi-cap">2.32</span> kW</div>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-tip="Total energy generated today (sunrise to now). A good clear day in Berhampur yields 10-12 kWh for a 2.32 kW system.">
             <div class="kpi-icon" style="background:var(--green-bg)">📈</div>
             <div class="kpi-label">Today's Yield</div>
             <div class="kpi-value"><span id="kpi-daily">--</span><span class="kpi-unit">kWh</span></div>
             <div class="kpi-detail">Target: 10–12 kWh on a good day</div>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-tip="Cumulative energy generated this calendar month. Resets on the 1st. Expected ~300-370 kWh/month for Feb in Berhampur.">
             <div class="kpi-icon" style="background:var(--cyan-bg)">📅</div>
             <div class="kpi-label">Monthly Yield</div>
             <div class="kpi-value"><span id="kpi-monthly">--</span><span class="kpi-unit" id="kpi-monthly-unit">kWh</span></div>
             <div class="kpi-detail">This month's total generation</div>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-tip="All-time energy generated since installation. This is the cumulative total from the inverter's lifetime counter. Your system has generated 68.3 kWh since commissioning.">
             <div class="kpi-icon" style="background:var(--purple-bg)">🔋</div>
             <div class="kpi-label">Lifetime Yield</div>
             <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit" id="kpi-total-unit">MWh</span></div>
             <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span> <span style="font-size:10px;color:var(--text-tertiary)">@ ₹7/kWh</span></div>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-tip="Composite health score (0-100) based on power consistency, voltage stability, yield efficiency, data quality, and uptime. A+ means all parameters are within expected ranges.">
             <div class="kpi-icon" style="background:var(--blue-bg)">🛡️</div>
             <div class="kpi-label">Health Score</div>
             <div class="kpi-value"><span id="kpi-health">--</span><span class="kpi-unit" id="kpi-grade"></span></div>
             <div class="kpi-detail">Data Quality: <span id="kpi-quality">--</span>%</div>
         </div>
-        <div class="kpi">
+        <div class="kpi" data-tip="Ratio of actual yield to theoretical maximum yield. PR = Actual ÷ (Capacity × PSH × Days). Values above 75% are excellent. Accounts for all losses (heat, wiring, inverter, soiling).">
             <div class="kpi-icon" style="background:var(--cyan-bg)">📊</div>
             <div class="kpi-label">Performance Ratio</div>
             <div class="kpi-value"><span id="kpi-pr">--</span><span class="kpi-unit">%</span></div>
@@ -525,14 +632,14 @@
     <div class="section-label">Generation Trends</div>
 
     <div class="grid-2">
-        <div class="card">
+        <div class="card" data-tip="Intra-day power output curve. Follows a sinusoidal shape: rises after sunrise, peaks at solar noon, falls to zero at sunset. EWMA trend line smooths short-term fluctuations.">
             <div class="card-header">
                 <span class="card-title">Power Generation Curve</span>
                 <span class="card-badge" id="badge-method">--</span>
             </div>
             <div class="chart-container h-64"><canvas id="powerChart"></canvas></div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="AI-generated insights based on real-time data, physics models, and historical trends. Compares actual output against expected values for your system's capacity and location.">
             <div class="card-header">
                 <span class="card-title">Smart Insights</span>
                 <span class="card-badge" id="badge-anomalies">0 anomalies</span>
@@ -542,9 +649,9 @@
     </div>
 
     <div class="grid-2">
-        <div class="card">
+        <div class="card" data-tip="Daily energy production for recent days. Green bars = above average, blue = normal, red = below expected. Zero-yield days indicate commissioning or system offline.">
             <div class="card-header">
-                <span class="card-title">Daily Yield History (30 Days)</span>
+                <span class="card-title">Daily Yield History</span>
                 <span class="card-badge" id="badge-daily-avg">--</span>
             </div>
             <div class="chart-container h-64"><canvas id="dailyProgressChart"></canvas></div>
@@ -554,7 +661,7 @@
                 <div>Trend: <strong id="daily-trend" style="color:var(--text-primary)">--</strong></div>
             </div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="Projected annual generation based on Berhampur's solar irradiance data (NASA POWER), system capacity, and seasonal factors. Best months: Apr-May (7 PSH), weakest: Jul-Aug (monsoon).">
             <div class="card-header">
                 <span class="card-title">Annual Projection</span>
                 <span class="card-badge">Seasonal Model</span>
@@ -588,14 +695,14 @@
     <div class="section-label">System Health &amp; Performance</div>
 
     <div class="grid-3">
-        <div class="card">
+        <div class="card" data-tip="Grid voltage and inverter output current throughout the day. Healthy voltage range is 210-250V. Current rises with power output. Both drop to zero at night.">
             <div class="card-header">
                 <span class="card-title">Voltage &amp; Current</span>
                 <span class="card-badge" id="badge-voltage">--</span>
             </div>
             <div class="chart-container h-48"><canvas id="voltageChart"></canvas></div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="Overall system health ring — weighted score of power consistency, voltage stability, yield efficiency, data quality, and uptime. Green ≥80, orange ≥60, red <60.">
             <div class="card-header"><span class="card-title">System Health</span></div>
             <div class="health-ring-wrap">
                 <div class="health-ring">
@@ -612,7 +719,7 @@
             </div>
             <div id="health-factors"></div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="Key performance indicators: PR (actual vs theoretical), CF (avg output vs max capacity), Uptime (% time system was generating), Data Quality (% valid readings).">
             <div class="card-header"><span class="card-title">Performance Metrics</span></div>
             <div id="perf-bars">
                 <div class="perf-bar-wrap"><div class="perf-bar-header"><span class="perf-bar-label">Performance Ratio</span><span class="perf-bar-value" id="pb-pr">--</span></div><div class="perf-bar-track"><div class="perf-bar-fill" id="pb-pr-fill" style="width:0%;background:linear-gradient(90deg,#0a84ff,#0071e3)"></div></div></div>
@@ -631,7 +738,7 @@
     <div class="section-label">Forecasting &amp; Operations</div>
 
     <div class="grid-2">
-        <div class="card">
+        <div class="card" data-tip="Month-by-month generation forecast using Berhampur's Peak Sun Hours (PSH) and seasonal irradiance data. Current month is highlighted. Monsoon months (Jul-Aug) show lowest output.">
             <div class="card-header">
                 <span class="card-title">Monthly Generation Forecast</span>
                 <span class="card-badge">Berhampur Model</span>
@@ -643,7 +750,7 @@
                 <div>Monsoon drop: <strong id="forecast-monsoon" style="color:var(--text-primary)">--</strong></div>
             </div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="Real-time inverter parameters. Values shown are from the peak-power moment of the day. Grid frequency should be 49.9-50.1 Hz. Panel temp above 45°C reduces output.">
             <div class="card-header"><span class="card-title">Operational Details</span></div>
             <div class="stat-row"><span class="stat-label">Inverter Status</span><span class="stat-value" id="op-status">--</span></div>
             <div class="stat-row"><span class="stat-label">Grid Voltage</span><span class="stat-value" id="op-voltage">--</span></div>
@@ -659,7 +766,7 @@
     <div class="section-label">TPSODL Net Metering · Solar Bank</div>
 
     <!-- How Solar Bank Works -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:16px" data-tip="TPSODL net metering works like a bank: surplus solar units are 'deposited' to the grid during the day and 'withdrawn' at night. 10% banking charges apply (wheeling/transmission losses). Monthly settlement; annual true-up.">
         <div class="card-header">
             <span class="card-title">🏦 How the Solar Bank Works</span>
             <span class="card-badge" style="background:var(--green-bg);color:var(--green)">Net Metering</span>
@@ -704,15 +811,20 @@
 
     <!-- Bill Calculator + Tariff -->
     <div class="grid-2">
-        <div class="card">
+        <div class="card" data-tip="Interactive calculator: adjust your monthly consumption and solar generation to see bill impact. Uses TPSODL slab rates with net metering banking model (50% daytime self-use, 50% banked at 90% efficiency).">
             <div class="card-header">
                 <span class="card-title">💡 Monthly Bill Calculator</span>
                 <span class="card-badge" id="calc-badge">250 units</span>
             </div>
             <div class="calc-input-row">
-                <label>Monthly Usage</label>
+                <label>Consumption</label>
                 <input type="range" id="calc-slider" min="50" max="600" step="10" value="250">
                 <div class="calc-val"><span id="calc-units">250</span> <span style="font-size:11px;color:var(--text-secondary)">units</span></div>
+            </div>
+            <div class="calc-input-row">
+                <label>Solar Gen.</label>
+                <input type="range" id="calc-solar-slider" min="0" max="500" step="10" value="300">
+                <div class="calc-val"><span id="calc-solar-units">300</span> <span style="font-size:11px;color:var(--text-secondary)">units</span></div>
             </div>
             <div class="bill-compare" id="bill-compare">
                 <div class="bill-col">
@@ -729,17 +841,28 @@
                     <div class="bill-vs-sub" id="bc-savings-pct">92% less</div>
                 </div>
                 <div class="bill-col solar">
-                    <div class="bill-col-title">✅ With Solar (Net Zero)</div>
-                    <div class="bill-line"><span class="bill-line-label">Energy (net units)</span><span class="bill-line-val" style="color:var(--green)" id="bc-energy-solar">₹0</span></div>
-                    <div class="bill-line"><span class="bill-line-label">Fixed Charge (2kW)</span><span class="bill-line-val">₹40</span></div>
-                    <div class="bill-line"><span class="bill-line-label">Meter Rent (Smart)</span><span class="bill-line-val">₹60</span></div>
+                    <div class="bill-col-title">✅ With Solar + Net Metering</div>
+                    <div class="bill-line"><span class="bill-line-label">Daytime self-use (free)</span><span class="bill-line-val" style="color:var(--green)" id="bc-selfuse">150 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Night use from bank</span><span class="bill-line-val" id="bc-banked">135 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Banking loss (10%)</span><span class="bill-line-val" style="color:var(--orange)" id="bc-bankloss">15 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Net billable units</span><span class="bill-line-val" id="bc-net-units">0 units</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Energy charge</span><span class="bill-line-val" style="color:var(--green)" id="bc-energy-solar">₹0</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Fixed + Meter</span><span class="bill-line-val">₹100</span></div>
                     <div class="bill-line"><span class="bill-line-label">Elec. Duty (4%)</span><span class="bill-line-val" id="bc-duty-solar">~₹4</span></div>
                     <div class="bill-total"><span>Total</span><span style="color:var(--green)" id="bc-total-solar">₹104</span></div>
                 </div>
             </div>
+            <div class="info-callout" style="margin-top:14px">
+                <span>📐</span>
+                <span><strong>How it's calculated:</strong> 50% of your consumption happens during solar hours (fully free from self-use). The other 50% is drawn at night from banked solar units, but banking has a <strong>10% loss</strong> (wheeling/transmission charges). Net billable = max(0, consumption − self_use − banked_after_loss). Surplus units, if any, are <em>not</em> paid out monthly — they carry forward.</span>
+            </div>
+            <div class="info-callout warn" id="export-note" style="display:none">
+                <span>⚠️</span>
+                <span id="export-note-text"></span>
+            </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-tip="TPSODL domestic tariff slabs for FY 2024-25 (Odisha). Higher consumption pushes units into expensive slabs. Solar eliminates the expensive upper slabs first.">
             <div class="card-header">
                 <span class="card-title">📊 TPSODL Tariff Slabs</span>
                 <span class="card-badge">FY 2024-25</span>
@@ -759,17 +882,19 @@
                     </tr>
                 </tfoot>
             </table>
-            <div style="margin-top:16px">
-                <div class="sb-info-row" style="margin-bottom:0">
-                    <span class="sb-info-icon">💡</span>
-                    <span style="font-size:12px"><strong>Fixed charges:</strong> ₹20/kW/month (₹40 for 2kW) + ₹60 smart meter rent = <strong>₹100 minimum bill</strong> even at net-zero consumption. Electricity Duty 4% applies on total.</span>
-                </div>
+            <div class="info-callout" style="margin-top:12px">
+                <span>💡</span>
+                <span><strong>Fixed charges are unavoidable:</strong> ₹20/kW/month (₹40 for 2kW) + ₹60 smart meter rent = <strong>₹100 minimum bill</strong> even at net-zero. Electricity Duty 4% applies on total.</span>
+            </div>
+            <div class="info-callout warn" style="margin-top:8px">
+                <span>🚫</span>
+                <span><strong>Common misconception:</strong> You <em>cannot</em> simply export all solar units and get paid. TPSODL requires you to consume <strong>at least 90% of your generation</strong> before any surplus qualifies for payout. Residual surplus (if any) is paid at just <strong>~₹2.50/unit</strong> (APPC rate), not the retail tariff of ₹4-6/unit. Solar is for <em>self-consumption savings</em>, not for selling electricity.</span>
             </div>
         </div>
     </div>
 
     <!-- ROI & Payback -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card" style="margin-bottom:16px" data-tip="ROI calculation based on actual Odisha subsidy stack (PM Surya Ghar + State subsidy). Net investment ~₹45-50K for a 2kW system; payback under 2 years with typical household consumption.">
         <div class="card-header">
             <span class="card-title">💰 Return on Investment</span>
             <span class="card-badge" id="roi-plant-size">2.32 kW System</span>
@@ -781,9 +906,9 @@
                 <div class="roi-stat-sub" id="roi-annual-sub">@ 250 units/mo</div>
             </div>
             <div class="roi-stat">
-                <div class="roi-stat-value" style="color:var(--accent)" id="roi-payback">~7 yrs</div>
+                <div class="roi-stat-value" style="color:var(--accent)" id="roi-payback">~1.5 yrs</div>
                 <div class="roi-stat-label">Payback Period</div>
-                <div class="roi-stat-sub" id="roi-payback-sub">System cost ~₹1.2L after subsidy</div>
+                <div class="roi-stat-sub" id="roi-payback-sub">Net cost ~₹48K after all subsidies</div>
             </div>
             <div class="roi-stat">
                 <div class="roi-stat-value" style="color:var(--purple)" id="roi-lifetime-save">₹3.6L</div>
@@ -791,19 +916,19 @@
                 <div class="roi-stat-sub">Panel lifetime value</div>
             </div>
             <div class="roi-stat">
-                <div class="roi-stat-value" style="color:var(--cyan)" id="roi-free-years">18 yrs</div>
+                <div class="roi-stat-value" style="color:var(--cyan)" id="roi-free-years">23 yrs</div>
                 <div class="roi-stat-label">Free Electricity</div>
                 <div class="roi-stat-sub">After payback</div>
             </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-            <div class="sb-info-row" style="margin-bottom:0">
-                <span class="sb-info-icon">🏛️</span>
-                <span style="font-size:12px"><strong>PM Surya Ghar Subsidy:</strong> ₹30,000/kW for first 2kW + ₹18,000/kW for 2-3kW. A 2.5kW system gets ~<strong>₹69,000</strong> subsidy, reducing cost from ~₹1.75L to ~₹1.06L.</span>
+        <div class="roi-info-grid">
+            <div class="info-callout success" style="margin-bottom:0">
+                <span>🏛️</span>
+                <span><strong>PM Surya Ghar (Central):</strong> ₹30,000/kW for first 2kW = <strong>₹60,000</strong>. <br><strong>Odisha State Subsidy:</strong> Additional ~₹40,000+ for ≤3kW systems. <br>Combined subsidy for 2kW: <strong>&gt;₹1,00,000</strong>. Gross cost ~₹1.5L → Net investment <strong>~₹45-50K</strong> only.</span>
             </div>
-            <div class="sb-info-row" style="margin-bottom:0">
-                <span class="sb-info-icon">📈</span>
-                <span style="font-size:12px"><strong>Tariff Escalation:</strong> Electricity prices rise ~5% yearly. At current rates, your savings grow each year. 25-year cumulative savings can exceed <strong>₹5 Lakhs</strong> with tariff inflation.</span>
+            <div class="info-callout" style="margin-bottom:0">
+                <span>📈</span>
+                <span><strong>Why payback is under 2 years:</strong> With 250+ units/month consumption, annual savings exceed ₹25K-30K. At a net investment of ~₹48K, the system pays for itself in <strong>1.5 – 2 years</strong>. After that, it's 23+ years of essentially <em>free electricity</em>. Tariff escalation (~5%/yr) makes future savings even higher.</span>
             </div>
         </div>
     </div>
@@ -812,7 +937,7 @@
     <div class="section-label">Data &amp; Analytics</div>
 
     <div class="grid-2-equal">
-        <div class="card">
+        <div class="card" data-tip="Statistical analysis of today's power readings: mean, median, standard deviation, quartiles, and range. EWMA (Exponentially Weighted Moving Average) forecasts the next reading.">
             <div class="card-header">
                 <span class="card-title">Statistical Summary</span>
                 <span class="card-badge">Analytics Engine</span>
@@ -826,7 +951,7 @@
             <div class="stat-row"><span class="stat-label">Peak Daily Yield</span><span class="stat-value" id="st-daily-max">--</span></div>
             <div class="stat-row"><span class="stat-label">EWMA Forecast</span><span class="stat-value" id="st-ewma">--</span></div>
         </div>
-        <div class="card">
+        <div class="card" data-tip="Raw telemetry data table showing each data point from the Waaree monitoring portal: timestamp, power output, voltage, current, and daily cumulative yield.">
             <div class="card-header">
                 <span class="card-title">Recent Telemetry</span>
                 <span class="card-badge" id="badge-records">0 records</span>
@@ -1522,8 +1647,9 @@
         return { s1: s1, s2: s2, s3: s3, s4: s4, total: s1 + s2 + s3 + s4 };
     }
 
-    function updateBillCalc(units) {
-        var t = calcTariff(units);
+    function updateBillCalc(consumption, solarGen) {
+        // ── Without Solar ──
+        var t = calcTariff(consumption);
         var fixedCharge = 40;
         var meterRent = 60;
         var energyNoSolar = t.total;
@@ -1531,53 +1657,109 @@
         var dutyNoSolar = Math.round(baseNoSolar * 0.04);
         var totalNoSolar = baseNoSolar + dutyNoSolar;
 
-        // With solar: net units = 0 (system matches consumption)
-        var baseSolar = 0 + fixedCharge + meterRent;
+        // ── With Solar (Banking Model) ──
+        // 50% of consumption happens during solar hours → self-use (100% free)
+        var daytimeConsumption = consumption * 0.50;
+        var nightConsumption = consumption * 0.50;
+
+        // Self-use: min(daytime consumption, solar generation)
+        var selfUse = Math.min(daytimeConsumption, solarGen);
+
+        // Surplus solar goes to bank
+        var surplusSolar = Math.max(0, solarGen - selfUse);
+
+        // Night use draws from bank at 90% efficiency (10% banking/wheeling loss)
+        var bankingEfficiency = 0.90;
+        var usableFromBank = surplusSolar * bankingEfficiency;
+        var bankingLoss = surplusSolar - usableFromBank;
+        var nightFromBank = Math.min(nightConsumption, usableFromBank);
+
+        // Net billable units
+        var netBillableUnits = Math.max(0, consumption - selfUse - nightFromBank);
+        netBillableUnits = Math.round(netBillableUnits);
+
+        var tSolar = calcTariff(netBillableUnits);
+        var energySolar = tSolar.total;
+        var baseSolar = energySolar + fixedCharge + meterRent;
         var dutySolar = Math.round(baseSolar * 0.04);
         var totalSolar = baseSolar + dutySolar;
 
         var savings = totalNoSolar - totalSolar;
-        var savingsPct = Math.round((savings / totalNoSolar) * 100);
+        var savingsPct = totalNoSolar > 0 ? Math.round((savings / totalNoSolar) * 100) : 0;
 
-        // Update tariff slab table
+        // Update tariff slab table (shows without-solar breakdown)
         setText('ts1', '₹' + Math.round(t.s1).toLocaleString('en-IN'));
         setText('ts2', '₹' + Math.round(t.s2).toLocaleString('en-IN'));
         setText('ts3', '₹' + Math.round(t.s3).toLocaleString('en-IN'));
         setText('ts4', '₹' + Math.round(t.s4).toLocaleString('en-IN'));
         setText('ts-total', '₹' + Math.round(t.total).toLocaleString('en-IN'));
 
-        // Update bill comparison
+        // Update bill comparison — without solar
         setText('bc-energy-nosolar', '₹' + Math.round(energyNoSolar).toLocaleString('en-IN'));
         setText('bc-duty-nosolar', '~₹' + dutyNoSolar);
         setText('bc-total-nosolar', '₹' + Math.round(totalNoSolar).toLocaleString('en-IN'));
-        setText('bc-energy-solar', '₹0');
+
+        // Update bill comparison — with solar (banking detail)
+        setText('bc-selfuse', Math.round(selfUse) + ' units');
+        setText('bc-banked', Math.round(nightFromBank) + ' units');
+        setText('bc-bankloss', Math.round(bankingLoss) + ' units');
+        setText('bc-net-units', netBillableUnits + ' units');
+        setText('bc-energy-solar', '₹' + Math.round(energySolar).toLocaleString('en-IN'));
         setText('bc-duty-solar', '~₹' + dutySolar);
         setText('bc-total-solar', '₹' + Math.round(totalSolar).toLocaleString('en-IN'));
         setText('bc-savings', '₹' + Math.round(savings).toLocaleString('en-IN'));
         setText('bc-savings-pct', savingsPct + '% less');
 
-        // Update ROI
+        // Export surplus note
+        var totalUsed = selfUse + nightFromBank;
+        var residualSurplus = Math.max(0, solarGen - selfUse - surplusSolar + (usableFromBank - nightFromBank));
+        // If solar gen > consumption needs after banking, there's residual
+        var exportEl = document.getElementById('export-note');
+        var exportText = document.getElementById('export-note-text');
+        if (solarGen > consumption && exportEl && exportText) {
+            var excess = Math.round(solarGen - consumption);
+            var consumed90 = (consumption >= solarGen * 0.9);
+            if (consumed90) {
+                exportText.innerHTML = 'You have <strong>' + excess + ' surplus units</strong>. Since you consume ≥90% of generation, these may qualify for payout at ~₹2.50/unit = <strong>₹' + Math.round(excess * 2.5) + '/month</strong>. However, these units typically carry forward and are settled annually.';
+            } else {
+                exportText.innerHTML = 'You have surplus solar, but you consume <strong>only ' + Math.round(consumption / solarGen * 100) + '%</strong> of generation. TPSODL requires ≥90% self-consumption before any export payout. Surplus units carry forward but <em>won\'t be paid out</em> until the 90% threshold is met at settlement.';
+            }
+            exportEl.style.display = 'flex';
+        } else if (exportEl) {
+            exportEl.style.display = 'none';
+        }
+
+        // ── Update ROI ──
         var annualSave = savings * 12;
-        var systemCostPerKw = 50000;  // after subsidy per kW approx
-        var plantKw = 2.32;  // default, updated later
+        var plantKw = 2.32;
         try { plantKw = num(document.getElementById('kpi-cap').textContent) || 2.32; } catch(e) {}
-        var subsidyFirst2 = Math.min(plantKw, 2) * 30000;
-        var subsidyRest = Math.max(plantKw - 2, 0) * 18000;
-        var totalSubsidy = subsidyFirst2 + subsidyRest;
-        var grossCost = plantKw * 70000;  // ~₹70K/kW gross
-        var netCost = grossCost - totalSubsidy;
+
+        // Odisha subsidy stack
+        var grossCost = plantKw * 70000;  // ~₹70K/kW gross installed cost
+        var pmSubsidyFirst2 = Math.min(plantKw, 2) * 30000;  // PM Surya Ghar: ₹30K/kW first 2kW
+        var pmSubsidyRest = Math.max(plantKw - 2, 0) * 18000; // ₹18K/kW for 2-3kW
+        var pmSubsidy = pmSubsidyFirst2 + pmSubsidyRest;
+        // Odisha state subsidy (~₹40K+ for ≤3kW systems)
+        var odishaSubsidy = plantKw <= 3 ? Math.min(plantKw, 2) * 20000 : 0;
+        var totalSubsidy = pmSubsidy + odishaSubsidy;
+        var netCost = Math.max(0, grossCost - totalSubsidy);
+
         var paybackYears = annualSave > 0 ? (netCost / annualSave) : 25;
         var freeYears = Math.max(0, Math.round(25 - paybackYears));
         var lifetimeSave = annualSave * 25;
 
         setText('roi-annual-save', fmtMoney(annualSave));
-        setText('roi-annual-sub', '@ ' + units + ' units/mo');
-        setText('roi-payback', '~' + Math.round(paybackYears) + ' yrs');
-        setText('roi-payback-sub', 'Cost ~' + fmtMoney(netCost) + ' after subsidy');
+        setText('roi-annual-sub', '@ ' + consumption + ' units/mo');
+        if (paybackYears < 1) {
+            setText('roi-payback', '< 1 yr');
+        } else {
+            setText('roi-payback', '~' + paybackYears.toFixed(1) + ' yrs');
+        }
+        setText('roi-payback-sub', 'Net cost ' + fmtMoney(netCost) + ' after all subsidies');
         setText('roi-lifetime-save', fmtMoney(lifetimeSave));
         setText('roi-free-years', freeYears + ' yrs');
         setText('roi-plant-size', plantKw.toFixed(2) + ' kW System');
-        setText('calc-badge', units + ' units');
+        setText('calc-badge', consumption + ' units');
     }
 
     function updateSolarBankFlow(records, meta) {
@@ -1591,29 +1773,50 @@
             var avgDaily = dailies.length > 0 ? dailies.reduce(function(a,b){return a+b;},0) / dailies.length : 8;
             monthlyGen = Math.round(avgDaily * 30);
         }
-        var selfUsePct = 60;
+        // Consistent with bill calculator: 50% self-use during daytime, rest banked at 90% efficiency
+        var selfUsePct = 50;
         var selfUse = Math.round(monthlyGen * selfUsePct / 100);
-        var exported = monthlyGen - selfUse;
-        var nightUse = exported;  // net-zero scenario: night draw equals export
-        var netBill = 0;  // net-zero
+        var exported = monthlyGen - selfUse;  // units sent to bank
+        var bankingEfficiency = 0.90;
+        var nightUse = Math.round(exported * bankingEfficiency);  // usable from bank after 10% loss
+        var bankingLoss = exported - nightUse;
 
         setText('sb-generation', monthlyGen + ' kWh');
         setText('sb-self-use', selfUsePct + '% · ' + selfUse + ' kWh');
-        setText('sb-banked', exported + ' kWh');
-        setText('sb-night', (100 - selfUsePct) + '% · ' + nightUse + ' kWh');
-        setText('sb-net', netBill === 0 ? '≈ ₹0' : '₹' + netBill);
+        setText('sb-banked', exported + ' kWh (−' + bankingLoss + ' loss)');
+        setText('sb-night', nightUse + ' kWh usable');
+        setText('sb-net', '₹100 min (fixed)');
+
+        // Also sync the solar slider default to actual monthly gen
+        if (calcSolarSlider && !calcSolarSlider._userTouched) {
+            calcSolarSlider.value = Math.min(500, Math.max(0, monthlyGen));
+            setText('calc-solar-units', calcSolarSlider.value);
+            syncBillCalc();
+        }
     }
 
-    // Wire up slider
+    // Wire up sliders (consumption + solar generation)
     var calcSlider = document.getElementById('calc-slider');
-    if (calcSlider) {
-        calcSlider.addEventListener('input', function() {
-            var units = parseInt(this.value, 10);
-            setText('calc-units', units);
-            updateBillCalc(units);
-        });
-        updateBillCalc(250);  // initial
+    var calcSolarSlider = document.getElementById('calc-solar-slider');
+
+    function syncBillCalc() {
+        var consumption = parseInt(calcSlider ? calcSlider.value : 250, 10);
+        var solarGen = parseInt(calcSolarSlider ? calcSolarSlider.value : 300, 10);
+        setText('calc-units', consumption);
+        setText('calc-solar-units', solarGen);
+        updateBillCalc(consumption, solarGen);
     }
+
+    if (calcSlider) {
+        calcSlider.addEventListener('input', syncBillCalc);
+    }
+    if (calcSolarSlider) {
+        calcSolarSlider.addEventListener('input', function() {
+            calcSolarSlider._userTouched = true;
+            syncBillCalc();
+        });
+    }
+    syncBillCalc();  // initial
 
     // ══════════════════════════════
     // BOOTSTRAP

@@ -407,38 +407,38 @@
     "daily_progress": [
       {
         "date": "2026-02-09",
-        "yield": 11.84,
-        "peak_power": 1.627,
-        "status": "Online"
+        "yield": 0.0,
+        "peak_power": 0.0,
+        "status": "Commissioning"
       },
       {
         "date": "2026-02-10",
-        "yield": 11.91,
-        "peak_power": 1.637,
-        "status": "Online"
+        "yield": 0.0,
+        "peak_power": 0.0,
+        "status": "Commissioning"
       },
       {
         "date": "2026-02-11",
-        "yield": 11.77,
-        "peak_power": 1.618,
-        "status": "Online"
+        "yield": 0.0,
+        "peak_power": 0.0,
+        "status": "Commissioning"
       },
       {
         "date": "2026-02-12",
-        "yield": 11.45,
-        "peak_power": 1.573,
+        "yield": 2.1,
+        "peak_power": 0.287,
         "status": "Online"
       },
       {
         "date": "2026-02-13",
-        "yield": 11.02,
-        "peak_power": 1.515,
+        "yield": 3.2,
+        "peak_power": 0.437,
         "status": "Online"
       },
       {
         "date": "2026-02-14",
-        "yield": 10.6,
-        "peak_power": 1.457,
+        "yield": 4.1,
+        "peak_power": 0.56,
         "status": "Online"
       },
       {
