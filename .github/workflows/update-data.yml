@@ -1,37 +1,86 @@
-name: Update Solar Data
+name: ☀️ Auto-Update Solar Data
 
+# ─────────────────────────────────────────────────────────
+# TRIGGERS
+# ─────────────────────────────────────────────────────────
 on:
   schedule:
-    # Runs at 6:00 AM, 12:00 PM, and 6:00 PM IST (UTC+5:30)
-    - cron: '30 0,6,12 * * *'
-  workflow_dispatch: # Allow manual trigger
+    # Runs 3× daily aligned to Indian solar window (IST = UTC+5:30)
+    #   06:30 IST (01:00 UTC) — Morning baseline
+    #   12:30 IST (07:00 UTC) — Solar peak
+    #   18:30 IST (13:00 UTC) — Evening wrap-up
+    - cron: '0 1,7,13 * * *'
+
+  workflow_dispatch:
+    # Manual trigger from Actions tab — with optional parameters
+    inputs:
+      days:
+        description: 'Days of history to generate (default: 1)'
+        required: false
+        default: '1'
+      use_scraper:
+        description: 'Attempt live scrape (requires WAAREE_USER & WAAREE_PASS secrets)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: write  # Allow the bot to push data commits
 
+# ─────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────
 jobs:
-  update-data:
+  refresh-solar-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
+      # ── 1. Clone the repo ──
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # ── 2. Setup Python ──
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Generate solar data
-        run: python scripts/generate_data.py --days 1
+      # ── 3. Install dependencies ──
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Run analytics engine
-        run: python scripts/update_data.py --days 1
-
-      - name: Commit & push updated data
+      # ── 4. (Optional) Live scrape — only when manually triggered with flag ──
+      - name: 🔬 Live Scrape (optional)
+        if: ${{ github.event.inputs.use_scraper == 'true' }}
+        env:
+          WAAREE_USER: ${{ secrets.WAAREE_USER }}
+          WAAREE_PASS: ${{ secrets.WAAREE_PASS }}
         run: |
-          git config user.name "Solar Bot"
+          echo "Attempting live scrape..."
+          python waaree_deep_crawler.py || echo "⚠️ Scrape failed — falling back to generator"
+
+      # ── 5. Generate solar data (always runs as fallback/primary) ──
+      - name: ⚡ Generate solar data
+        run: |
+          DAYS="${{ github.event.inputs.days || '1' }}"
+          echo "Generating ${DAYS} day(s) of solar data..."
+          python scripts/update_data.py --days "$DAYS"
+
+      # ── 6. Commit & push (only if data actually changed) ──
+      - name: 🚀 Commit and push
+        run: |
+          git config user.name "Solar Bot ☀️"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add data/dashboard_data.json
-          git diff --staged --quiet || git commit -m "☀️ Auto-update solar data — $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
+
+          # Only commit if there are actual changes
+          if git diff --staged --quiet; then
+            echo "✅ No data changes — skipping commit"
+          else
+            TIMESTAMP=$(TZ='Asia/Kolkata' date +'%Y-%m-%d %I:%M %p IST')
+            git commit -m "☀️ Auto-update solar data — ${TIMESTAMP}"
+            git push
+            echo "✅ Data committed and pushed"
+          fi
