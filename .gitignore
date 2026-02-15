@@ -49,6 +49,21 @@ htmlcov/
 # Temporary files
 /tmp/
 *.tmp
-credentials.txt
 
+# Credentials & secrets (NEVER commit)
+credentials.txt
+credentials.json
+waaree_session.pkl
+
+# Debug artifacts
+deep_crawler_debug.png
+diagnostics/
+system_snapshots/
+validation_run.log
+run_validation.sh
+
+# Deprecated files
 test_solarman.py
+dashboard_backup.html
+dashboard_new.html
+write_clean_data.py

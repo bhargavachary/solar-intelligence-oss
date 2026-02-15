@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>☀️ Bhargav's Solar Dashboard — Waaree 2.32 kW</title>
+    <meta name="description" content="Real-time solar energy monitoring dashboard for a Waaree 2.32 kW rooftop system in Berhampur, Odisha. Live power, yield, forecasts and ML analytics." />
+    <meta name="author" content="Bhargav Achary" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Bhargav's Solar Dashboard" />
+    <meta property="og:description" content="Live solar monitoring for a Waaree 2.32 kW rooftop plant in Berhampur, Odisha." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bhargavachary.in/waaree_api_access/" />
+    <meta property="og:image" content="https://bhargavachary.in/waaree_api_access/assets/og-image.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+
+    <!-- Fonts & Libraries -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           DESIGN SYSTEM — "Solar Intelligence" Apple-inspired theme
+           ═══════════════════════════════════════════════════════════ */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+        :root {
+            --bg: #f5f5f7;
+            --surface: rgba(255,255,255,0.72);
+            --surface-solid: #ffffff;
+            --surface-elevated: rgba(255,255,255,0.85);
+            --surface-secondary: #f2f2f7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #aeaeb2;
+            --separator: rgba(0,0,0,0.06);
+            --accent: #0071e3;
+            --accent-light: rgba(0,113,227,0.08);
+            --green: #30d158;
+            --green-bg: rgba(48,209,88,0.12);
+            --orange: #ff9f0a;
+            --orange-bg: rgba(255,159,10,0.12);
+            --red: #ff453a;
+            --red-bg: rgba(255,69,58,0.12);
+            --purple: #bf5af2;
+            --purple-bg: rgba(191,90,242,0.12);
+            --cyan: #64d2ff;
+            --cyan-bg: rgba(100,210,255,0.12);
+            --yellow: #ffd60a;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.03);
+            --radius: 20px;
+            --radius-sm: 14px;
+            --radius-xs: 10px;
+            --blur: blur(20px) saturate(180%);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --surface: rgba(28,28,30,0.72);
+                --surface-solid: #1c1c1e;
+                --surface-elevated: rgba(44,44,46,0.80);
+                --surface-secondary: rgba(44,44,46,0.6);
+                --text-primary: #f5f5f7;
+                --text-secondary: #98989d;
+                --text-tertiary: #48484a;
+                --separator: rgba(255,255,255,0.07);
+                --accent: #0a84ff;
+                --accent-light: rgba(10,132,255,0.18);
+                --green: #30d158;
+                --green-bg: rgba(48,209,88,0.18);
+                --orange-bg: rgba(255,159,10,0.18);
+                --red-bg: rgba(255,69,58,0.18);
+                --purple-bg: rgba(191,90,242,0.18);
+                --cyan-bg: rgba(100,210,255,0.18);
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+                --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+                --shadow-lg: 0 12px 48px rgba(0,0,0,0.5);
+            }
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(255,159,10,0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(0,113,227,0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(48,209,88,0.04) 0%, transparent 50%);
+            z-index: -1;
+            animation: ambientShift 20s ease-in-out infinite alternate;
+        }
+        @keyframes ambientShift { 0%{transform:translate(0,0) rotate(0deg)} 100%{transform:translate(-3%,-3%) rotate(3deg)} }
+
+        .container { max-width: 1420px; margin: 0 auto; padding: 16px 20px; }
+
+        /* ── Header ── */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0 20px; flex-wrap: wrap; gap: 16px;
+        }
+        .header-brand { display: flex; align-items: center; gap: 14px; }
+        .header-brand .logo {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: linear-gradient(135deg, #ff9f0a, #ff6723);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: white;
+            box-shadow: 0 6px 20px rgba(255,149,0,0.35);
+            position: relative; overflow: hidden;
+        }
+        .logo::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            animation: logoShine 3s ease-in-out infinite;
+        }
+        @keyframes logoShine { 0%,100%{transform:translateX(-100%)} 50%{transform:translateX(100%)} }
+        .header-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+        .header-subtitle { font-size: 13px; color: var(--text-secondary); font-weight: 400; margin-top: 2px; }
+        .header-nav {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .header-link {
+            font-size: 12px; font-weight: 600; padding: 7px 16px;
+            border-radius: 100px; background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--separator);
+            color: var(--text-primary); text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .header-link:hover { background: var(--accent-light); color: var(--accent); }
+        .header-meta {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--separator);
+        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .status-dot.live { background: var(--green); box-shadow: 0 0 12px rgba(48,209,88,0.6); animation: pulse 2s infinite; }
+        .status-dot.stale { background: var(--orange); box-shadow: 0 0 8px rgba(255,159,10,0.4); }
+        .status-dot.offline { background: var(--red); }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.9)} }
+        .status-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+        .status-time { font-size: 11px; color: var(--text-secondary); }
+
+        /* ── Glass Card ── */
+        .card {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--separator);
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+        .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .card-title { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+        .card-badge {
+            font-size: 11px; font-weight: 600; padding: 4px 12px;
+            border-radius: 100px; background: var(--accent-light); color: var(--accent);
+        }
+
+        /* ── KPI Hero Cards ── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .kpi {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--separator);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden;
+        }
+        .kpi:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px) scale(1.01); }
+        .kpi::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .kpi:nth-child(1)::before { background: linear-gradient(90deg, #ff9f0a, #ff6723); }
+        .kpi:nth-child(2)::before { background: linear-gradient(90deg, #30d158, #34c759); }
+        .kpi:nth-child(3)::before { background: linear-gradient(90deg, #bf5af2, #af52de); }
+        .kpi:nth-child(4)::before { background: linear-gradient(90deg, #0a84ff, #0071e3); }
+        .kpi:nth-child(5)::before { background: linear-gradient(90deg, #64d2ff, #32ade6); }
+
+        .kpi-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; margin-bottom: 14px;
+        }
+        .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+        .kpi-value { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; transition: color 0.3s; }
+        .kpi-unit { font-size: 15px; font-weight: 500; color: var(--text-tertiary); margin-left: 3px; }
+        .kpi-detail { font-size: 11px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; }
+        .kpi-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+        .kpi-trend.up { color: var(--green); background: var(--green-bg); }
+        .kpi-trend.down { color: var(--red); background: var(--red-bg); }
+        .kpi-trend.stable { color: var(--text-secondary); background: var(--surface-secondary); }
+
+        /* ── Layout Grids ── */
+        .grid-2 { display: grid; grid-template-columns: 5fr 3fr; gap: 16px; margin-bottom: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+        .grid-2-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        @media (max-width: 900px) { .grid-2, .grid-3, .grid-2-equal { grid-template-columns: 1fr; } }
+
+        /* ── Chart ── */
+        .chart-container { position: relative; width: 100%; }
+        .chart-container.h-64 { height: 280px; }
+        .chart-container.h-48 { height: 210px; }
+
+        /* ── Insights ── */
+        .insight-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: var(--radius-xs);
+            background: var(--surface-secondary); margin-bottom: 8px;
+            font-size: 13px; color: var(--text-primary); line-height: 1.5;
+            transition: background 0.2s;
+        }
+        .insight-item:hover { background: var(--accent-light); }
+        .insight-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Health Ring ── */
+        .health-ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 16px 0; }
+        .health-ring { position: relative; width: 150px; height: 150px; }
+        .health-ring svg { transform: rotate(-90deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1)); }
+        .health-ring-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .health-score { font-size: 40px; font-weight: 900; letter-spacing: -0.04em; }
+        .health-grade { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+        /* ── Stat Rows ── */
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid var(--separator); font-size: 13px;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-secondary); font-weight: 400; }
+        .stat-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+        /* ── Performance Bars ── */
+        .perf-bar-wrap { margin-bottom: 16px; }
+        .perf-bar-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+        .perf-bar-label { color: var(--text-secondary); font-weight: 500; }
+        .perf-bar-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .perf-bar-track { height: 8px; background: var(--surface-secondary); border-radius: 4px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        /* ── Data Table ── */
+        .table-wrap { max-height: 340px; overflow-y: auto; border-radius: var(--radius-xs); }
+        .table-wrap::-webkit-scrollbar { width: 5px; }
+        .table-wrap::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { position: sticky; top: 0; z-index: 2; }
+        th {
+            background: var(--surface-secondary); color: var(--text-secondary);
+            font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+            padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--separator);
+        }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--separator); font-variant-numeric: tabular-nums; }
+        tr:hover td { background: var(--accent-light); }
+
+        /* ── Mode Badge ── */
+        .mode-badge {
+            font-size: 10px; font-weight: 700; padding: 3px 10px;
+            border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .mode-badge.readonly { background: var(--cyan-bg); color: var(--cyan); }
+        .mode-badge.local { background: var(--green-bg); color: var(--green); }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 80px 20px; color: var(--text-secondary);
+        }
+        .empty-state h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center; padding: 28px 0 16px;
+            font-size: 12px; color: var(--text-tertiary); line-height: 1.6;
+        }
+        .footer a { color: var(--text-secondary); text-decoration: none; }
+        .footer a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- ═══ HEADER ═══ -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="logo">☀️</div>
+            <div>
+                <div class="header-title">Solar Intelligence</div>
+                <div class="header-subtitle">Waaree Energies · Berhampur, Odisha</div>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a class="header-link" href="https://bhargavachary.in/">← Home</a>
+            <span id="mode-badge" class="mode-badge readonly">👁️ Read Only</span>
+        </div>
+        <div class="header-meta">
+            <div id="status-dot" class="status-dot offline"></div>
+            <div>
+                <div id="status-label" class="status-label">Initializing</div>
+                <div id="status-time" class="status-time">--</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ KPI ROW ═══ -->
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="kpi-icon" style="background:var(--orange-bg)">⚡</div>
+            <div class="kpi-label">Live Power</div>
+            <div class="kpi-value"><span id="kpi-power">--</span><span class="kpi-unit">kW</span></div>
+            <div class="kpi-detail">Peak today: <strong id="kpi-peak">--</strong> kW · Cap: <span id="kpi-cap">2.32</span> kW</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon" style="background:var(--green-bg)">📈</div>
+            <div class="kpi-label">Today's Yield</div>
+            <div class="kpi-value"><span id="kpi-daily">--</span><span class="kpi-unit">kWh</span></div>
+            <div class="kpi-detail">Target: 10–12 kWh on a good day</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon" style="background:var(--purple-bg)">🔋</div>
+            <div class="kpi-label">Lifetime Yield</div>
+            <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit">kWh</span></div>
+            <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span></div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon" style="background:var(--accent-light)">🛡️</div>
+            <div class="kpi-label">Health Score</div>
+            <div class="kpi-value"><span id="kpi-health">--</span><span class="kpi-unit" id="kpi-grade"></span></div>
+            <div class="kpi-detail">Quality: <span id="kpi-quality">--</span>%</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon" style="background:var(--cyan-bg)">📊</div>
+            <div class="kpi-label">Performance Ratio</div>
+            <div class="kpi-value"><span id="kpi-pr">--</span><span class="kpi-unit">%</span></div>
+            <div class="kpi-detail"><span id="kpi-trend" class="kpi-trend stable">● stable</span></div>
+        </div>
+    </div>
+
+    <!-- ═══ POWER CHART + INSIGHTS ═══ -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Power Generation Trend</span>
+                <span class="card-badge" id="badge-method">--</span>
+            </div>
+            <div class="chart-container h-64"><canvas id="powerChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Smart Insights</span>
+                <span class="card-badge" id="badge-anomalies">0 anomalies</span>
+            </div>
+            <div id="insights-list" style="max-height:280px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- ═══ VOLTAGE + HEALTH RING + PERFORMANCE ═══ -->
+    <div class="grid-3">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Voltage & Current</span>
+                <span class="card-badge" id="badge-voltage">--</span>
+            </div>
+            <div class="chart-container h-48"><canvas id="voltageChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="card-title">System Health</span></div>
+            <div class="health-ring-wrap">
+                <div class="health-ring">
+                    <svg width="150" height="150" viewBox="0 0 150 150">
+                        <circle cx="75" cy="75" r="62" fill="none" stroke="var(--separator)" stroke-width="12" />
+                        <circle id="health-arc" cx="75" cy="75" r="62" fill="none" stroke="var(--green)" stroke-width="12"
+                            stroke-linecap="round" stroke-dasharray="0 390" />
+                    </svg>
+                    <div class="health-ring-label">
+                        <div class="health-score" id="health-score-text">--</div>
+                        <div class="health-grade" id="health-grade-text">--</div>
+                    </div>
+                </div>
+            </div>
+            <div id="health-factors"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Performance Metrics</span></div>
+            <div id="perf-bars">
+                <div class="perf-bar-wrap"><div class="perf-bar-header"><span class="perf-bar-label">Performance Ratio</span><span class="perf-bar-value" id="pb-pr">--</span></div><div class="perf-bar-track"><div class="perf-bar-fill" id="pb-pr-fill" style="width:0%;background:linear-gradient(90deg,#0a84ff,#0071e3)"></div></div></div>
+                <div class="perf-bar-wrap"><div class="perf-bar-header"><span class="perf-bar-label">Capacity Factor</span><span class="perf-bar-value" id="pb-cf">--</span></div><div class="perf-bar-track"><div class="perf-bar-fill" id="pb-cf-fill" style="width:0%;background:linear-gradient(90deg,#30d158,#28a745)"></div></div></div>
+                <div class="perf-bar-wrap"><div class="perf-bar-header"><span class="perf-bar-label">Uptime</span><span class="perf-bar-value" id="pb-uptime">--</span></div><div class="perf-bar-track"><div class="perf-bar-fill" id="pb-uptime-fill" style="width:0%;background:linear-gradient(90deg,#bf5af2,#af52de)"></div></div></div>
+                <div class="perf-bar-wrap"><div class="perf-bar-header"><span class="perf-bar-label">Data Quality</span><span class="perf-bar-value" id="pb-dq">--</span></div><div class="perf-bar-track"><div class="perf-bar-fill" id="pb-dq-fill" style="width:0%;background:linear-gradient(90deg,#64d2ff,#32ade6)"></div></div></div>
+            </div>
+            <div class="stat-row" style="margin-top:8px;border-top:1px solid var(--separator);padding-top:12px">
+                <span class="stat-label">Degradation est.</span>
+                <span class="stat-value" id="degradation-est">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MONTHLY FORECAST + OPERATIONAL ═══ -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Monthly Generation Forecast</span>
+                <span class="card-badge">Berhampur Model</span>
+            </div>
+            <div class="chart-container h-48"><canvas id="monthlyChart"></canvas></div>
+            <div style="display:flex;gap:28px;margin-top:14px;font-size:12px;color:var(--text-secondary)">
+                <div>Annual: <strong id="forecast-annual" style="color:var(--text-primary)">--</strong> kWh</div>
+                <div>This month: <strong id="forecast-month" style="color:var(--text-primary)">--</strong> kWh</div>
+                <div>Monsoon drop: <strong id="forecast-monsoon" style="color:var(--text-primary)">--</strong></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Operational Details</span></div>
+            <div class="stat-row"><span class="stat-label">Inverter Status</span><span class="stat-value" id="op-status">--</span></div>
+            <div class="stat-row"><span class="stat-label">Grid Voltage</span><span class="stat-value" id="op-voltage">--</span></div>
+            <div class="stat-row"><span class="stat-label">Output Current</span><span class="stat-value" id="op-current">--</span></div>
+            <div class="stat-row"><span class="stat-label">Grid Frequency</span><span class="stat-value" id="op-freq">--</span></div>
+            <div class="stat-row"><span class="stat-label">Panel Temperature</span><span class="stat-value" id="op-temp">--</span></div>
+            <div class="stat-row"><span class="stat-label">Samples Collected</span><span class="stat-value" id="op-samples">--</span></div>
+            <div class="stat-row"><span class="stat-label">Location</span><span class="stat-value" id="op-location">--</span></div>
+        </div>
+    </div>
+
+    <!-- ═══ STATISTICS + TABLE ═══ -->
+    <div class="grid-2-equal">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Statistical Summary</span>
+                <span class="card-badge">Analytics Engine</span>
+            </div>
+            <div class="stat-row"><span class="stat-label">Power Mean</span><span class="stat-value" id="st-power-mean">--</span></div>
+            <div class="stat-row"><span class="stat-label">Power Median</span><span class="stat-value" id="st-power-median">--</span></div>
+            <div class="stat-row"><span class="stat-label">Power σ (std dev)</span><span class="stat-value" id="st-power-std">--</span></div>
+            <div class="stat-row"><span class="stat-label">Power Q25 — Q75</span><span class="stat-value" id="st-power-iqr">--</span></div>
+            <div class="stat-row"><span class="stat-label">Power Min — Max</span><span class="stat-value" id="st-power-range">--</span></div>
+            <div class="stat-row"><span class="stat-label">Voltage Mean ± σ</span><span class="stat-value" id="st-voltage">--</span></div>
+            <div class="stat-row"><span class="stat-label">Peak Daily Yield</span><span class="stat-value" id="st-daily-max">--</span></div>
+            <div class="stat-row"><span class="stat-label">EWMA Forecast</span><span class="stat-value" id="st-ewma">--</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Recent Telemetry</span>
+                <span class="card-badge" id="badge-records">0 records</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Time</th><th style="text-align:right">Power</th>
+                        <th style="text-align:right">Daily</th><th style="text-align:right">Voltage</th>
+                        <th style="text-align:right">Status</th>
+                    </tr></thead>
+                    <tbody id="data-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        Waaree Solar Intelligence v4.0 · Powered by ML Analytics Engine<br>
+        <span style="font-size:11px">
+            <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
+            <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
+            Plant: <span id="footer-plant">--</span>
+        </span>
+    </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     APPLICATION LOGIC
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    // ── State ──
+    const S = { powerChart: null, voltageChart: null, monthlyChart: null };
+    const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].indexOf(window.location.hostname) !== -1;
+
+    // ── Helpers ──
+    const num = v => {
+        if (typeof v === 'number' && Number.isFinite(v)) return v;
+        const m = String(v ?? '').match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : 0;
+    };
+    const parseTs = v => { if (!v) return null; const d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? null : d; };
+    const fmtTime = v => { const d = parseTs(v); return d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--'; };
+    const fmtDateTime = v => { const d = parseTs(v); return d ? d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--'; };
+    const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+    // ── Chart defaults ──
+    Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.plugins.legend.display = false;
+
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+    const tickColor = isDark ? '#636366' : '#98989d';
+
+    // ── Mode Detection ──
+    function detectMode() {
+        const badge = document.getElementById('mode-badge');
+        if (isLocal) {
+            badge.textContent = '✏️ Local Dev';
+            badge.className = 'mode-badge local';
+        } else {
+            badge.textContent = '👁️ Read Only';
+            badge.className = 'mode-badge readonly';
+        }
+    }
+
+    // ── Data path: local uses root, GitHub Pages uses data/ ──
+    function dataPath() {
+        if (isLocal) return 'dashboard_data.json';
+        return 'data/dashboard_data.json';
+    }
+
+    // ── Normalize Records ──
+    function normalizeRecords(payload) {
+        const meta = (payload && typeof payload === 'object' && !Array.isArray(payload)) ? (payload.meta || {}) : {};
+        const raw = Array.isArray(payload) ? payload : (payload?.history || []);
+        const analytics = payload?.analytics || null;
+        const summary = payload?.summary || {};
+
+        const records = raw.map(r => ({
+            timestamp: r.timestamp || null,
+            ts: parseTs(r.timestamp),
+            plant_id: r.plant_id || meta.plant_id || '--',
+            power: num(r.current_power_kw ?? r.current_power),
+            daily: num(r.daily_yield_kwh ?? r.daily_yield),
+            total: num(r.total_yield_kwh ?? r.total_yield),
+            income: num(r.income_inr ?? r.income),
+            voltage: num(r.voltage_v ?? r.voltage_sample),
+            current: num(r.current_a ?? r.current_sample),
+            frequency: num(r.frequency_hz),
+            temperature: num(r.temperature_c),
+            status: r.status || 'Unknown',
+            portal_loaded: Boolean(r.portal_loaded),
+            portal_score: num(r.portal_validation_score),
+            method: r.extraction_method || '',
+            anomalies: Array.isArray(r.anomaly_notes) ? r.anomaly_notes : []
+        })).filter(r => r.timestamp).sort((a, b) => (a.ts?.getTime() || 0) - (b.ts?.getTime() || 0));
+
+        return { meta, records, analytics, summary };
+    }
+
+    function computeMetrics(records) {
+        const latest = records.at(-1) || null;
+        const powers = records.map(r => r.power);
+        const volts = records.map(r => r.voltage).filter(v => v > 0);
+        const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+        const peak = powers.length ? Math.max(...powers) : 0;
+        return { latest, avgPower: avg(powers), peakPower: peak, avgVolt: avg(volts) };
+    }
+
+    // ── Client-side Forecast Fallback ──
+    function clientForecast(records, meta) {
+        const maxDaily = num(meta?.daily_realistic_max_kwh) || 12;
+        const factors = [0.88, 0.92, 1.0, 1.08, 1.12, 0.95, 0.72, 0.68, 0.78, 0.90, 0.96, 0.90];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const now = new Date();
+        const cm = now.getMonth();
+        const observed = records.length ? Math.max(...records.map(r => r.daily)) : maxDaily * 0.75;
+        const base = Math.min(Math.max(observed, maxDaily * 0.5), maxDaily * 1.1);
+        const monthly = factors.map((f, i) => {
+            const d = new Date(now.getFullYear(), i + 1, 0).getDate();
+            return Math.max(0, +(base * f * d).toFixed(1));
+        });
+        const annual = monthly.reduce((a, b) => a + b, 0);
+        const monsoonDrop = Math.round((1 - factors[7] / Math.max(...factors)) * 100);
+        return { monthly, months, annual, current: monthly[cm], cm, monsoonDrop };
+    }
+
+    // ── Update Functions ──
+    function updateHeader(meta, m) {
+        const dot = document.getElementById('status-dot');
+        const label = document.getElementById('status-label');
+        const time = document.getElementById('status-time');
+        if (!m.latest?.ts) { dot.className = 'status-dot offline'; label.textContent = 'No Data'; time.textContent = '--'; return; }
+        const age = (Date.now() - m.latest.ts.getTime()) / 60000;
+        if (age <= 5) { dot.className = 'status-dot live'; label.textContent = 'Live'; }
+        else if (age <= 30) { dot.className = 'status-dot stale'; label.textContent = 'Stale'; }
+        else { dot.className = 'status-dot offline'; label.textContent = 'Offline'; }
+        time.textContent = fmtDateTime(m.latest.timestamp);
+    }
+
+    function updateKPIs(meta, records, m, analytics) {
+        const l = m.latest;
+        setText('kpi-power', l ? l.power.toFixed(2) : '--');
+        setText('kpi-peak', m.peakPower.toFixed(2));
+        setText('kpi-cap', num(meta.plant_capacity_kw || 2.32).toFixed(2));
+        setText('kpi-daily', l ? l.daily.toFixed(2) : '--');
+        setText('kpi-total', l ? l.total.toFixed(1) : '--');
+        setText('kpi-income', l ? l.income.toLocaleString('en-IN', {maximumFractionDigits:0}) : '--');
+        const h = analytics?.health || {};
+        setText('kpi-health', h.score ?? '--');
+        setText('kpi-grade', h.grade ? ` ${h.grade}` : '');
+        setText('kpi-quality', analytics?.performance?.performance_ratio_pct ?? '--');
+        const pr = analytics?.performance?.performance_ratio_pct ?? '--';
+        setText('kpi-pr', pr);
+        const trendEl = document.getElementById('kpi-trend');
+        const dir = analytics?.power_trend?.direction || 'stable';
+        const icons = { rising: '↑ rising', falling: '↓ falling', stable: '● stable' };
+        const cls = { rising: 'up', falling: 'down', stable: 'stable' };
+        trendEl.className = `kpi-trend ${cls[dir] || 'stable'}`;
+        trendEl.textContent = icons[dir] || '● stable';
+    }
+
+    function updateInsights(records, m, analytics) {
+        const items = [];
+        const l = m.latest;
+        const ico = (emoji, text) => `<div class="insight-item"><span class="insight-icon">${emoji}</span><span>${text}</span></div>`;
+        if (!l) { items.push(ico('📭', 'No telemetry records found yet.')); }
+        else {
+            const capPct = (l.power / num(2.32) * 100).toFixed(0);
+            items.push(ico('⚡', `Current output: <strong>${l.power.toFixed(2)} kW</strong> (${capPct}% of capacity)`));
+            if (l.daily > 0) items.push(ico('📈', `Today's yield: <strong>${l.daily.toFixed(2)} kWh</strong> — ${(l.daily / 12 * 100).toFixed(0)}% of daily target`));
+            const trend = analytics?.power_trend;
+            if (trend?.direction === 'rising') items.push(ico('🔺', `Power trend <strong>rising</strong> (slope: +${trend.slope_kw_per_sample} kW/sample, R²=${trend.r_squared})`));
+            else if (trend?.direction === 'falling') items.push(ico('🌅', `Power trend <strong>falling</strong> — afternoon decline (slope: ${trend.slope_kw_per_sample} kW/sample)`));
+            const pr = analytics?.performance?.performance_ratio_pct;
+            if (pr) {
+                const prLabel = pr >= 75 ? 'excellent' : pr >= 60 ? 'good' : pr >= 40 ? 'moderate' : 'low';
+                items.push(ico('🎯', `Performance Ratio: <strong>${pr}%</strong> (${prLabel})`));
+            }
+            if (m.avgVolt > 0) {
+                if (m.avgVolt >= 210 && m.avgVolt <= 250) items.push(ico('✅', `Grid voltage stable at <strong>${m.avgVolt.toFixed(1)}V</strong> — healthy range`));
+                else items.push(ico('⚠️', `Grid voltage at ${m.avgVolt.toFixed(1)}V — outside recommended range`));
+            }
+            if (l.temperature > 0) {
+                const tempNote = l.temperature > 35 ? '⚠️ high temp may reduce efficiency' : 'within optimal range';
+                items.push(ico('🌡️', `Panel temperature: <strong>${l.temperature.toFixed(1)}°C</strong> — ${tempNote}`));
+            }
+            const anomalyCount = analytics?.anomalies?.total_count || 0;
+            if (anomalyCount > 0) items.push(ico('🔍', `${anomalyCount} anomalies detected by ML engine`));
+            else items.push(ico('✨', 'No anomalies detected — system operating normally'));
+            if (trend?.forecast_next_kw > 0) items.push(ico('🔮', `EWMA forecast for next sample: <strong>${trend.forecast_next_kw} kW</strong>`));
+        }
+        document.getElementById('insights-list').innerHTML = items.join('');
+        setText('badge-anomalies', `${analytics?.anomalies?.total_count || 0} anomalies`);
+        setText('badge-method', m.latest?.method || 'awaiting');
+    }
+
+    function updateHealthRing(analytics) {
+        const h = analytics?.health || { score: 0, grade: 'N/A' };
+        const score = h.score || 0;
+        const arc = document.getElementById('health-arc');
+        const circumference = 2 * Math.PI * 62;
+        arc.setAttribute('stroke-dasharray', `${(score / 100) * circumference} ${circumference}`);
+        arc.setAttribute('stroke', score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)');
+        setText('health-score-text', score);
+        setText('health-grade-text', `Grade ${h.grade || 'N/A'}`);
+        const factors = h.factors || {};
+        document.getElementById('health-factors').innerHTML = Object.entries(factors).map(([k, v]) => {
+            const label = k.replace(/_/g, ' ').replace(/\bpct\b/, '%');
+            return `<div class="stat-row"><span class="stat-label" style="text-transform:capitalize">${label}</span><span class="stat-value">${v}${typeof v === 'number' && v <= 100 ? '%' : ''}</span></div>`;
+        }).join('');
+    }
+
+    function updatePerformance(summary, analytics) {
+        const perf = analytics?.performance || {};
+        const pr = perf.performance_ratio_pct || 0;
+        const cf = perf.capacity_factor_pct || 0;
+        const up = summary?.uptime_pct || 0;
+        const dq = summary?.data_quality_score || 0;
+        setText('pb-pr', `${pr}%`); document.getElementById('pb-pr-fill').style.width = `${pr}%`;
+        setText('pb-cf', `${cf}%`); document.getElementById('pb-cf-fill').style.width = `${cf}%`;
+        setText('pb-uptime', `${up}%`); document.getElementById('pb-uptime-fill').style.width = `${up}%`;
+        setText('pb-dq', `${dq}%`); document.getElementById('pb-dq-fill').style.width = `${dq}%`;
+        const deg = perf.degradation;
+        if (deg && deg.confidence !== 'insufficient_data') setText('degradation-est', `${deg.degradation_pct_year}%/yr (${deg.confidence})`);
+        else setText('degradation-est', 'Collecting data…');
+    }
+
+    function updateStats(analytics) {
+        const s = analytics?.statistics; if (!s) return;
+        const p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
+        setText('st-power-mean', `${p.mean ?? '--'} kW`);
+        setText('st-power-median', `${p.median ?? '--'} kW`);
+        setText('st-power-std', `${p.std ?? '--'} kW`);
+        setText('st-power-iqr', `${p.q25 ?? '--'} — ${p.q75 ?? '--'} kW`);
+        setText('st-power-range', `${p.min ?? '--'} — ${p.max ?? '--'} kW`);
+        setText('st-voltage', `${v.mean ?? '--'} ± ${v.std ?? '--'} V`);
+        setText('st-daily-max', `${d.max_observed ?? '--'} kWh`);
+        setText('st-ewma', `${analytics?.power_trend?.forecast_next_kw ?? '--'} kW`);
+    }
+
+    function updateOperational(meta, records, m) {
+        const l = m.latest;
+        setText('op-status', l?.status || '--');
+        setText('op-voltage', l ? `${l.voltage.toFixed(1)} V` : '--');
+        setText('op-current', l ? `${l.current.toFixed(2)} A` : '--');
+        setText('op-freq', l ? `${l.frequency.toFixed(2)} Hz` : '--');
+        setText('op-temp', l ? `${l.temperature.toFixed(1)} °C` : '--');
+        setText('op-samples', records.length);
+        setText('op-location', meta.location || 'Berhampur, Odisha');
+        setText('footer-plant', l?.plant_id || meta.plant_id || '--');
+        setText('badge-voltage', l ? `${l.voltage.toFixed(0)}V · ${l.current.toFixed(1)}A` : '--');
+        setText('badge-records', `${records.length} records`);
+    }
+
+    function updateTable(records) {
+        const tbody = document.getElementById('data-table');
+        const recent = [...records].reverse().slice(0, 20);
+        tbody.innerHTML = recent.map(r => {
+            const isOnline = r.status.toLowerCase() === 'online' || r.status.toLowerCase() === 'normal';
+            const statusColor = isOnline ? 'var(--green)' : 'var(--orange)';
+            const statusDot = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${statusColor};margin-right:5px;vertical-align:middle"></span>`;
+            return `<tr>
+                <td style="font-weight:500">${fmtTime(r.timestamp)}</td>
+                <td style="text-align:right;font-weight:700">${r.power.toFixed(2)} kW</td>
+                <td style="text-align:right">${r.daily.toFixed(1)} kWh</td>
+                <td style="text-align:right">${r.voltage > 0 ? r.voltage.toFixed(0) + ' V' : '—'}</td>
+                <td style="text-align:right;font-weight:500">${statusDot}${r.status}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Charts ──
+    function renderPowerChart(records, analytics, cap) {
+        const labels = records.map(r => fmtTime(r.timestamp));
+        const values = records.map(r => r.power);
+        const ewma = analytics?.power_trend?.ewma || [];
+        const ctx = document.getElementById('powerChart').getContext('2d');
+        const maxY = Math.max(cap * 1.35, ...values, 1);
+        const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, isDark ? 'rgba(10,132,255,0.25)' : 'rgba(0,113,227,0.15)');
+        gradient.addColorStop(1, isDark ? 'rgba(10,132,255,0)' : 'rgba(0,113,227,0)');
+
+        const datasets = [{
+            label: 'Power (kW)', data: values,
+            borderColor: isDark ? '#0a84ff' : '#0071e3',
+            backgroundColor: gradient, borderWidth: 2.5, fill: true, tension: 0.4,
+            pointRadius: values.length > 20 ? 0 : 4,
+            pointBackgroundColor: isDark ? '#0a84ff' : '#0071e3',
+            pointBorderColor: isDark ? '#1c1c1e' : '#ffffff', pointBorderWidth: 2,
+        }];
+        if (ewma.length > 0) {
+            const padded = new Array(Math.max(0, values.length - ewma.length)).fill(null).concat(ewma);
+            datasets.push({
+                label: 'EWMA Trend', data: padded,
+                borderColor: '#ff9f0a', borderWidth: 2, borderDash: [6, 3],
+                fill: false, tension: 0.4, pointRadius: 0
+            });
+        }
+
+        if (!S.powerChart) {
+            S.powerChart = new Chart(ctx, {
+                type: 'line', data: { labels, datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: true, labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, weight: 500 } } },
+                        tooltip: { backgroundColor: isDark ? '#2c2c2e' : '#fff', titleColor: isDark ? '#f5f5f7' : '#1d1d1f', bodyColor: isDark ? '#98989d' : '#6e6e73', borderColor: isDark ? '#48484a' : '#e0e0e0', borderWidth: 1, cornerRadius: 12, padding: 12, displayColors: true }
+                    },
+                    scales: {
+                        x: { ticks: { color: tickColor, maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true, suggestedMax: maxY }
+                    }
+                }
+            });
+        } else {
+            S.powerChart.data.labels = labels;
+            S.powerChart.data.datasets = datasets;
+            S.powerChart.options.scales.y.suggestedMax = maxY;
+            S.powerChart.update('none');
+        }
+    }
+
+    function renderVoltageChart(records) {
+        const labels = records.map(r => fmtTime(r.timestamp));
+        const volts = records.map(r => r.voltage || null);
+        const amps = records.map(r => r.current || null);
+        const ctx = document.getElementById('voltageChart').getContext('2d');
+        if (!S.voltageChart) {
+            S.voltageChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [
+                    { label: 'Voltage (V)', data: volts, borderColor: '#bf5af2', backgroundColor: 'rgba(191,90,242,0.08)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y' },
+                    { label: 'Current (A)', data: amps, borderColor: '#30d158', borderWidth: 1.5, fill: false, tension: 0.3, pointRadius: 0, yAxisID: 'y1' }
+                ] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: true, labels: { usePointStyle: true, pointStyle: 'circle', padding: 14, font: { size: 10 } } } },
+                    scales: {
+                        x: { ticks: { color: tickColor, maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+                        y: { position: 'left', ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
+                        y1: { position: 'right', ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } }
+                    }
+                }
+            });
+        } else {
+            S.voltageChart.data.labels = labels;
+            S.voltageChart.data.datasets[0].data = volts;
+            S.voltageChart.data.datasets[1].data = amps;
+            S.voltageChart.update('none');
+        }
+    }
+
+    function renderMonthlyChart(forecast) {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const colors = forecast.months.map((_, i) => {
+            if (i === forecast.cm) return isDark ? 'rgba(10,132,255,0.9)' : 'rgba(0,113,227,0.85)';
+            return isDark ? 'rgba(10,132,255,0.2)' : 'rgba(0,113,227,0.18)';
+        });
+        if (!S.monthlyChart) {
+            S.monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: forecast.months, datasets: [{ label: 'Predicted (kWh)', data: forecast.monthly, backgroundColor: colors, borderRadius: 8, borderSkipped: false }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: tickColor, font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        } else {
+            S.monthlyChart.data.datasets[0].data = forecast.monthly;
+            S.monthlyChart.data.datasets[0].backgroundColor = colors;
+            S.monthlyChart.update('none');
+        }
+        setText('forecast-annual', `${forecast.annual.toFixed(0)}`);
+        setText('forecast-month', `${forecast.current.toFixed(0)}`);
+        setText('forecast-monsoon', `~${forecast.monsoonDrop}% lower`);
+    }
+
+    // ── Local Mode: Scraper Trigger ──
+    async function triggerScrape() {
+        if (!isLocal) return;
+        try {
+            const res = await fetch('http://localhost:8006/trigger_scrape', { method: 'POST' });
+            const data = await res.json();
+            console.log('[Scraper]', data.message);
+        } catch (err) {
+            console.debug('[Scraper] Not available (expected on GitHub Pages)');
+        }
+    }
+
+    // ── Main Refresh ──
+    async function refresh() {
+        try {
+            const res = await fetch(`${dataPath()}?t=${Date.now()}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const payload = await res.json();
+            const { meta, records, analytics, summary } = normalizeRecords(payload);
+            const m = computeMetrics(records);
+
+            const forecast = analytics?.seasonal_forecast
+                ? { monthly: analytics.seasonal_forecast.monthly_kwh, months: analytics.seasonal_forecast.month_names, annual: analytics.seasonal_forecast.annual_kwh, current: analytics.seasonal_forecast.current_month_kwh, cm: new Date().getMonth(), monsoonDrop: analytics.seasonal_forecast.monsoon_drop_pct }
+                : clientForecast(records, meta);
+
+            updateHeader(meta, m);
+            updateKPIs(meta, records, m, analytics);
+            updateInsights(records, m, analytics);
+            updateHealthRing(analytics);
+            updatePerformance(summary, analytics);
+            updateStats(analytics);
+            updateOperational(meta, records, m);
+            updateTable(records);
+            renderPowerChart(records, analytics, num(meta.plant_capacity_kw || 2.32));
+            renderVoltageChart(records);
+            renderMonthlyChart(forecast);
+        } catch (err) {
+            console.error('Refresh error:', err);
+            document.getElementById('status-dot').className = 'status-dot offline';
+            document.getElementById('status-label').textContent = 'Data Error';
+
+            // Show helpful empty state on first load error
+            const insights = document.getElementById('insights-list');
+            if (insights && !insights.innerHTML) {
+                insights.innerHTML = '<div class="empty-state"><h2>No Data Available</h2><p>Waiting for solar telemetry data. Run the data generator locally or check the data pipeline.</p></div>';
+            }
+        }
+    }
+
+    // ── Bootstrap ──
+    detectMode();
+    refresh();
+    setInterval(refresh, isLocal ? 10000 : 60000); // 10s local, 60s GitHub Pages
+    if (isLocal) {
+        triggerScrape();
+        setInterval(triggerScrape, 5 * 60 * 1000);
+    }
+
+})();
+</script>
+</body>
+</html>
