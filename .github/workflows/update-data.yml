@@ -5,11 +5,13 @@ name: ☀️ Auto-Update Solar Data
 # ─────────────────────────────────────────────────────────
 on:
   schedule:
-    # Runs 3× daily aligned to Indian solar window (IST = UTC+5:30)
-    #   06:30 IST (01:00 UTC) — Morning baseline
-    #   12:30 IST (07:00 UTC) — Solar peak
-    #   18:30 IST (13:00 UTC) — Evening wrap-up
-    - cron: '0 1,7,13 * * *'
+    # Runs 5× daily during solar production window (IST = UTC+5:30)
+    #   08:00 AM IST (02:30 UTC) — Morning ramp-up
+    #   11:00 AM IST (05:30 UTC) — Mid-morning
+    #   01:00 PM IST (07:30 UTC) — Solar peak
+    #   03:00 PM IST (09:30 UTC) — Afternoon
+    #   07:00 PM IST (13:30 UTC) — Evening shutdown
+    - cron: '30 2,5,7,9,13 * * *'
 
   workflow_dispatch:
     # Manual trigger from Actions tab — with optional parameters
