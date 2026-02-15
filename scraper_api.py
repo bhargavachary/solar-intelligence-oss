@@ -120,7 +120,7 @@ def status():
     """Get current scraper status and last run info"""
     # Read latest dashboard data timestamp
     try:
-        with open('/Users/bhargav/Documents/GitHub/waaree_api_access/dashboard_data.json', 'r') as f:
+        with open('/Users/bhargav/Documents/GitHub/waaree_api_access/data/dashboard_data.json', 'r') as f:
             data = json.load(f)
             last_data_update = data.get('summary', {}).get('latest_timestamp')
     except:

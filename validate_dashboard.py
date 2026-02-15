@@ -682,12 +682,12 @@ def test_forecast(data):
 def test_dashboard_rendering(data):
     cat = "F. Dashboard Rendering"
     
-    # Read dashboard.html
+    # Read index.html (main dashboard)
     try:
-        with open("dashboard.html", "r") as f:
+        with open("index.html", "r") as f:
             html = f.read()
     except:
-        test("F00 Dashboard HTML exists", False, "Cannot read dashboard.html", cat, "critical")
+        test("F00 Dashboard HTML exists", False, "Cannot read index.html", cat, "critical")
         return
     
     # F1: All referenced element IDs exist in HTML

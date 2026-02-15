@@ -216,6 +216,142 @@ class TrendAnalyzer:
 
 
 # ═══════════════════════════════════════════════════════════════
+# PRODUCTION MONITORING & ALERTS
+# ═══════════════════════════════════════════════════════════════
+class ProductionMonitor:
+    """Detect production drops and suggest likely causes."""
+
+    @staticmethod
+    def analyze_production_drop(history, capacity_kw, daily_max_kwh=12):
+        """Analyze if production is below expected and suggest causes."""
+        if len(history) < 3:
+            return {"status": "insufficient_data", "alerts": []}
+
+        now = datetime.datetime.now()
+        current_month = now.month - 1
+        current_hour = now.hour
+
+        # Calculate expected production
+        psh = BERHAMPUR_PSH[current_month]
+        season_factor = SEASON_FACTORS[current_month]
+        expected_daily = capacity_kw * psh * 0.78 * season_factor
+
+        # Get today's actual production
+        today_str = now.strftime("%Y-%m-%d")
+        today_records = [r for r in history if r.get("timestamp", "").startswith(today_str)]
+        
+        actual_daily = max([r.get("daily_yield_kwh", 0) for r in today_records]) if today_records else 0
+        
+        # Get current power (latest reading)
+        latest = history[-1] if history else {}
+        current_power = latest.get("current_power_kw", 0)
+        
+        # Expected power for current hour (bell curve)
+        hour_index = current_hour - 7  # 7am start
+        expected_power = 0
+        if 0 <= hour_index < 14:  # 7am to 8pm
+            solar_curve = [0.08, 0.32, 0.68, 0.85, 0.94, 1.0, 0.92, 0.75, 0.65, 0.52, 0.38, 0.24, 0.15, 0.08]
+            expected_power = capacity_kw * solar_curve[hour_index] * season_factor
+
+        alerts = []
+        drop_detected = False
+        severity = "normal"
+
+        # Check 1: Daily yield vs expected
+        if expected_daily > 0:
+            daily_ratio = actual_daily / expected_daily
+            if daily_ratio < 0.7:
+                drop_detected = True
+                severity = "high" if daily_ratio < 0.5 else "medium"
+                deficit_pct = round((1 - daily_ratio) * 100, 1)
+                alerts.append({
+                    "type": "low_daily_yield",
+                    "severity": severity,
+                    "message": f"Daily yield {deficit_pct}% below expected ({actual_daily:.2f} vs {expected_daily:.2f} kWh)",
+                    "expected": round(expected_daily, 2),
+                    "actual": round(actual_daily, 2),
+                    "deficit_pct": deficit_pct
+                })
+
+        # Check 2: Current power vs expected (only during daylight 7am-7pm)
+        if 7 <= current_hour <= 19 and expected_power > 0.1:
+            power_ratio = current_power / expected_power
+            if power_ratio < 0.6:
+                drop_detected = True
+                sev = "high" if power_ratio < 0.4 else "medium"
+                deficit = round((1 - power_ratio) * 100, 1)
+                alerts.append({
+                    "type": "low_current_power",
+                    "severity": sev,
+                    "message": f"Power output {deficit}% below expected for this hour",
+                    "expected": round(expected_power, 2),
+                    "actual": round(current_power, 2),
+                    "deficit_pct": deficit
+                })
+
+        # Suggest likely causes based on patterns
+        likely_causes = []
+        if drop_detected:
+            # Check temperature
+            temp = latest.get("temperature_c", 25)
+            if temp > 38:
+                likely_causes.append({"cause": "High temperature", "probability": "high", "action": "Normal — panel efficiency drops in heat"})
+            
+            # Check voltage stability
+            voltages = [r.get("voltage_v", 230) for r in history[-10:]]
+            v_std = _std(voltages) if len(voltages) > 1 else 0
+            if v_std > 5:
+                likely_causes.append({"cause": "Grid instability", "probability": "medium", "action": "Monitor voltage fluctuations"})
+            
+            # Seasonal check
+            if current_month in [6, 7, 8]:  # Monsoon
+                likely_causes.append({"cause": "Monsoon season (low sunlight)", "probability": "high", "action": "Expected seasonal variation"})
+            
+            # Time-based guesses
+            if not likely_causes:
+                likely_causes.append({"cause": "Dust/soiling on panels", "probability": "medium", "action": "Consider cleaning panels"})
+                likely_causes.append({"cause": "Partial shading", "probability": "low", "action": "Check for obstructions"})
+                likely_causes.append({"cause": "Cloudy weather", "probability": "medium", "action": "Check local weather"})
+
+        return {
+            "status": "drop_detected" if drop_detected else "normal",
+            "severity": severity,
+            "alerts": alerts,
+            "likely_causes": likely_causes,
+            "expected_daily_kwh": round(expected_daily, 2),
+            "actual_daily_kwh": round(actual_daily, 2),
+            "expected_current_power_kw": round(expected_power, 2),
+            "actual_current_power_kw": round(current_power, 2)
+        }
+
+    @staticmethod
+    def track_daily_progress(history):
+        """Build day-by-day yield tracking for last 30 days."""
+        if not history:
+            return []
+
+        daily_dict = {}
+        for record in history:
+            ts = record.get("timestamp", "")
+            if not ts:
+                continue
+            date_str = ts.split(" ")[0]
+            daily_yield = record.get("daily_yield_kwh", 0)
+            
+            if date_str not in daily_dict or daily_yield > daily_dict[date_str]["yield"]:
+                daily_dict[date_str] = {
+                    "date": date_str,
+                    "yield": daily_yield,
+                    "peak_power": record.get("current_power_kw", 0),
+                    "status": record.get("status", "Unknown")
+                }
+
+        # Sort by date and return last 30 days
+        sorted_days = sorted(daily_dict.values(), key=lambda x: x["date"])
+        return sorted_days[-30:]
+
+
+# ═══════════════════════════════════════════════════════════════
 # SEASONAL FORECAST MODEL
 # ═══════════════════════════════════════════════════════════════
 class SeasonalForecaster:
@@ -514,6 +650,10 @@ def run_analytics(dashboard_json_path="dashboard_data.json"):
     latest_daily = daily_yields[-1] if daily_yields else 0
     forecast = SeasonalForecaster.predict_monthly(capacity, latest_daily, daily_max)
 
+    # ── Production Monitoring & Alerts ──
+    production_status = ProductionMonitor.analyze_production_drop(history, capacity, daily_max)
+    daily_progress = ProductionMonitor.track_daily_progress(history)
+
     # ── Performance Metrics ──
     current_month = datetime.datetime.now().month - 1
     pr = PerformanceAnalyzer.compute_pr(latest_daily, capacity, current_month)
@@ -549,6 +689,8 @@ def run_analytics(dashboard_json_path="dashboard_data.json"):
             "total_count": len(power_anomalies) + len(voltage_anomalies)
         },
         "seasonal_forecast": forecast,
+        "production_monitoring": production_status,
+        "daily_progress": daily_progress,
         "performance": {
             "performance_ratio_pct": pr,
             "capacity_factor_pct": cf,

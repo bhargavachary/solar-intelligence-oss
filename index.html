@@ -184,6 +184,16 @@
             border-radius: 100px; background: var(--accent-light); color: var(--accent);
         }
 
+        /* ── Alert Card ── */
+        #production-alerts-section {
+            margin-bottom: 16px;
+            animation: slideDown 0.4s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* ── KPI Hero Cards ── */
         .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
         @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -369,6 +379,63 @@
         </div>
     </div>
 
+    <!-- ═══ PRODUCTION ALERTS ═══ -->
+    <div id="production-alerts-section" style="display:none;" class="card" style="background:var(--red-bg);border-left:4px solid var(--red);">
+        <div class="card-header">
+            <span class="card-title">⚠️ Production Alert</span>
+            <span class="card-badge" id="alert-severity">--</span>
+        </div>
+        <div id="alerts-content" style="padding:0 16px 16px"></div>
+        <div style="padding:0 16px 16px">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--text-primary)">Likely Causes:</div>
+            <div id="likely-causes-list"></div>
+        </div>
+    </div>
+
+    <!-- ═══ DAILY PROGRESS + ANNUAL PROJECTION ═══ -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Daily Progress (Last 30 Days)</span>
+                <span class="card-badge" id="badge-daily-avg">--</span>
+            </div>
+            <div class="chart-container h-64"><canvas id="dailyProgressChart"></canvas></div>
+            <div style="display:flex;gap:20px;margin-top:12px;font-size:12px;color:var(--text-secondary)">
+                <div>Avg: <strong id="daily-avg" style="color:var(--text-primary)">--</strong> kWh/day</div>
+                <div>Best: <strong id="daily-best" style="color:var(--text-primary)">--</strong> kWh</div>
+                <div>Trend: <strong id="daily-trend" style="color:var(--text-primary)">--</strong></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Annual Projection</span>
+                <span class="card-badge">Based on seasonal model</span>
+            </div>
+            <div style="padding:24px 16px">
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:24px">
+                    <div style="font-size:48px;font-weight:700;color:var(--text-primary)" id="annual-projection">--</div>
+                    <div style="font-size:18px;color:var(--text-secondary)">kWh/year</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                    <div>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Best Quarter</div>
+                        <div style="font-size:20px;font-weight:600;color:var(--green)" id="best-quarter">--</div>
+                        <div style="font-size:12px;color:var(--text-secondary)" id="best-quarter-months">--</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Weakest Quarter</div>
+                        <div style="font-size:20px;font-weight:600;color:var(--orange)" id="weak-quarter">--</div>
+                        <div style="font-size:12px;color:var(--text-secondary)" id="weak-quarter-months">--</div>
+                    </div>
+                </div>
+                <div style="border-top:1px solid var(--separator);padding-top:12px">
+                    <div class="stat-row"><span class="stat-label">Expected revenue</span><span class="stat-value">₹<span id="annual-revenue">--</span></span></div>
+                    <div class="stat-row"><span class="stat-label">CO₂ offset</span><span class="stat-value"><span id="annual-co2">--</span> kg</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══ POWER CHART + INSIGHTS ═══ -->
     <div class="grid-2">
         <div class="card">
@@ -506,7 +573,7 @@
     'use strict';
 
     // ── State ──
-    const S = { powerChart: null, voltageChart: null, monthlyChart: null };
+    const S = { powerChart: null, voltageChart: null, monthlyChart: null, dailyProgressChart: null };
     const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].indexOf(window.location.hostname) !== -1;
 
     // ── Helpers ──
@@ -859,6 +926,140 @@
         setText('forecast-monsoon', `~${forecast.monsoonDrop}% lower`);
     }
 
+    function renderDailyProgressChart(dailyProgress) {
+        if (!dailyProgress || dailyProgress.length === 0) return;
+
+        const ctx = document.getElementById('dailyProgressChart').getContext('2d');
+        const labels = dailyProgress.map(d => {
+            const date = new Date(d.date);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        });
+        const data = dailyProgress.map(d => d.yield);
+
+        // Calculate stats
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        const best = Math.max(...data);
+        const recent = data.slice(-7);
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const trend = recentAvg > avg ? '📈 improving' : recentAvg < avg * 0.9 ? '📉 declining' : '➡️ stable';
+
+        setText('daily-avg', avg.toFixed(2));
+        setText('daily-best', best.toFixed(2));
+        setText('daily-trend', trend);
+        setText('badge-daily-avg', `${avg.toFixed(1)} kWh avg`);
+
+        if (!S.dailyProgressChart) {
+            S.dailyProgressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Daily Yield (kWh)',
+                        data: data,
+                        borderColor: isDark ? 'rgba(48,209,88,0.8)' : 'rgba(48,209,88,1)',
+                        backgroundColor: isDark ? 'rgba(48,209,88,0.1)' : 'rgba(48,209,88,0.08)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: tickColor, font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: tickColor, callback: v => `${v} kWh` }, grid: { color: gridColor } }
+                    },
+                    plugins: {
+                        tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(2)} kWh` } }
+                    }
+                }
+            });
+        } else {
+            S.dailyProgressChart.data.labels = labels;
+            S.dailyProgressChart.data.datasets[0].data = data;
+            S.dailyProgressChart.update('none');
+        }
+    }
+
+    function renderProductionAlerts(monitoring) {
+        const section = document.getElementById('production-alerts-section');
+        const content = document.getElementById('alerts-content');
+        const causesList = document.getElementById('likely-causes-list');
+        const severityBadge = document.getElementById('alert-severity');
+
+        if (monitoring.status === 'drop_detected' && monitoring.alerts.length > 0) {
+            section.style.display = 'block';
+            
+            // Update severity badge
+            const sevColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
+            severityBadge.textContent = monitoring.severity.toUpperCase();
+            severityBadge.style.background = sevColors[monitoring.severity] || 'var(--orange)';
+            severityBadge.style.color = '#fff';
+
+            // Render alerts
+            let alertsHTML = monitoring.alerts.map(alert => `
+                <div style="padding:12px;margin-bottom:8px;background:var(--surface-elevated);border-radius:var(--radius-xs)">
+                    <div style="font-weight:600;margin-bottom:4px">${alert.message}</div>
+                    <div style="font-size:12px;color:var(--text-secondary)">
+                        Expected: ${alert.expected} | Actual: ${alert.actual} | Deficit: ${alert.deficit_pct}%
+                    </div>
+                </div>
+            `).join('');
+            content.innerHTML = alertsHTML;
+
+            // Render likely causes
+            let causesHTML = monitoring.likely_causes.map(cause => {
+                const probColors = { high: 'var(--red)', medium: 'var(--orange)', low: 'var(--yellow)' };
+                const probColor = probColors[cause.probability] || 'var(--text-secondary)';
+                return `
+                    <div style="padding:10px;margin-bottom:6px;background:var(--surface);border-radius:var(--radius-xs);border-left:3px solid ${probColor}">
+                        <div style="font-weight:600;font-size:13px;margin-bottom:2px">${cause.cause}</div>
+                        <div style="font-size:11px;color:var(--text-secondary)">
+                            Probability: <span style="color:${probColor};font-weight:600">${cause.probability}</span> • ${cause.action}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            causesList.innerHTML = causesHTML;
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    function renderAnnualProjection(forecast) {
+        setText('annual-projection', Math.round(forecast.annual).toLocaleString());
+        
+        // Calculate quarterly totals
+        const q1 = forecast.monthly[0] + forecast.monthly[1] + forecast.monthly[2];
+        const q2 = forecast.monthly[3] + forecast.monthly[4] + forecast.monthly[5];
+        const q3 = forecast.monthly[6] + forecast.monthly[7] + forecast.monthly[8];
+        const q4 = forecast.monthly[9] + forecast.monthly[10] + forecast.monthly[11];
+        
+        const quarters = [
+            { q: 'Q1', months: 'Jan-Mar', val: q1 },
+            { q: 'Q2', months: 'Apr-Jun', val: q2 },
+            { q: 'Q3', months: 'Jul-Sep', val: q3 },
+            { q: 'Q4', months: 'Oct-Dec', val: q4 }
+        ];
+        
+        const best = quarters.reduce((a, b) => a.val > b.val ? a : b);
+        const weak = quarters.reduce((a, b) => a.val < b.val ? a : b);
+        
+        setText('best-quarter', `${best.q}: ${Math.round(best.val)} kWh`);
+        setText('best-quarter-months', best.months);
+        setText('weak-quarter', `${weak.q}: ${Math.round(weak.val)} kWh`);
+        setText('weak-quarter-months', weak.months);
+        
+        // Revenue and CO2 (₹7/kWh, 0.82 kg CO2/kWh for India grid)
+        const revenue = Math.round(forecast.annual * 7);
+        const co2 = Math.round(forecast.annual * 0.82);
+        setText('annual-revenue', revenue.toLocaleString());
+        setText('annual-co2', co2.toLocaleString());
+    }
+
     // ── Local Mode: Scraper Trigger ──
     async function triggerScrape() {
         if (!isLocal) return;
@@ -895,6 +1096,17 @@
             renderPowerChart(records, analytics, num(meta.plant_capacity_kw || 2.32));
             renderVoltageChart(records);
             renderMonthlyChart(forecast);
+
+            // New features
+            if (analytics?.daily_progress) {
+                renderDailyProgressChart(analytics.daily_progress);
+            }
+            if (analytics?.production_monitoring) {
+                renderProductionAlerts(analytics.production_monitoring);
+            }
+            if (forecast) {
+                renderAnnualProjection(forecast);
+            }
         } catch (err) {
             console.error('Refresh error:', err);
             document.getElementById('status-dot').className = 'status-dot offline';
