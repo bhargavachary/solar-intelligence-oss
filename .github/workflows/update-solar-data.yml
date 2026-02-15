@@ -1,0 +1,188 @@
+name: Update Solar Data
+
+on:
+  schedule:
+    # Run at 7 AM, 10 AM, 1 PM, 4 PM, 7 PM IST (1:30 AM, 4:30 AM, 7:30 AM, 10:30 AM, 1:30 PM UTC)
+    # IST = UTC + 5:30, so 7 AM IST = 1:30 AM UTC, 10 AM IST = 4:30 AM UTC, etc.
+    - cron: '30 1,4,7,10,13 * * *'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install undetected-chromedriver flask flask-cors
+      
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+      
+      - name: Verify Chrome installation
+        run: |
+          which google-chrome || which chrome || which chromium-browser
+          google-chrome --version || chrome --version || chromium-browser --version
+      
+      - name: Restore session cache
+        id: cache-session
+        uses: actions/cache@v4
+        with:
+          path: |
+            waaree_session.pkl
+          key: waaree-session-${{ github.run_id }}
+          restore-keys: |
+            waaree-session-
+      
+      - name: Check session age
+        id: check-session
+        run: |
+          if [ -f waaree_session.pkl ]; then
+            # Check if session file is older than 4 hours
+            if [ $(find waaree_session.pkl -mmin +240 | wc -l) -gt 0 ]; then
+              echo "Session expired (>4 hours old)"
+              echo "session_valid=false" >> $GITHUB_OUTPUT
+            else
+              echo "Session still valid (<4 hours old)"
+              echo "session_valid=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No session file found"
+            echo "session_valid=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create credentials file
+        run: |
+          cat > credentials.json << 'EOF'
+          {
+            "username": "${{ secrets.WAAREE_USERNAME }}",
+            "password": "${{ secrets.WAAREE_PASSWORD }}",
+            "plant_id": "${{ secrets.WAAREE_PLANT_ID }}",
+            "plant_capacity_kw": 2.32,
+            "daily_realistic_max_kwh": 12.0,
+            "location": "Berhampur, Odisha"
+          }
+          EOF
+      
+      - name: Run scraper with session reuse (if valid)
+        if: steps.check-session.outputs.session_valid == 'true'
+        id: scrape-reuse
+        continue-on-error: true
+        run: |
+          echo "Attempting scrape with existing session..."
+          timeout 300 python waaree_deep_crawler.py --validate --fresh-cycles 0 --reuse-cycles 1 || echo "Session reuse failed"
+          if [ -f dashboard_data.json ]; then
+            echo "scrape_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "scrape_success=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Run scraper with fresh login (if session invalid or reuse failed)
+        if: steps.check-session.outputs.session_valid == 'false' || steps.scrape-reuse.outputs.scrape_success != 'true'
+        id: scrape-fresh
+        run: |
+          echo "Starting fresh login scrape..."
+          timeout 300 python waaree_deep_crawler.py --validate --fresh-cycles 1 --reuse-cycles 0
+          if [ -f dashboard_data.json ]; then
+            echo "Fresh scrape succeeded"
+            echo "scrape_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "Fresh scrape failed"
+            exit 1
+          fi
+      
+      - name: Copy data to public directory
+        run: |
+          mkdir -p data
+          if [ -f dashboard_data.json ]; then
+            cp dashboard_data.json data/dashboard_data.json
+            echo "Data synced to data/dashboard_data.json"
+          else
+            echo "Error: dashboard_data.json not found!"
+            exit 1
+          fi
+      
+      - name: Run analytics (optional)
+        continue-on-error: true
+        run: |
+          if [ -f solar_analytics.py ]; then
+            python solar_analytics.py
+            echo "Analytics completed"
+          fi
+      
+      - name: Save session cache for next run
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            waaree_session.pkl
+          key: waaree-session-${{ github.run_id }}
+      
+      - name: Archive diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-${{ github.run_id }}
+          path: |
+            diagnostics/*.html
+            diagnostics/*.json
+            *.log
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: Commit and push data updates
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add data/dashboard_data.json
+          git add data/energy_logs/*.json || true
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "🤖 Auto-update solar data - $TIMESTAMP"
+            git push
+            echo "Data committed and pushed successfully"
+          fi
+      
+      - name: Trigger GitHub Pages deployment
+        if: success()
+        run: |
+          echo "Data updated, GitHub Pages will auto-deploy"
+      
+      - name: Dry-run summary
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "SCRAPE RUN SUMMARY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Session valid: ${{ steps.check-session.outputs.session_valid }}"
+          echo "Reuse success: ${{ steps.scrape-reuse.outputs.scrape_success }}"
+          echo "Fresh success: ${{ steps.scrape-fresh.outputs.scrape_success }}"
+          echo ""
+          if [ -f data/dashboard_data.json ]; then
+            echo "✅ Dashboard data updated successfully"
+            echo "File size: $(stat -c%s data/dashboard_data.json 2>/dev/null || stat -f%z data/dashboard_data.json) bytes"
+            echo "Records: $(jq '.records | length' data/dashboard_data.json 2>/dev/null || echo 'N/A')"
+          else
+            echo "❌ Dashboard data update failed"
+          fi
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

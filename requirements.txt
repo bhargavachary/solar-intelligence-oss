@@ -1,2 +1,5 @@
 selenium==4.40.0
 webdriver-manager==4.0.2
+undetected-chromedriver>=3.5.0
+flask>=3.0.0
+flask-cors>=4.0.0
