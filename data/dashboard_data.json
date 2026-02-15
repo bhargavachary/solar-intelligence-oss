@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "4.0",
-    "generated_at": "2026-02-15 15:21:57",
+    "generated_at": "2026-02-15 16:00:18",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "sampling_seconds": 60,
     "plant_capacity_kw": 2.32,
@@ -10,19 +10,19 @@
     "engine_version": "4.0"
   },
   "summary": {
-    "points": 9,
+    "points": 10,
     "peak_power_kw": 1.92,
-    "avg_power_kw": 1.291,
-    "std_power_kw": 0.544,
+    "avg_power_kw": 1.262,
+    "std_power_kw": 0.524,
     "avg_voltage_v": 229.8,
     "std_voltage_v": 1.8,
     "uptime_pct": 100.0,
     "portal_validation_pct": 100.0,
     "portal_loaded_latest": true,
-    "latest_timestamp": "2026-02-15 15:00:00",
-    "latest_power_kw": 1.22,
-    "latest_daily_yield_kwh": 6.75,
-    "latest_total_yield_kwh": 69.25,
+    "latest_timestamp": "2026-02-15 16:00:00",
+    "latest_power_kw": 1.0,
+    "latest_daily_yield_kwh": 7.27,
+    "latest_total_yield_kwh": 69.77,
     "data_quality_score": 92.0
   },
   "history": [
@@ -187,14 +187,32 @@
       "portal_ocr_excerpt": "Power Generating Today Yield Total Yield kWh",
       "extraction_method": "css_selector",
       "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-02-15 16:00:00",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 1.0,
+      "daily_yield_kwh": 7.27,
+      "total_yield_kwh": 69.77,
+      "income_inr": 488,
+      "voltage_v": 230.7,
+      "current_a": 4.33,
+      "frequency_hz": 50.0,
+      "temperature_c": 33.7,
+      "status": "Online",
+      "portal_loaded": true,
+      "portal_validation_score": 89,
+      "portal_ocr_excerpt": "Power Generating Today Yield Total Yield kWh",
+      "extraction_method": "css_selector",
+      "anomaly_notes": []
     }
   ],
   "analytics": {
-    "computed_at": "2026-02-15 15:21:57",
+    "computed_at": "2026-02-15 16:00:18",
     "power_trend": {
       "direction": "rising",
-      "slope_kw_per_sample": 0.1382,
-      "r_squared": 0.429,
+      "slope_kw_per_sample": 0.0846,
+      "r_squared": 0.215,
       "ewma": [
         0.15,
         0.288,
@@ -204,14 +222,15 @@
         1.354,
         1.488,
         1.476,
-        1.399
+        1.399,
+        1.28
       ],
-      "forecast_next_kw": 1.982
+      "forecast_next_kw": 1.727
     },
     "voltage_trend": {
       "direction": "rising",
-      "slope": 0.4583,
-      "r_squared": 0.413
+      "slope": 0.3848,
+      "r_squared": 0.391
     },
     "anomalies": {
       "power": [
@@ -222,8 +241,8 @@
           "methods": [
             "iqr_outlier"
           ],
-          "severity": 0.9,
-          "z_score": -1.98
+          "severity": 0.67,
+          "z_score": -2.01
         }
       ],
       "voltage": [],
@@ -231,21 +250,21 @@
     },
     "seasonal_forecast": {
       "monthly_kwh": [
-        220.8,
-        232.5,
-        303.9,
-        342.9,
-        378.2,
-        243.9,
-        132.0,
-        114.8,
-        153.0,
-        221.4,
-        242.0,
-        217.1
+        229.1,
+        241.3,
+        315.4,
+        355.8,
+        392.5,
+        253.2,
+        137.0,
+        119.2,
+        158.7,
+        229.8,
+        251.2,
+        225.3
       ],
-      "annual_kwh": 2802.5,
-      "current_month_kwh": 232.5,
+      "annual_kwh": 2908.5,
+      "current_month_kwh": 241.3,
       "current_month_name": "Feb",
       "monsoon_drop_pct": 58.6,
       "best_month": "May",
@@ -294,8 +313,8 @@
       ]
     },
     "performance": {
-      "performance_ratio_pct": 50.2,
-      "capacity_factor_pct": 52.6,
+      "performance_ratio_pct": 54.0,
+      "capacity_factor_pct": 43.1,
       "degradation": {
         "degradation_pct_year": 0.0,
         "confidence": "insufficient_data"
@@ -317,34 +336,34 @@
       "numbers_found": 0
     },
     "health": {
-      "score": 82.6,
+      "score": 83.7,
       "grade": "A",
       "factors": {
-        "power_consistency": 77.6,
-        "voltage_stability": 98.3,
+        "power_consistency": 78.1,
+        "voltage_stability": 98.4,
         "voltage_in_range_pct": 100.0,
-        "yield_efficiency": 56.2,
-        "data_quality": 91.1,
+        "yield_efficiency": 60.6,
+        "data_quality": 90.9,
         "uptime": 100.0
       }
     },
     "statistics": {
       "power": {
-        "mean": 1.291,
-        "median": 1.45,
-        "std": 0.577,
+        "mean": 1.262,
+        "median": 1.355,
+        "std": 0.552,
         "min": 0.15,
         "max": 1.92,
-        "q25": 1.22,
-        "q75": 1.7
+        "q25": 1.055,
+        "q75": 1.652
       },
       "voltage": {
         "mean": 229.8,
-        "std": 2.0
+        "std": 1.9
       },
       "daily_yield": {
-        "latest": 6.75,
-        "max_observed": 6.75
+        "latest": 7.27,
+        "max_observed": 7.27
       }
     }
   }

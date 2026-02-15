@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Validation Suite for Waaree Solar Dashboard
+Comprehensive Validation Suite for Solar Dashboard
 =========================================================
 100+ tests covering:
   A. Data Schema & Structure (15 tests)
@@ -932,7 +932,7 @@ def test_cross_field(data):
 # ═══════════════════════════════════════════════════════════════
 def run_all():
     print("=" * 76)
-    print("  WAAREE SOLAR DASHBOARD — COMPREHENSIVE VALIDATION SUITE")
+    print("  SOLAR DASHBOARD — COMPREHENSIVE VALIDATION SUITE")
     print("=" * 76)
     print()
     

@@ -2,7 +2,7 @@
 """
 Solar Data Generator
 ====================
-Generates realistic solar telemetry data for the Waaree 2.32 kW plant.
+Generates realistic solar telemetry data for a 2.32 kW plant.
 Uses bell-curve insolation model based on Berhampur, Odisha (19.3°N, 84.8°E).
 
 Output: data/dashboard_data.json (consumed by index.html)

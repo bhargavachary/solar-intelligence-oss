@@ -2,7 +2,7 @@
 
 # ☀️ Solar Intelligence Dashboard
 
-**Real-time monitoring for a Waaree 2.32 kW rooftop solar plant**
+**Real-time monitoring for a 2.32 kW rooftop solar plant**
 
 [![Live Dashboard](https://img.shields.io/badge/🔴_Live-Dashboard-ff9f0a?style=for-the-badge)](https://bhargavachary.in/waaree_api_access/)
 [![Update Data](https://img.shields.io/github/actions/workflow/status/bhargavachary/waaree_api_access/update-data.yml?style=for-the-badge&label=Data%20Pipeline&logo=github-actions)](https://github.com/bhargavachary/waaree_api_access/actions)
@@ -97,7 +97,7 @@ The `solar_analytics.py` module is a **pure Python** (no numpy/sklearn) analytic
 
 | Spec | Value |
 |------|-------|
-| **Manufacturer** | Waaree Energies |
+| **Manufacturer** | N/A |
 | **Capacity** | 2.32 kW |
 | **Type** | Rooftop Grid-tied |
 | **Location** | Berhampur, Odisha (19.3°N, 84.8°E) |
@@ -138,5 +138,5 @@ MIT © [Bhargav Achary](https://bhargavachary.in/)
 ---
 
 <div align="center">
-  <sub>Built with ☀️ in Berhampur · <a href="https://bhargavachary.in/">bhargavachary.in</a></sub>
+  <sub>Maintained with Love by Bhargav and Copilot</sub>
 </div>
