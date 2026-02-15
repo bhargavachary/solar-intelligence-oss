@@ -1710,7 +1710,7 @@
             if (analytics && analytics.daily_progress) renderDailyProgressChart(analytics.daily_progress);
             if (analytics && analytics.production_monitoring) renderProductionAlerts(analytics.production_monitoring);
             if (forecast) renderAnnualProjection(forecast);
-            updateSolarBankFlow(records, meta);
+            updateSolarBankFlow(records, meta, forecast);
         })
         .catch(function(err) {
             console.error('Refresh error:', err);
@@ -1849,11 +1849,13 @@
         setText('calc-badge', consumption + ' units');
     }
 
-    function updateSolarBankFlow(records, meta) {
+    function updateSolarBankFlow(records, meta, forecast) {
         var l = records.length ? records[records.length - 1] : null;
-        // Use actual monthly yield from portal if available, else estimate from daily
+        // Use forecast annual projection divided by 12 for monthly estimate
         var monthlyGen;
-        if (l && l.monthly > 0) {
+        if (forecast && forecast.annual > 0) {
+            monthlyGen = Math.round(forecast.annual / 12);
+        } else if (l && l.monthly > 0) {
             monthlyGen = Math.round(l.monthly);
         } else {
             var dailies = records.map(function(r) { return r.daily; }).filter(function(d) { return d > 0; });
