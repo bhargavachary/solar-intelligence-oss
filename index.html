@@ -314,6 +314,9 @@
         }
         .footer a { color: var(--text-secondary); text-decoration: none; }
         .footer a:hover { color: var(--accent); }
+        #renewable-quote {
+            transition: opacity 0.3s ease-in-out;
+        }
 
         /* ═══════════════════════════════════════
            SOLAR BANK & TARIFF SECTION
@@ -661,15 +664,18 @@
                 <div>Trend: <strong id="daily-trend" style="color:var(--text-primary)">--</strong></div>
             </div>
         </div>
-        <div class="card" data-tip="Projected annual generation based on Berhampur's solar irradiance data (NASA POWER), system capacity, and seasonal factors. Best months: Apr-May (7 PSH), weakest: Jul-Aug (monsoon).">
+        <div class="card" data-tip="Conservative projection for Berhampur's coastal climate: high humidity, monsoon rainfall, cyclone risk. Estimates account for real-world conditions, not ideal lab performance.">
             <div class="card-header">
                 <span class="card-title">Annual Projection</span>
-                <span class="card-badge">Seasonal Model</span>
+                <span class="card-badge">Realistic Range</span>
             </div>
             <div style="padding:24px 16px">
-                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:24px">
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
                     <div style="font-size:48px;font-weight:700;color:var(--text-primary)" id="annual-projection">--</div>
                     <div style="font-size:18px;color:var(--text-secondary)">kWh/year</div>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">
+                    Range: <span style="color:var(--orange)" id="annual-pessimistic">--</span> – <span style="color:var(--green)" id="annual-optimistic">--</span> kWh
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
                     <div>
@@ -683,9 +689,17 @@
                         <div style="font-size:12px;color:var(--text-secondary)" id="weak-quarter-months">--</div>
                     </div>
                 </div>
-                <div style="border-top:1px solid var(--separator);padding-top:12px">
+                <div style="border-top:1px solid var(--separator);padding-top:12px;margin-bottom:12px">
                     <div class="stat-row"><span class="stat-label">Expected revenue</span><span class="stat-value">₹<span id="annual-revenue">--</span></span></div>
                     <div class="stat-row"><span class="stat-label">CO₂ offset</span><span class="stat-value"><span id="annual-co2">--</span></span></div>
+                </div>
+                <div class="info-callout" style="margin-top:12px">
+                    <span>🌍</span>
+                    <span><strong>Location Comparison (2.32 kW system):</strong><br>
+                    <strong>Berhampur</strong> (You): <span id="berhampur-annual">2,550</span> kWh/yr · Humid coastal<br>
+                    <strong>Jaipur</strong>: ~3,200 kWh/yr · Sunny year-round<br>
+                    <strong>Nagpur</strong>: ~2,900 kWh/yr · Dry, minimal rain<br>
+                    <strong>Bengaluru</strong>: ~2,400 kWh/yr · Cloud cover, pleasant climate</span>
                 </div>
             </div>
         </div>
@@ -981,7 +995,8 @@
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
             Plant: <span id="footer-plant">--</span> ·
             Data: <span id="footer-source" style="font-weight:600">--</span>
-        </span>
+        </span><br>
+        <span id="renewable-quote" style="font-size:10px;opacity:0.8;font-style:italic;margin-top:4px;display:block">🌱 Proud to make the world greener, one kWh at a time</span>
     </footer>
 </div>
 
@@ -1174,20 +1189,52 @@
 
     function clientForecast(records, meta) {
         var maxDaily = num(meta && meta.daily_realistic_max_kwh ? meta.daily_realistic_max_kwh : 12);
-        var factors = [0.88, 0.92, 1.0, 1.08, 1.12, 0.95, 0.72, 0.68, 0.78, 0.90, 0.96, 0.90];
+        
+        // Berhampur (Coastal Odisha): Cyclonic, humid, high monsoon rainfall
+        // Conservative estimates accounting for:
+        // - High humidity reducing efficiency (5-10%)
+        // - Frequent cloud cover during monsoon (Jun-Sep)
+        // - Cyclone risk (Oct-Nov)
+        // - Coastal haze
+        var factorsExpected = [0.82, 0.86, 0.94, 1.02, 0.98, 0.68, 0.52, 0.48, 0.62, 0.76, 0.84, 0.80];
+        var factorsPessimistic = [0.75, 0.78, 0.86, 0.92, 0.88, 0.58, 0.42, 0.38, 0.52, 0.68, 0.76, 0.72];
+        var factorsOptimistic = [0.88, 0.92, 1.02, 1.12, 1.08, 0.78, 0.62, 0.58, 0.72, 0.84, 0.92, 0.88];
+        
         var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         var now = new Date();
         var cm = now.getMonth();
         var dailies = records.map(function(r) { return r.daily; });
-        var observed = dailies.length ? Math.max.apply(null, dailies) : maxDaily * 0.75;
-        var base = Math.min(Math.max(observed, maxDaily * 0.5), maxDaily * 1.1);
-        var monthly = factors.map(function(f, i) {
+        var observed = dailies.length ? Math.max.apply(null, dailies) : maxDaily * 0.70;
+        var base = Math.min(Math.max(observed, maxDaily * 0.45), maxDaily * 0.95);
+        
+        var monthlyExpected = factorsExpected.map(function(f, i) {
             var d = new Date(now.getFullYear(), i + 1, 0).getDate();
             return Math.max(0, +(base * f * d).toFixed(1));
         });
-        var annual = monthly.reduce(function(a, b) { return a + b; }, 0);
-        var monsoonDrop = Math.round((1 - factors[7] / Math.max.apply(null, factors)) * 100);
-        return { monthly: monthly, months: months, annual: annual, current: monthly[cm], cm: cm, monsoonDrop: monsoonDrop };
+        var monthlyPessimistic = factorsPessimistic.map(function(f, i) {
+            var d = new Date(now.getFullYear(), i + 1, 0).getDate();
+            return Math.max(0, +(base * f * d).toFixed(1));
+        });
+        var monthlyOptimistic = factorsOptimistic.map(function(f, i) {
+            var d = new Date(now.getFullYear(), i + 1, 0).getDate();
+            return Math.max(0, +(base * f * d).toFixed(1));
+        });
+        
+        var annualExpected = monthlyExpected.reduce(function(a, b) { return a + b; }, 0);
+        var annualPessimistic = monthlyPessimistic.reduce(function(a, b) { return a + b; }, 0);
+        var annualOptimistic = monthlyOptimistic.reduce(function(a, b) { return a + b; }, 0);
+        var monsoonDrop = Math.round((1 - factorsExpected[7] / Math.max.apply(null, factorsExpected)) * 100);
+        
+        return {
+            monthly: monthlyExpected,
+            monthlyRange: { pessimistic: monthlyPessimistic, expected: monthlyExpected, optimistic: monthlyOptimistic },
+            months: months,
+            annual: annualExpected,
+            annualRange: { pessimistic: annualPessimistic, expected: annualExpected, optimistic: annualOptimistic },
+            current: monthlyExpected[cm],
+            cm: cm,
+            monsoonDrop: monsoonDrop
+        };
     }
 
     // ══════════════════════════════
@@ -1642,6 +1689,16 @@
 
     function renderAnnualProjection(forecast) {
         setText('annual-projection', Math.round(forecast.annual).toLocaleString());
+        
+        // Display ranges with realistic estimates
+        if (forecast.annualRange) {
+            setText('annual-pessimistic', Math.round(forecast.annualRange.pessimistic).toLocaleString());
+            setText('annual-optimistic', Math.round(forecast.annualRange.optimistic).toLocaleString());
+        }
+        
+        // Update location comparison with Berhampur expected value
+        setText('berhampur-annual', Math.round(forecast.annual).toLocaleString());
+        
         var q1 = forecast.monthly[0] + forecast.monthly[1] + forecast.monthly[2];
         var q2 = forecast.monthly[3] + forecast.monthly[4] + forecast.monthly[5];
         var q3 = forecast.monthly[6] + forecast.monthly[7] + forecast.monthly[8];
@@ -1913,6 +1970,32 @@
         calcGenHoursSlider.addEventListener('input', syncBillCalc);
     }
     syncBillCalc();  // initial
+
+    // ══════════════════════════════
+    // ROTATING RENEWABLE ENERGY QUOTES
+    // ══════════════════════════════
+    var renewableQuotes = [
+        "🌱 Proud to make the world greener, one kWh at a time",
+        "☀️ Clean energy today, bright future tomorrow",
+        "🌍 Every solar kWh counts towards a sustainable planet",
+        "⚡ Be the change: renewable energy starts with you",
+        "🌿 Sustainable technology for a better tomorrow",
+        "💚 Powering progress through renewable energy",
+        "🔆 Solar power: infinite energy, zero guilt"
+    ];
+    var quoteIndex = 0;
+    function rotateQuote() {
+        quoteIndex = (quoteIndex + 1) % renewableQuotes.length;
+        var elem = document.getElementById('renewable-quote');
+        if (elem) {
+            elem.style.opacity = '0';
+            setTimeout(function() {
+                elem.textContent = renewableQuotes[quoteIndex];
+                elem.style.opacity = '0.8';
+            }, 300);
+        }
+    }
+    setInterval(rotateQuote, 15000); // Rotate every 15 seconds
 
     // ══════════════════════════════
     // BOOTSTRAP
