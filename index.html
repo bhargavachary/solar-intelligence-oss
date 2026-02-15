@@ -25,36 +25,36 @@
            ═══════════════════════════════════════ */
         :root,
         [data-theme="light"] {
-            --bg: #faf8f5;
-            --bg-secondary: #f2efe9;
-            --surface: rgba(255, 255, 255, 0.88);
-            --surface-secondary: #f5f2ec;
+            --bg: #faf9f7;
+            --bg-secondary: #f0ede8;
+            --surface: rgba(255, 255, 255, 0.92);
+            --surface-secondary: #f5f3ef;
             --surface-elevated: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #5c5c5c;
-            --text-tertiary: #8c8c8c;
-            --separator: rgba(0, 0, 0, 0.06);
-            --accent: #d97706;
-            --accent-light: rgba(217, 119, 6, 0.08);
-            --accent-hover: #b45309;
-            --green: #16a34a;
-            --green-bg: rgba(22, 163, 74, 0.08);
-            --red: #dc2626;
-            --red-bg: rgba(220, 38, 38, 0.06);
-            --orange: #ea580c;
-            --orange-bg: rgba(234, 88, 12, 0.08);
-            --purple: #7c3aed;
-            --purple-bg: rgba(124, 58, 237, 0.08);
-            --cyan: #0891b2;
-            --cyan-bg: rgba(8, 145, 178, 0.08);
-            --yellow: #ca8a04;
-            --yellow-bg: rgba(202, 138, 4, 0.08);
-            --blue: #2563eb;
-            --blue-bg: rgba(37, 99, 235, 0.08);
-            --blur: blur(20px);
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-            --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+            --text-primary: #1c1917;
+            --text-secondary: #57534e;
+            --text-tertiary: #a8a29e;
+            --separator: rgba(28, 25, 23, 0.08);
+            --accent: #c2410c;
+            --accent-light: rgba(194, 65, 12, 0.07);
+            --accent-hover: #9a3412;
+            --green: #15803d;
+            --green-bg: rgba(21, 128, 61, 0.08);
+            --red: #b91c1c;
+            --red-bg: rgba(185, 28, 28, 0.06);
+            --orange: #c2410c;
+            --orange-bg: rgba(194, 65, 12, 0.07);
+            --purple: #6d28d9;
+            --purple-bg: rgba(109, 40, 217, 0.07);
+            --cyan: #0e7490;
+            --cyan-bg: rgba(14, 116, 144, 0.07);
+            --yellow: #a16207;
+            --yellow-bg: rgba(161, 98, 7, 0.07);
+            --blue: #1d4ed8;
+            --blue-bg: rgba(29, 78, 216, 0.07);
+            --blur: blur(20px) saturate(150%);
+            --shadow-sm: 0 1px 3px rgba(28,25,23,0.05), 0 1px 2px rgba(28,25,23,0.04);
+            --shadow-md: 0 4px 16px rgba(28,25,23,0.08);
+            --shadow-lg: 0 12px 36px rgba(28,25,23,0.1);
             --radius: 16px;
             --radius-xs: 10px;
         }
@@ -122,7 +122,7 @@
             width: 44px; height: 44px; border-radius: 14px;
             background: linear-gradient(135deg, var(--accent), var(--orange));
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+            font-size: 22px; box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
         }
         .header-title { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
         .header-subtitle { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
@@ -975,7 +975,7 @@
     </div>
 
     <footer class="footer">
-        Solar Intelligence v4.3 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
+        Solar Intelligence v5.1 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
         <span style="font-size:11px">
             <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
@@ -1034,11 +1034,11 @@
             dark: dark,
             grid: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
             tick: dark ? '#636366' : '#8c8c8c',
-            primary: dark ? '#0a84ff' : '#d97706',
-            primaryArea: dark ? 'rgba(10,132,255,0.15)' : 'rgba(217,119,6,0.12)',
-            secondary: dark ? '#ff9f0a' : '#2563eb',
-            barHi: dark ? 'rgba(10,132,255,0.9)' : 'rgba(217,119,6,0.85)',
-            barLo: dark ? 'rgba(10,132,255,0.2)' : 'rgba(217,119,6,0.18)',
+            primary: dark ? '#0a84ff' : '#c2410c',
+            primaryArea: dark ? 'rgba(10,132,255,0.15)' : 'rgba(194,65,12,0.12)',
+            secondary: dark ? '#ff9f0a' : '#1d4ed8',
+            barHi: dark ? 'rgba(10,132,255,0.9)' : 'rgba(194,65,12,0.85)',
+            barLo: dark ? 'rgba(10,132,255,0.2)' : 'rgba(194,65,12,0.18)',
             ttBg: dark ? '#2c2c2e' : '#fff',
             ttTitle: dark ? '#f5f5f7' : '#1a1a1a',
             ttBody: dark ? '#98989d' : '#5c5c5c',
@@ -1098,19 +1098,19 @@
         // Schema v5.0+ compatibility: live + last_7_days instead of history array
         var raw = [];
         if (meta.schema_version === "5.0" && payload.live) {
-            // New structure: Need to fetch today's hourly records from energy log
-            // For now, use last_7_days to build synthetic hourly data
+            // New structure: live + last_7_days → synthetic hourly data
             if (payload.last_7_days && payload.last_7_days.length > 0) {
-                // Build synthetic records from last_7_days (for charts)
                 var today = payload.last_7_days[payload.last_7_days.length - 1];
                 var numRecords = today.record_count || 12;
+                // Compute true monthly yield from all last_7_days entries (all are this month)
+                var computedMonthly = payload.last_7_days.reduce(function(s,d){ return s + (d.yield_kwh||0); }, 0);
+                var monthlyVal = Math.max(computedMonthly, payload.live.monthly_yield_kwh || 0);
                 // Generate synthetic hourly records based on daily summary
                 for (var i = 0; i < numRecords; i++) {
                     var hour = 6 + i;  // 6 AM to 5 PM
                     var timestamp = today.date + ' ' + (hour < 10 ? '0' : '') + hour + ':30:00';
-                    // Bell curve power distribution
                     var progress = i / (numRecords - 1);
-                    var bellCurve = Math.sin(progress * Math.PI);  // 0 to 1 to 0
+                    var bellCurve = Math.sin(progress * Math.PI);
                     var power = today.peak_power_kw * bellCurve;
                     var dailyYield = today.yield_kwh * Math.pow(progress, 0.7);
                     
@@ -1118,7 +1118,7 @@
                         timestamp: timestamp,
                         current_power_kw: power,
                         daily_yield_kwh: dailyYield,
-                        monthly_yield_kwh: payload.live.monthly_yield_kwh,
+                        monthly_yield_kwh: monthlyVal,
                         total_yield_kwh: payload.live.total_yield_kwh,
                         income_inr: payload.live.income_inr,
                         voltage_v: 230 + (Math.random() * 4 - 2),
@@ -1221,14 +1221,14 @@
             setText('kpi-income', fmtMoney(l.income));
         }
         var h = (analytics && analytics.health) || {};
-        setText('kpi-health', h.score != null ? h.score : '--');
+        setText('kpi-health', h.overall_score != null ? h.overall_score : (h.score != null ? h.score : '--'));
         setText('kpi-grade', h.grade ? ' ' + h.grade : '');
         var dq = (analytics && analytics.health && analytics.health.factors) ? analytics.health.factors.data_quality : null;
         setText('kpi-quality', dq != null ? Math.round(dq) : '--');
-        var pr = (analytics && analytics.performance) ? analytics.performance.performance_ratio_pct : '--';
+        var pr = analytics ? (analytics.performance_ratio_pct || (analytics.performance && analytics.performance.performance_ratio_pct) || '--') : '--';
         setText('kpi-pr', pr);
         var trendEl = document.getElementById('kpi-trend');
-        var dir = (analytics && analytics.power_trend) ? analytics.power_trend.direction : 'stable';
+        var dir = (analytics && analytics.power_trend) ? (analytics.power_trend.trend_direction || analytics.power_trend.direction || 'stable') : 'stable';
         var icons = { rising: '↑ rising', falling: '↓ falling', stable: '● stable' };
         var cls = { rising: 'up', falling: 'down', stable: 'stable' };
         trendEl.className = 'kpi-trend ' + (cls[dir] || 'stable');
@@ -1249,7 +1249,13 @@
 
             // Daily yield vs expected
             var dailyStats = (analytics && analytics.statistics && analytics.statistics.daily_yield) || {};
-            var expected = dailyStats.expected_today || num((metaRef && metaRef.daily_realistic_max_kwh) || 11);
+            var dailyProg = (analytics && analytics.daily_progress) || [];
+            var expectedFallback = num((metaRef && metaRef.daily_realistic_max_kwh) || 11);
+            if (!dailyStats.expected_today && dailyProg.length > 1) {
+                var yields = dailyProg.map(function(d) { return d.yield_kwh || d.yield || 0; });
+                expectedFallback = yields.reduce(function(a,b){return a+b;},0) / yields.length;
+            }
+            var expected = dailyStats.expected_today || expectedFallback;
             if (l.daily > 0) {
                 var yieldPct = (l.daily / expected * 100).toFixed(0);
                 var yieldEmoji = yieldPct >= 95 ? '🎯' : yieldPct >= 80 ? '📈' : '📉';
@@ -1257,25 +1263,25 @@
             }
 
             // Performance ratio with interpretation
-            var perf = analytics ? analytics.performance : null;
-            if (perf && perf.performance_ratio_pct) {
-                var prVal = perf.performance_ratio_pct;
+            var prVal = analytics ? (analytics.performance_ratio_pct || (analytics.performance && analytics.performance.performance_ratio_pct)) : null;
+            if (prVal) {
                 var prLabel = prVal >= 90 ? 'excellent — near-optimal output' : prVal >= 75 ? 'good — healthy system' : prVal >= 60 ? 'moderate — check for soiling' : 'low — inspect panels';
                 items.push(ico('🏆', 'Performance Ratio: <strong>' + prVal + '%</strong> (' + prLabel + ')'));
             }
 
             // Capacity factor with interpretation
-            if (perf && perf.capacity_factor_pct) {
-                var cfVal = perf.capacity_factor_pct;
+            var cfVal = analytics ? (analytics.capacity_factor_pct || (analytics.performance && analytics.performance.capacity_factor_pct)) : null;
+            if (cfVal) {
                 var cfLabel = cfVal >= 18 ? 'above average for India' : cfVal >= 15 ? 'typical for the region' : 'below expected — check shading';
                 items.push(ico('📊', 'Capacity Factor: <strong>' + cfVal + '%</strong> — ' + cfLabel));
             }
 
             // Power trend
             var trend = analytics ? analytics.power_trend : null;
-            if (trend && trend.direction === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> — morning ramp-up'));
-            else if (trend && trend.direction === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline (normal solar behavior)'));
-            else if (trend) items.push(ico('➡️', 'Power trend <strong>stable</strong> — near solar noon'));
+            var trendDir = trend ? (trend.trend_direction || trend.direction || 'stable') : null;
+            if (trendDir === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> — morning ramp-up'));
+            else if (trendDir === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline (normal solar behavior)'));
+            else if (trendDir) items.push(ico('➡️', 'Power trend <strong>stable</strong> — near solar noon'));
 
             // Grid voltage
             if (m.avgVolt > 0) {
@@ -1292,16 +1298,18 @@
 
             // Production monitoring
             var pm = analytics ? analytics.production_monitoring : null;
-            if (pm && pm.status === 'normal') items.push(ico('✨', 'Production on track — no anomalies detected'));
-            else if (pm && pm.alerts && pm.alerts.length > 0) items.push(ico('⚠️', pm.alerts[0].message));
+            if (pm && pm.alerts && pm.alerts.length > 0) items.push(ico('⚠️', pm.alerts[0].message));
+            else if (pm && pm.consistency_score) items.push(ico('✨', 'System operating normally — consistency <strong>' + pm.consistency_score + '%</strong>'));
             else items.push(ico('✨', 'System operating normally'));
 
             // Degradation
-            var deg = perf && perf.degradation;
+            var deg = (analytics && analytics.health) ? { degradation_pct_year: analytics.health.degradation_pct, note: 'typical for crystalline silicon' } : null;
             if (deg) items.push(ico('🔧', 'Estimated degradation: <strong>~' + deg.degradation_pct_year + '%/yr</strong> — ' + (deg.note || 'industry standard')));
 
             // EWMA forecast
-            if (trend && trend.forecast_next_kw > 0) items.push(ico('🔮', 'Next interval forecast (EWMA): <strong>' + trend.forecast_next_kw + ' kW</strong>'));
+            var ewmaForecast = (trend && trend.forecast_next_kw > 0) ? trend.forecast_next_kw : null;
+            if (!ewmaForecast && trend && trend.ewma && trend.ewma.length > 0) ewmaForecast = trend.ewma[trend.ewma.length - 1];
+            if (ewmaForecast > 0) items.push(ico('🔮', 'EWMA power estimate: <strong>' + num(ewmaForecast).toFixed(3) + ' kW</strong>'));
         }
         document.getElementById('insights-list').innerHTML = items.join('');
         var anomalyCount = (analytics && analytics.anomalies) ? analytics.anomalies.total_count : 0;
@@ -1313,8 +1321,8 @@
     }
 
     function updateHealthRing(analytics) {
-        var h = (analytics && analytics.health) || { score: 0, grade: 'N/A' };
-        var score = h.score || 0;
+        var h = (analytics && analytics.health) || { overall_score: 0, grade: 'N/A' };
+        var score = h.overall_score || h.score || 0;
         var arc = document.getElementById('health-arc');
         var circumference = 2 * Math.PI * 62;
         arc.setAttribute('stroke-dasharray', (score / 100) * circumference + ' ' + circumference);
@@ -1330,32 +1338,67 @@
     }
 
     function updatePerformance(summary, analytics) {
-        var perf = (analytics && analytics.performance) || {};
-        var pr = perf.performance_ratio_pct || 0;
-        var cf = perf.capacity_factor_pct || 0;
-        var up = (summary && summary.uptime_pct) || 0;
-        var dq = (summary && summary.data_quality_score) || 0;
+        // Read from flat analytics or nested performance object
+        var pr = 0, cf = 0, up = 0, dq = 0;
+        if (analytics) {
+            pr = analytics.performance_ratio_pct || (analytics.performance && analytics.performance.performance_ratio_pct) || 0;
+            cf = analytics.capacity_factor_pct || (analytics.performance && analytics.performance.capacity_factor_pct) || 0;
+            var health = analytics.health || {};
+            up = health.uptime_pct || (summary && summary.uptime_pct) || 0;
+            dq = (health.factors && health.factors.data_quality) || (summary && summary.data_quality_score) || 0;
+        }
         setText('pb-pr', pr + '%'); document.getElementById('pb-pr-fill').style.width = Math.min(pr, 100) + '%';
-        setText('pb-cf', cf + '%'); document.getElementById('pb-cf-fill').style.width = Math.min(cf, 100) + '%';
+        setText('pb-cf', cf + '%'); document.getElementById('pb-cf-fill').style.width = Math.min(cf / 25 * 100, 100) + '%'; // CF normalized: 25% = 100% bar
         setText('pb-uptime', up + '%'); document.getElementById('pb-uptime-fill').style.width = up + '%';
         setText('pb-dq', dq + '%'); document.getElementById('pb-dq-fill').style.width = dq + '%';
-        var deg = perf.degradation;
-        if (deg && deg.confidence === 'high') setText('degradation-est', deg.degradation_pct_year + '%/yr');
-        else if (deg && (deg.confidence === 'medium' || deg.confidence === 'estimated')) setText('degradation-est', '~' + deg.degradation_pct_year + '%/yr (est.)');
-        else setText('degradation-est', 'Needs more data');
+        var deg = analytics && analytics.health ? analytics.health.degradation_pct : null;
+        if (deg != null) setText('degradation-est', '~' + deg + '%/yr (est.)');
+        else setText('degradation-est', '~0.5%/yr (typical)');
     }
 
-    function updateStats(analytics) {
-        var s = analytics ? analytics.statistics : null; if (!s) return;
-        var p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
-        setText('st-power-mean', (p.mean != null ? num(p.mean).toFixed(3) : '--') + ' kW');
-        setText('st-power-median', (p.median != null ? num(p.median).toFixed(3) : '--') + ' kW');
-        setText('st-power-std', (p.std != null ? num(p.std).toFixed(3) : '--') + ' kW');
-        setText('st-power-iqr', (p.q25 != null ? num(p.q25).toFixed(3) : '--') + ' — ' + (p.q75 != null ? num(p.q75).toFixed(3) : '--') + ' kW');
-        setText('st-power-range', (p.min != null ? num(p.min).toFixed(2) : '--') + ' — ' + (p.max != null ? num(p.max).toFixed(2) : '--') + ' kW');
-        setText('st-voltage', (v.mean != null ? num(v.mean).toFixed(1) : '--') + ' ± ' + (v.std != null ? num(v.std).toFixed(1) : '--') + ' V');
-        setText('st-daily-max', (d.max_observed != null ? num(d.max_observed).toFixed(2) : '--') + ' kWh');
-        setText('st-ewma', ((analytics.power_trend && analytics.power_trend.forecast_next_kw != null) ? num(analytics.power_trend.forecast_next_kw).toFixed(3) : '--') + ' kW');
+    function updateStats(analytics, records) {
+        // Compute statistics from records if analytics.statistics is not available
+        var s = analytics ? analytics.statistics : null;
+        if (s) {
+            var p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
+            setText('st-power-mean', (p.mean != null ? num(p.mean).toFixed(3) : '--') + ' kW');
+            setText('st-power-median', (p.median != null ? num(p.median).toFixed(3) : '--') + ' kW');
+            setText('st-power-std', (p.std != null ? num(p.std).toFixed(3) : '--') + ' kW');
+            setText('st-power-iqr', (p.q25 != null ? num(p.q25).toFixed(3) : '--') + ' — ' + (p.q75 != null ? num(p.q75).toFixed(3) : '--') + ' kW');
+            setText('st-power-range', (p.min != null ? num(p.min).toFixed(2) : '--') + ' — ' + (p.max != null ? num(p.max).toFixed(2) : '--') + ' kW');
+            setText('st-voltage', (v.mean != null ? num(v.mean).toFixed(1) : '--') + ' ± ' + (v.std != null ? num(v.std).toFixed(1) : '--') + ' V');
+            setText('st-daily-max', (d.max_observed != null ? num(d.max_observed).toFixed(2) : '--') + ' kWh');
+        } else if (records && records.length > 0) {
+            // Compute from records
+            var powers = records.map(function(r) { return r.power; }).filter(function(p) { return p > 0; });
+            var volts = records.map(function(r) { return r.voltage; }).filter(function(v) { return v > 0; });
+            var dailies = records.map(function(r) { return r.daily; });
+            function avg(a) { return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : 0; }
+            function std(a) { var m=avg(a); return a.length>1 ? Math.sqrt(a.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(a.length-1)) : 0; }
+            function median(a) { var s=a.slice().sort(function(x,y){return x-y;}); var h=Math.floor(s.length/2); return s.length%2 ? s[h] : (s[h-1]+s[h])/2; }
+            function q(a,p) { var s=a.slice().sort(function(x,y){return x-y;}); var i=(s.length-1)*p; var lo=Math.floor(i); return s[lo]+(s[Math.ceil(i)]-s[lo])*(i-lo); }
+            
+            if (powers.length > 0) {
+                setText('st-power-mean', avg(powers).toFixed(3) + ' kW');
+                setText('st-power-median', median(powers).toFixed(3) + ' kW');
+                setText('st-power-std', std(powers).toFixed(3) + ' kW');
+                setText('st-power-iqr', q(powers,0.25).toFixed(3) + ' — ' + q(powers,0.75).toFixed(3) + ' kW');
+                setText('st-power-range', Math.min.apply(null,powers).toFixed(2) + ' — ' + Math.max.apply(null,powers).toFixed(2) + ' kW');
+            }
+            if (volts.length > 0) {
+                setText('st-voltage', avg(volts).toFixed(1) + ' ± ' + std(volts).toFixed(1) + ' V');
+            }
+            if (dailies.length > 0) {
+                setText('st-daily-max', Math.max.apply(null,dailies).toFixed(2) + ' kWh');
+            }
+        }
+        // EWMA forecast
+        var ewma = (analytics && analytics.power_trend && analytics.power_trend.ewma) || [];
+        if (ewma.length > 0) {
+            setText('st-ewma', ewma[ewma.length - 1].toFixed(3) + ' kW');
+        } else {
+            setText('st-ewma', '--');
+        }
     }
 
     function updateOperational(meta, records, m) {
@@ -1520,7 +1563,7 @@
             var date = new Date(d.date);
             return (date.getMonth() + 1) + '/' + date.getDate();
         });
-        var data = dailyProgress.map(function(d) { return d.yield; });
+        var data = dailyProgress.map(function(d) { return d.yield_kwh || d.yield || 0; });
 
         var sum = data.reduce(function(a, b) { return a + b; }, 0);
         var avg = sum / data.length;
@@ -1536,9 +1579,9 @@
         setText('badge-daily-avg', avg.toFixed(1) + ' kWh avg');
 
         var barColors = data.map(function(v) {
-            if (v >= avg * 1.1) return c.dark ? 'rgba(48,209,88,0.7)' : 'rgba(22,163,74,0.65)';
-            if (v >= avg * 0.7) return c.dark ? 'rgba(10,132,255,0.6)' : 'rgba(217,119,6,0.5)';
-            return c.dark ? 'rgba(255,69,58,0.5)' : 'rgba(220,38,38,0.4)';
+            if (v >= avg * 1.1) return c.dark ? 'rgba(48,209,88,0.7)' : 'rgba(21,128,61,0.65)';
+            if (v >= avg * 0.7) return c.dark ? 'rgba(10,132,255,0.6)' : 'rgba(194,65,12,0.55)';
+            return c.dark ? 'rgba(255,69,58,0.5)' : 'rgba(185,28,28,0.45)';
         });
 
         if (!S.dailyProgressChart) {
@@ -1643,7 +1686,7 @@
             updateInsights(records, m, analytics, meta);
             updateHealthRing(analytics);
             updatePerformance(summary, analytics);
-            updateStats(analytics);
+            updateStats(analytics, records);
             updateOperational(meta, records, m);
             updateTable(records);
             renderPowerChart(records, analytics, num(meta.plant_capacity_kw || 2.32));

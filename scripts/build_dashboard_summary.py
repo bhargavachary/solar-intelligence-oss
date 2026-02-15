@@ -56,11 +56,24 @@ def get_latest_reading(energy_logs):
         return None
     
     latest = records[-1]
+    
+    # Compute true monthly total from all logs in the same month
+    latest_date = latest_log.get("date", "")
+    latest_month = latest_date[:7]  # "YYYY-MM"
+    computed_monthly = sum(
+        log.get("daily_summary", {}).get("total_yield_kwh", 0)
+        for log in energy_logs
+        if log.get("date", "")[:7] == latest_month
+    )
+    # Use the larger of computed or portal-reported monthly
+    portal_monthly = latest.get("monthly_yield_kwh", 0)
+    monthly_val = max(computed_monthly, portal_monthly)
+    
     return {
         "timestamp": latest.get("timestamp"),
         "power_kw": latest.get("current_power_kw", 0),
         "daily_yield_kwh": latest.get("daily_yield_kwh", 0),
-        "monthly_yield_kwh": latest.get("monthly_yield_kwh", 0),
+        "monthly_yield_kwh": round(monthly_val, 1),
         "total_yield_kwh": latest.get("total_yield_kwh", 0),
         "income_inr": latest.get("income_inr", 0),
         "voltage_v": latest.get("voltage_v", 0),
@@ -229,6 +242,54 @@ def compute_analytics(energy_logs):
     annual_kwh = sum(monthly_kwh)
     current_month_kwh = monthly_kwh[1]  # February (index 1)
     
+    # ── Compute detailed statistics from all hourly records ──
+    all_powers = []
+    all_voltages = []
+    all_daily_yields = []
+    for log in energy_logs:
+        records = log.get("records", [])
+        for r in records:
+            pw = r.get("current_power_kw", 0)
+            vt = r.get("voltage_v", 0)
+            if pw > 0:
+                all_powers.append(pw)
+            if vt > 0:
+                all_voltages.append(vt)
+        ds = log.get("daily_summary", {})
+        dy = ds.get("total_yield_kwh", 0)
+        if dy > 0:
+            all_daily_yields.append(dy)
+    
+    import statistics as st_mod
+    def q_val(arr, p):
+        s = sorted(arr)
+        i = (len(s) - 1) * p
+        lo = int(i)
+        hi = min(lo + 1, len(s) - 1)
+        return s[lo] + (s[hi] - s[lo]) * (i - lo)
+    
+    stats_block = {}
+    if all_powers:
+        stats_block["power"] = {
+            "mean": round(st_mod.mean(all_powers), 4),
+            "median": round(st_mod.median(all_powers), 4),
+            "std": round(st_mod.pstdev(all_powers), 4),
+            "q25": round(q_val(all_powers, 0.25), 4),
+            "q75": round(q_val(all_powers, 0.75), 4),
+            "min": round(min(all_powers), 4),
+            "max": round(max(all_powers), 4),
+        }
+    if all_voltages:
+        stats_block["voltage"] = {
+            "mean": round(st_mod.mean(all_voltages), 1),
+            "std": round(st_mod.pstdev(all_voltages), 1),
+        }
+    if all_daily_yields:
+        stats_block["daily_yield"] = {
+            "max_observed": round(max(all_daily_yields), 2),
+            "expected_today": round(st_mod.mean(all_daily_yields), 2),
+        }
+    
     return {
         "health": {
             "overall_score": round(health_score, 1),
@@ -244,6 +305,7 @@ def compute_analytics(energy_logs):
         },
         "capacity_factor_pct": round(capacity_factor, 1),
         "performance_ratio_pct": round(performance_ratio, 1),
+        "statistics": stats_block,
         "daily_progress": daily_progress,
         "power_trend": {
             "ewma": ewma[-min(20, len(ewma)):] if ewma else [],  # Last 20 points
