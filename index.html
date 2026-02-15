@@ -131,8 +131,9 @@
             font-size: 12px; font-weight: 600; color: var(--text-secondary);
             text-decoration: none; padding: 6px 12px;
             border-radius: 8px; transition: all 0.2s;
+            border: 1px solid var(--separator);
         }
-        .header-link:hover { color: var(--accent); background: var(--accent-light); }
+        .header-link:hover { color: var(--accent); background: var(--accent-light); border-color: var(--accent); }
         .header-meta { display: flex; align-items: center; gap: 10px; }
         .status-dot {
             width: 10px; height: 10px; border-radius: 50%;
@@ -196,9 +197,9 @@
         /* ═══════════════════════════════════════
            KPI HERO CARDS
            ═══════════════════════════════════════ */
-        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-        @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 700px) { .kpi-grid { grid-template-columns: 1fr; } }
         .kpi {
             background: var(--surface);
             backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
@@ -504,7 +505,7 @@
             .header-subtitle { font-size: 11px; }
             .header-nav { gap: 6px; }
             .header-link { font-size: 11px; padding: 4px 8px; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-grid { grid-template-columns: 1fr; gap: 8px; }
             .kpi { padding: 14px; }
             .kpi-icon { width: 32px; height: 32px; font-size: 16px; margin-bottom: 10px; }
             .kpi-value { font-size: 24px; }
@@ -697,9 +698,9 @@
                     <span>🌍</span>
                     <span><strong>Location Comparison (2.32 kW system):</strong><br>
                     <strong>Berhampur</strong> (You): <span id="berhampur-annual">2,550</span> kWh/yr · Humid coastal<br>
-                    <strong>Jaipur</strong>: ~3,200 kWh/yr · Sunny year-round<br>
-                    <strong>Nagpur</strong>: ~2,900 kWh/yr · Dry, minimal rain<br>
-                    <strong>Bengaluru</strong>: ~2,400 kWh/yr · Cloud cover, pleasant climate</span>
+                    <strong>Jaipur</strong>: <span id="jaipur-annual">--</span> kWh/yr · Sunny year-round<br>
+                    <strong>Nagpur</strong>: <span id="nagpur-annual">--</span> kWh/yr · Dry, minimal rain<br>
+                    <strong>Bengaluru</strong>: <span id="bengaluru-annual">--</span> kWh/yr · Cloud cover, pleasant climate</span>
                 </div>
             </div>
         </div>
@@ -989,12 +990,10 @@
     </div>
 
     <footer class="footer">
-        Solar Intelligence v5.1 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
+        Solar Intelligence v5.1 · Maintained with Love by Bhargav and Copilot<br>
         <span style="font-size:11px">
-            <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
-            Plant: <span id="footer-plant">--</span> ·
-            Data: <span id="footer-source" style="font-weight:600">--</span>
+            Last Updated: <span id="footer-last-updated" style="font-weight:600">--</span>
         </span><br>
         <span id="renewable-quote" style="font-size:10px;opacity:0.8;font-style:italic;margin-top:4px;display:block">🌱 Proud to make the world greener, one kWh at a time</span>
     </footer>
@@ -1466,7 +1465,6 @@
         setText('op-temp', op && op.temperature > 0 ? op.temperature.toFixed(1) + ' °C' : '--');
         setText('op-samples', records.length);
         setText('op-location', meta.location || 'Berhampur, Odisha');
-        setText('footer-plant', (l ? l.plant_id : null) || meta.plant_id || '--');
         var vBadge = op && op.voltage > 0 ? op.voltage.toFixed(0) + 'V · ' + op.current.toFixed(1) + 'A' : '--';
         setText('badge-voltage', vBadge);
         setText('badge-records', records.length + ' records');
@@ -1696,8 +1694,17 @@
             setText('annual-optimistic', Math.round(forecast.annualRange.optimistic).toLocaleString());
         }
         
-        // Update location comparison with Berhampur expected value
-        setText('berhampur-annual', Math.round(forecast.annual).toLocaleString());
+        // Update location comparison with Berhampur as baseline
+        var berhampur = Math.round(forecast.annual);
+        setText('berhampur-annual', berhampur.toLocaleString());
+        
+        // Calculate other locations using multipliers (relative to Berhampur baseline)
+        // Jaipur: 25% more (sunny, low humidity)
+        // Nagpur: 14% more (dry, less monsoon impact)
+        // Bengaluru: 6% less (more cloud cover)
+        setText('jaipur-annual', Math.round(berhampur * 1.25).toLocaleString());
+        setText('nagpur-annual', Math.round(berhampur * 1.14).toLocaleString());
+        setText('bengaluru-annual', Math.round(berhampur * 0.94).toLocaleString());
         
         var q1 = forecast.monthly[0] + forecast.monthly[1] + forecast.monthly[2];
         var q2 = forecast.monthly[3] + forecast.monthly[4] + forecast.monthly[5];
@@ -1768,6 +1775,18 @@
             if (analytics && analytics.production_monitoring) renderProductionAlerts(analytics.production_monitoring);
             if (forecast) renderAnnualProjection(forecast);
             updateSolarBankFlow(records, meta, forecast);
+            
+            // Update footer with last updated timestamp
+            var lastUpdated = meta && meta.last_updated ? meta.last_updated : (d.live && d.live.timestamp ? d.live.timestamp : null);
+            if (lastUpdated) {
+                var dt = parseTs(lastUpdated);
+                if (dt) {
+                    setText('footer-last-updated', dt.toLocaleString('en-IN', { 
+                        month: 'short', day: 'numeric', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit' 
+                    }));
+                }
+            }
         })
         .catch(function(err) {
             console.error('Refresh error:', err);
