@@ -314,6 +314,130 @@
         }
         .footer a { color: var(--text-secondary); text-decoration: none; }
         .footer a:hover { color: var(--accent); }
+
+        /* ═══════════════════════════════════════
+           SOLAR BANK & TARIFF SECTION
+           ═══════════════════════════════════════ */
+        .sb-flow {
+            display: flex; align-items: center; justify-content: center; gap: 0;
+            flex-wrap: wrap; padding: 8px 0 20px;
+        }
+        .sb-node {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 14px 18px; border-radius: var(--radius-xs);
+            background: var(--surface-secondary); min-width: 100px; text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .sb-node:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .sb-node-icon { font-size: 28px; margin-bottom: 6px; }
+        .sb-node-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+        .sb-node-value { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-top: 2px; }
+        .sb-arrow {
+            font-size: 22px; color: var(--text-tertiary); padding: 0 6px;
+            animation: arrowPulse 2s infinite;
+        }
+        @keyframes arrowPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+        @media (max-width: 700px) {
+            .sb-flow { gap: 8px; }
+            .sb-arrow { transform: rotate(90deg); padding: 4px 0; }
+        }
+
+        .bill-compare {
+            display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch;
+            border-radius: var(--radius-xs); overflow: hidden;
+            border: 1px solid var(--separator);
+        }
+        @media (max-width: 700px) { .bill-compare { grid-template-columns: 1fr; } .bill-vs { border-left: none !important; border-right: none !important; border-top: 1px solid var(--separator); border-bottom: 1px solid var(--separator); } }
+        .bill-col {
+            padding: 20px; background: var(--surface-secondary);
+        }
+        .bill-col.solar { background: var(--green-bg); }
+        .bill-col-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 14px;
+        }
+        .bill-col.solar .bill-col-title { color: var(--green); }
+        .bill-line {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; font-size: 13px; color: var(--text-primary);
+        }
+        .bill-line-label { color: var(--text-secondary); }
+        .bill-line-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .bill-total {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding: 12px 0 0; margin-top: 10px;
+            border-top: 2px solid var(--separator); font-size: 15px; font-weight: 800;
+        }
+        .bill-vs {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 20px 16px;
+            border-left: 1px solid var(--separator);
+            border-right: 1px solid var(--separator);
+            background: var(--surface); text-align: center;
+        }
+        .bill-vs-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+        .bill-vs-amount { font-size: 28px; font-weight: 900; color: var(--green); letter-spacing: -0.02em; }
+        .bill-vs-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+        .tariff-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+        .tariff-table th {
+            background: var(--surface-secondary); color: var(--text-secondary);
+            font-weight: 600; font-size: 10px; text-transform: uppercase;
+            letter-spacing: 0.08em; padding: 10px 12px; text-align: left;
+            border-bottom: 1px solid var(--separator);
+        }
+        .tariff-table td { padding: 10px 12px; border-bottom: 1px solid var(--separator); }
+        .tariff-table tr:hover td { background: var(--accent-light); }
+        .tariff-slab-bar {
+            height: 6px; border-radius: 3px; margin-top: 4px;
+            transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .roi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            margin-top: 16px;
+        }
+        @media (max-width: 900px) { .roi-grid { grid-template-columns: repeat(2, 1fr); } }
+        .roi-stat {
+            text-align: center; padding: 16px 10px;
+            background: var(--surface-secondary); border-radius: var(--radius-xs);
+            transition: transform 0.2s;
+        }
+        .roi-stat:hover { transform: translateY(-2px); }
+        .roi-stat-value { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; }
+        .roi-stat-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .roi-stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+        .sb-info-row {
+            display: flex; gap: 12px; padding: 14px;
+            border-radius: var(--radius-xs); background: var(--surface-secondary);
+            margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: var(--text-primary);
+            transition: background 0.2s;
+        }
+        .sb-info-row:hover { background: var(--accent-light); }
+        .sb-info-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+        .calc-input-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: var(--surface-secondary);
+            border-radius: var(--radius-xs); margin-bottom: 12px;
+        }
+        .calc-input-row label { font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+        .calc-input-row input[type="range"] {
+            flex: 1; -webkit-appearance: none; appearance: none;
+            height: 6px; border-radius: 3px; background: var(--separator);
+            outline: none;
+        }
+        .calc-input-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--accent); cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .calc-input-row .calc-val {
+            font-size: 18px; font-weight: 800; min-width: 70px;
+            text-align: right; color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -525,6 +649,159 @@
         </div>
     </div>
 
+    <!-- ═══ SECTION: TPSODL NET METERING / SOLAR BANK ═══ -->
+    <div class="section-label">TPSODL Net Metering · Solar Bank</div>
+
+    <!-- How Solar Bank Works -->
+    <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+            <span class="card-title">🏦 How the Solar Bank Works</span>
+            <span class="card-badge" style="background:var(--green-bg);color:var(--green)">Net Metering</span>
+        </div>
+        <div class="sb-flow">
+            <div class="sb-node">
+                <div class="sb-node-icon">☀️</div>
+                <div class="sb-node-label">Solar Panels</div>
+                <div class="sb-node-value" id="sb-generation">-- kWh</div>
+            </div>
+            <div class="sb-arrow">→</div>
+            <div class="sb-node">
+                <div class="sb-node-icon">🏠</div>
+                <div class="sb-node-label">Self Use</div>
+                <div class="sb-node-value" id="sb-self-use">~60%</div>
+            </div>
+            <div class="sb-arrow">→</div>
+            <div class="sb-node" style="border:1.5px solid var(--green)">
+                <div class="sb-node-icon">🏦</div>
+                <div class="sb-node-label">Solar Bank</div>
+                <div class="sb-node-value" id="sb-banked">-- kWh</div>
+            </div>
+            <div class="sb-arrow">→</div>
+            <div class="sb-node">
+                <div class="sb-node-icon">🌙</div>
+                <div class="sb-node-label">Night Use</div>
+                <div class="sb-node-value" id="sb-night">~40%</div>
+            </div>
+            <div class="sb-arrow">→</div>
+            <div class="sb-node">
+                <div class="sb-node-icon">📋</div>
+                <div class="sb-node-label">Net Bill</div>
+                <div class="sb-node-value" style="color:var(--green)" id="sb-net">≈ ₹0</div>
+            </div>
+        </div>
+        <div style="padding:0 4px">
+            <div class="sb-info-row"><span class="sb-info-icon">📥</span><span><strong>Banking:</strong> Surplus solar units exported to TPSODL grid are credited to your account — like depositing electricity into a bank.</span></div>
+            <div class="sb-info-row"><span class="sb-info-icon">📤</span><span><strong>Settlement:</strong> Night-time consumption first draws from banked units. You pay only for the <em>net</em> difference (Import − Export).</span></div>
+            <div class="sb-info-row"><span class="sb-info-icon">🔄</span><span><strong>Carry Forward:</strong> Surplus units carry over month-to-month. Annual settlement (March 31) pays remaining surplus at <strong>₹3.28/unit</strong> (APPC rate FY 24-25).</span></div>
+        </div>
+    </div>
+
+    <!-- Bill Calculator + Tariff -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">💡 Monthly Bill Calculator</span>
+                <span class="card-badge" id="calc-badge">250 units</span>
+            </div>
+            <div class="calc-input-row">
+                <label>Monthly Usage</label>
+                <input type="range" id="calc-slider" min="50" max="600" step="10" value="250">
+                <div class="calc-val"><span id="calc-units">250</span> <span style="font-size:11px;color:var(--text-secondary)">units</span></div>
+            </div>
+            <div class="bill-compare" id="bill-compare">
+                <div class="bill-col">
+                    <div class="bill-col-title">❌ Without Solar</div>
+                    <div class="bill-line"><span class="bill-line-label">Energy (slab-wise)</span><span class="bill-line-val" id="bc-energy-nosolar">₹1,160</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Fixed Charge (2kW)</span><span class="bill-line-val">₹40</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Meter Rent (Smart)</span><span class="bill-line-val">₹60</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Elec. Duty (4%)</span><span class="bill-line-val" id="bc-duty-nosolar">~₹50</span></div>
+                    <div class="bill-total"><span>Total</span><span style="color:var(--red)" id="bc-total-nosolar">₹1,310</span></div>
+                </div>
+                <div class="bill-vs">
+                    <div class="bill-vs-label">You Save</div>
+                    <div class="bill-vs-amount" id="bc-savings">₹1,206</div>
+                    <div class="bill-vs-sub" id="bc-savings-pct">92% less</div>
+                </div>
+                <div class="bill-col solar">
+                    <div class="bill-col-title">✅ With Solar (Net Zero)</div>
+                    <div class="bill-line"><span class="bill-line-label">Energy (net units)</span><span class="bill-line-val" style="color:var(--green)" id="bc-energy-solar">₹0</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Fixed Charge (2kW)</span><span class="bill-line-val">₹40</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Meter Rent (Smart)</span><span class="bill-line-val">₹60</span></div>
+                    <div class="bill-line"><span class="bill-line-label">Elec. Duty (4%)</span><span class="bill-line-val" id="bc-duty-solar">~₹4</span></div>
+                    <div class="bill-total"><span>Total</span><span style="color:var(--green)" id="bc-total-solar">₹104</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📊 TPSODL Tariff Slabs</span>
+                <span class="card-badge">FY 2024-25</span>
+            </div>
+            <table class="tariff-table">
+                <thead><tr><th>Slab</th><th>Units</th><th>Rate</th><th style="text-align:right">Your Cost</th></tr></thead>
+                <tbody id="tariff-body">
+                    <tr><td>Slab 1</td><td>0 – 50</td><td>₹3.00</td><td style="text-align:right;font-weight:700" id="ts1">₹150</td></tr>
+                    <tr><td>Slab 2</td><td>51 – 200</td><td>₹4.80</td><td style="text-align:right;font-weight:700" id="ts2">₹720</td></tr>
+                    <tr><td>Slab 3</td><td>201 – 400</td><td>₹5.80</td><td style="text-align:right;font-weight:700" id="ts3">₹290</td></tr>
+                    <tr><td>Slab 4</td><td>401+</td><td>₹6.20</td><td style="text-align:right;font-weight:700" id="ts4">₹0</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight:800;border-top:2px solid var(--separator)">
+                        <td colspan="3">Total Energy Charge</td>
+                        <td style="text-align:right;color:var(--accent)" id="ts-total">₹1,160</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div style="margin-top:16px">
+                <div class="sb-info-row" style="margin-bottom:0">
+                    <span class="sb-info-icon">💡</span>
+                    <span style="font-size:12px"><strong>Fixed charges:</strong> ₹20/kW/month (₹40 for 2kW) + ₹60 smart meter rent = <strong>₹100 minimum bill</strong> even at net-zero consumption. Electricity Duty 4% applies on total.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROI & Payback -->
+    <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+            <span class="card-title">💰 Return on Investment</span>
+            <span class="card-badge" id="roi-plant-size">2.32 kW System</span>
+        </div>
+        <div class="roi-grid" id="roi-grid">
+            <div class="roi-stat">
+                <div class="roi-stat-value" style="color:var(--green)" id="roi-annual-save">₹14.5K</div>
+                <div class="roi-stat-label">Annual Savings</div>
+                <div class="roi-stat-sub" id="roi-annual-sub">@ 250 units/mo</div>
+            </div>
+            <div class="roi-stat">
+                <div class="roi-stat-value" style="color:var(--accent)" id="roi-payback">~7 yrs</div>
+                <div class="roi-stat-label">Payback Period</div>
+                <div class="roi-stat-sub" id="roi-payback-sub">System cost ~₹1.2L after subsidy</div>
+            </div>
+            <div class="roi-stat">
+                <div class="roi-stat-value" style="color:var(--purple)" id="roi-lifetime-save">₹3.6L</div>
+                <div class="roi-stat-label">25-Year Savings</div>
+                <div class="roi-stat-sub">Panel lifetime value</div>
+            </div>
+            <div class="roi-stat">
+                <div class="roi-stat-value" style="color:var(--cyan)" id="roi-free-years">18 yrs</div>
+                <div class="roi-stat-label">Free Electricity</div>
+                <div class="roi-stat-sub">After payback</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+            <div class="sb-info-row" style="margin-bottom:0">
+                <span class="sb-info-icon">🏛️</span>
+                <span style="font-size:12px"><strong>PM Surya Ghar Subsidy:</strong> ₹30,000/kW for first 2kW + ₹18,000/kW for 2-3kW. A 2.5kW system gets ~<strong>₹69,000</strong> subsidy, reducing cost from ~₹1.75L to ~₹1.06L.</span>
+            </div>
+            <div class="sb-info-row" style="margin-bottom:0">
+                <span class="sb-info-icon">📈</span>
+                <span style="font-size:12px"><strong>Tariff Escalation:</strong> Electricity prices rise ~5% yearly. At current rates, your savings grow each year. 25-year cumulative savings can exceed <strong>₹5 Lakhs</strong> with tariff inflation.</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══ SECTION: DATA & ANALYTICS ═══ -->
     <div class="section-label">Data &amp; Analytics</div>
 
@@ -562,7 +839,7 @@
     </div>
 
     <footer class="footer">
-        Solar Intelligence v4.2 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
+        Solar Intelligence v4.3 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
         <span style="font-size:11px">
             <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
@@ -1159,6 +1436,7 @@
             if (analytics && analytics.daily_progress) renderDailyProgressChart(analytics.daily_progress);
             if (analytics && analytics.production_monitoring) renderProductionAlerts(analytics.production_monitoring);
             if (forecast) renderAnnualProjection(forecast);
+            updateSolarBankFlow(records, meta);
         })
         .catch(function(err) {
             console.error('Refresh error:', err);
@@ -1169,6 +1447,104 @@
                 insights.innerHTML = '<div class="empty-state"><h2>No Data Available</h2><p>Waiting for solar telemetry data.</p></div>';
             }
         });
+    }
+
+    // ══════════════════════════════
+    // TPSODL BILL CALCULATOR
+    // ══════════════════════════════
+    function calcTariff(units) {
+        var s1 = Math.min(units, 50) * 3.00;
+        var s2 = Math.min(Math.max(units - 50, 0), 150) * 4.80;
+        var s3 = Math.min(Math.max(units - 200, 0), 200) * 5.80;
+        var s4 = Math.max(units - 400, 0) * 6.20;
+        return { s1: s1, s2: s2, s3: s3, s4: s4, total: s1 + s2 + s3 + s4 };
+    }
+
+    function updateBillCalc(units) {
+        var t = calcTariff(units);
+        var fixedCharge = 40;
+        var meterRent = 60;
+        var energyNoSolar = t.total;
+        var baseNoSolar = energyNoSolar + fixedCharge + meterRent;
+        var dutyNoSolar = Math.round(baseNoSolar * 0.04);
+        var totalNoSolar = baseNoSolar + dutyNoSolar;
+
+        // With solar: net units = 0 (system matches consumption)
+        var baseSolar = 0 + fixedCharge + meterRent;
+        var dutySolar = Math.round(baseSolar * 0.04);
+        var totalSolar = baseSolar + dutySolar;
+
+        var savings = totalNoSolar - totalSolar;
+        var savingsPct = Math.round((savings / totalNoSolar) * 100);
+
+        // Update tariff slab table
+        setText('ts1', '₹' + Math.round(t.s1).toLocaleString('en-IN'));
+        setText('ts2', '₹' + Math.round(t.s2).toLocaleString('en-IN'));
+        setText('ts3', '₹' + Math.round(t.s3).toLocaleString('en-IN'));
+        setText('ts4', '₹' + Math.round(t.s4).toLocaleString('en-IN'));
+        setText('ts-total', '₹' + Math.round(t.total).toLocaleString('en-IN'));
+
+        // Update bill comparison
+        setText('bc-energy-nosolar', '₹' + Math.round(energyNoSolar).toLocaleString('en-IN'));
+        setText('bc-duty-nosolar', '~₹' + dutyNoSolar);
+        setText('bc-total-nosolar', '₹' + Math.round(totalNoSolar).toLocaleString('en-IN'));
+        setText('bc-energy-solar', '₹0');
+        setText('bc-duty-solar', '~₹' + dutySolar);
+        setText('bc-total-solar', '₹' + Math.round(totalSolar).toLocaleString('en-IN'));
+        setText('bc-savings', '₹' + Math.round(savings).toLocaleString('en-IN'));
+        setText('bc-savings-pct', savingsPct + '% less');
+
+        // Update ROI
+        var annualSave = savings * 12;
+        var systemCostPerKw = 50000;  // after subsidy per kW approx
+        var plantKw = 2.32;  // default, updated later
+        try { plantKw = num(document.getElementById('kpi-cap').textContent) || 2.32; } catch(e) {}
+        var subsidyFirst2 = Math.min(plantKw, 2) * 30000;
+        var subsidyRest = Math.max(plantKw - 2, 0) * 18000;
+        var totalSubsidy = subsidyFirst2 + subsidyRest;
+        var grossCost = plantKw * 70000;  // ~₹70K/kW gross
+        var netCost = grossCost - totalSubsidy;
+        var paybackYears = annualSave > 0 ? (netCost / annualSave) : 25;
+        var freeYears = Math.max(0, Math.round(25 - paybackYears));
+        var lifetimeSave = annualSave * 25;
+
+        setText('roi-annual-save', fmtMoney(annualSave));
+        setText('roi-annual-sub', '@ ' + units + ' units/mo');
+        setText('roi-payback', '~' + Math.round(paybackYears) + ' yrs');
+        setText('roi-payback-sub', 'Cost ~' + fmtMoney(netCost) + ' after subsidy');
+        setText('roi-lifetime-save', fmtMoney(lifetimeSave));
+        setText('roi-free-years', freeYears + ' yrs');
+        setText('roi-plant-size', plantKw.toFixed(2) + ' kW System');
+        setText('calc-badge', units + ' units');
+    }
+
+    function updateSolarBankFlow(records, meta) {
+        // Use actual daily yield data to populate the Solar Bank flow
+        var dailies = records.map(function(r) { return r.daily; }).filter(function(d) { return d > 0; });
+        var avgDaily = dailies.length > 0 ? dailies.reduce(function(a,b){return a+b;},0) / dailies.length : 8;
+        var monthlyGen = Math.round(avgDaily * 30);
+        var selfUsePct = 60;
+        var selfUse = Math.round(monthlyGen * selfUsePct / 100);
+        var exported = monthlyGen - selfUse;
+        var nightUse = exported;  // net-zero scenario: night draw equals export
+        var netBill = 0;  // net-zero
+
+        setText('sb-generation', monthlyGen + ' kWh');
+        setText('sb-self-use', selfUsePct + '% · ' + selfUse + ' kWh');
+        setText('sb-banked', exported + ' kWh');
+        setText('sb-night', (100 - selfUsePct) + '% · ' + nightUse + ' kWh');
+        setText('sb-net', netBill === 0 ? '≈ ₹0' : '₹' + netBill);
+    }
+
+    // Wire up slider
+    var calcSlider = document.getElementById('calc-slider');
+    if (calcSlider) {
+        calcSlider.addEventListener('input', function() {
+            var units = parseInt(this.value, 10);
+            setText('calc-units', units);
+            updateBillCalc(units);
+        });
+        updateBillCalc(250);  // initial
     }
 
     // ══════════════════════════════
