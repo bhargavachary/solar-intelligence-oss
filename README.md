@@ -39,19 +39,22 @@
 
 ```
 waaree_api_access/
-├── index.html                    # Self-contained dashboard (HTML + CSS + JS)
+├── index.html                    # Dashboard (HTML + CSS + JS, schema v5.0)
 ├── data/
-│   └── dashboard_data.json       # Solar telemetry + analytics payload
+│   ├── dashboard_data.json       # Lightweight summary (~1.3 KB)
+│   └── energy_logs/              # Immutable daily logs (source of truth)
+│       ├── solar_energy_2026-02-15.json
+│       └── ...
 ├── scripts/
-│   ├── generate_data.py          # Bell-curve solar data generator
-│   └── update_data.py            # CI/CD pipeline orchestrator
+│   ├── archive_daily_data.py     # Create immutable daily energy logs
+│   ├── build_dashboard_summary.py # Aggregate logs → dashboard
+│   ├── update_data.py            # Integrated pipeline (scrape → log → build)
+│   └── waaree_deep_crawler.py    # Live portal scraper
 ├── solar_analytics.py            # Pure Python ML analytics engine
-├── .github/
-│   └── workflows/
-│       └── update-data.yml       # Scheduled data refresh (3×/day)
-├── assets/
-│   └── screenshot.png            # Dashboard preview
-└── README.md
+├── docs/
+│   └── DATA_MANAGEMENT.md        # Data architecture guide
+└── .github/workflows/
+    └── update-data.yml           # Scheduled pipeline (3×/day)
 ```
 
 ## 🚀 Quick Start

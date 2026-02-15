@@ -23,35 +23,35 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parent.parent
-ARCHIVE_DIR = ROOT / "data" / "archives"
+ENERGY_LOG_DIR = ROOT / "data" / "energy_logs"
 OUTPUT_FILE = ROOT / "data" / "dashboard_data.json"
 
 
-def load_archives():
-    """Load all daily archives and return sorted by date."""
-    if not ARCHIVE_DIR.exists():
-        print("✗ Archive directory not found")
+def load_energy_logs():
+    """Load all daily energy logs and return sorted by date."""
+    if not ENERGY_LOG_DIR.exists():
+        print("✗ Energy log directory not found")
         return []
     
-    archives = []
-    for archive_file in sorted(ARCHIVE_DIR.glob("solar_energy_*.json")):
+    logs = []
+    for log_file in sorted(ENERGY_LOG_DIR.glob("solar_energy_*.json")):
         try:
-            with open(archive_file) as f:
+            with open(log_file) as f:
                 data = json.load(f)
-                archives.append(data)
+                logs.append(data)
         except Exception as e:
-            print(f"⚠️  Failed to load {archive_file.name}: {e}")
+            print(f"⚠️  Failed to load {log_file.name}: {e}")
     
-    return sorted(archives, key=lambda a: a.get("date", ""))
+    return sorted(logs, key=lambda a: a.get("date", ""))
 
 
-def get_latest_reading(archives):
-    """Get the most recent reading from all archives."""
-    if not archives:
+def get_latest_reading(energy_logs):
+    """Get the most recent reading from all energy logs."""
+    if not energy_logs:
         return None
     
-    latest_archive = archives[-1]
-    records = latest_archive.get("records", [])
+    latest_log = energy_logs[-1]
+    records = latest_log.get("records", [])
     if not records:
         return None
     
@@ -70,19 +70,19 @@ def get_latest_reading(archives):
     }
 
 
-def get_last_n_days(archives, n=7):
+def get_last_n_days(energy_logs, n=7):
     """Get summary of last N days."""
-    if not archives:
+    if not energy_logs:
         return []
     
-    # Get last N archives
-    recent = archives[-n:] if len(archives) >= n else archives
+    # Get last N logs
+    recent = energy_logs[-n:] if len(energy_logs) >= n else energy_logs
     
     summary = []
-    for archive in recent:
-        daily_sum = archive.get("daily_summary", {})
+    for log in recent:
+        daily_sum = log.get("daily_summary", {})
         summary.append({
-            "date": archive.get("date"),
+            "date": log.get("date"),
             "yield_kwh": daily_sum.get("total_yield_kwh", 0),
             "peak_power_kw": daily_sum.get("peak_power_kw", 0),
             "avg_power_kw": daily_sum.get("avg_power_kw", 0),
@@ -92,12 +92,12 @@ def get_last_n_days(archives, n=7):
     return summary
 
 
-def aggregate_monthly(archives):
+def aggregate_monthly(energy_logs):
     """Aggregate yields by month."""
     monthly = defaultdict(lambda: {"yield_kwh": 0, "days_active": 0, "peak_power_kw": 0})
     
-    for archive in archives:
-        date = archive.get("date", "")
+    for log in energy_logs:
+        date = log.get("date", "")
         if not date:
             continue
         
@@ -105,7 +105,7 @@ def aggregate_monthly(archives):
         year_month = date[:7]  # YYYY-MM
         month_name = datetime.strptime(date, "%Y-%m-%d").strftime("%B_%Y").lower()
         
-        daily_sum = archive.get("daily_summary", {})
+        daily_sum = log.get("daily_summary", {})
         yield_kwh = daily_sum.get("total_yield_kwh", 0)
         peak_kw = daily_sum.get("peak_power_kw", 0)
         
@@ -116,32 +116,32 @@ def aggregate_monthly(archives):
     return dict(monthly)
 
 
-def compute_analytics(archives):
+def compute_analytics(energy_logs):
     """
     Compute analytics for the dashboard.
     This is a simplified version — can be enriched with solar_analytics.py.
     """
-    if not archives:
+    if not energy_logs:
         return {}
     
-    latest_archive = archives[-1]
-    latest_summary = latest_archive.get("daily_summary", {})
+    latest_log = energy_logs[-1]
+    latest_summary = latest_log.get("daily_summary", {})
     
     # Last 7 days for daily_progress
-    last_7 = get_last_n_days(archives, 7)
+    last_7 = get_last_n_days(energy_logs, 7)
     daily_progress = [
         {"date": d["date"], "yield_kwh": d["yield_kwh"]}
         for d in last_7
     ]
     
     # Compute capacity factor and performance ratio
-    meta = latest_archive.get("meta", {})
+    meta = latest_log.get("meta", {})
     plant_capacity = meta.get("plant_capacity_kw", 2.32)
     
     total_yield = 0
-    total_days = len(archives)
-    for archive in archives:
-        total_yield += archive.get("daily_summary", {}).get("total_yield_kwh", 0)
+    total_days = len(energy_logs)
+    for log in energy_logs:
+        total_yield += log.get("daily_summary", {}).get("total_yield_kwh", 0)
     
     avg_daily_yield = total_yield / total_days if total_days > 0 else 0
     daily_max_theoretical = plant_capacity * 5  # ~5 peak sun hours
@@ -164,37 +164,37 @@ def compute_analytics(archives):
     }
 
 
-def build_summary(archives, verbose=False):
+def build_summary(energy_logs, verbose=False):
     """Build the lightweight dashboard summary."""
-    if not archives:
-        print("✗ No archives found")
+    if not energy_logs:
+        print("✗ No energy logs found")
         return None
     
     if verbose:
-        print(f"📊 Processing {len(archives)} archives...")
+        print(f"📊 Processing {len(energy_logs)} energy logs...")
     
-    # Get first archive for plant metadata
-    first_archive = archives[0]
-    meta = first_archive.get("meta", {})
+    # Get first log for plant metadata
+    first_log = energy_logs[0]
+    meta = first_log.get("meta", {})
     
     summary = {
         "meta": {
             "schema_version": "5.0",
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "plant_id": first_archive.get("plant_id"),
+            "plant_id": first_log.get("plant_id"),
             "plant_capacity_kw": meta.get("plant_capacity_kw", 2.32),
             "location": meta.get("location", "Berhampur, Odisha"),
-            "data_source": "archived",
-            "archive_count": len(archives),
+            "data_source": "energy_logs",
+            "log_count": len(energy_logs),
             "date_range": {
-                "first": archives[0].get("date"),
-                "last": archives[-1].get("date"),
+                "first": energy_logs[0].get("date"),
+                "last": energy_logs[-1].get("date"),
             },
         },
-        "live": get_latest_reading(archives),
-        "last_7_days": get_last_n_days(archives, 7),
-        "monthly": aggregate_monthly(archives),
-        "analytics": compute_analytics(archives),
+        "live": get_latest_reading(energy_logs),
+        "last_7_days": get_last_n_days(energy_logs, 7),
+        "monthly": aggregate_monthly(energy_logs),
+        "analytics": compute_analytics(energy_logs),
     }
     
     return summary
@@ -202,7 +202,7 @@ def build_summary(archives, verbose=False):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Build dashboard summary from archives")
+    parser = argparse.ArgumentParser(description="Build dashboard summary from energy logs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = parser.parse_args()
     
@@ -210,16 +210,16 @@ def main():
     print("📊 Dashboard Summary Builder")
     print("=" * 60)
     
-    archives = load_archives()
+    energy_logs = load_energy_logs()
     
-    if not archives:
-        print("✗ No archives found in data/archives/")
+    if not energy_logs:
+        print("✗ No energy logs found in data/energy_logs/")
         print("  Run: python scripts/archive_daily_data.py --backfill")
         sys.exit(1)
     
-    print(f"📦 Loaded {len(archives)} archives")
+    print(f"📦 Loaded {len(energy_logs)} energy logs")
     
-    summary = build_summary(archives, verbose=args.verbose)
+    summary = build_summary(energy_logs, verbose=args.verbose)
     
     if not summary:
         sys.exit(1)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Daily Data Archiver — Immutable Solar Telemetry Storage
+Daily Energy Logger — Immutable Solar Telemetry Storage
 ========================================================
 Extracts minute/hour-level data for a given date and writes an immutable
-archive file: `solar_energy_<date>.json`
+energy log: `solar_energy_<date>.json`
 
-Archives are the SOURCE OF TRUTH and must never be modified after creation.
+Energy logs are the SOURCE OF TRUTH and must never be modified after creation.
 
 Usage:
-    python scripts/archive_daily_data.py                # archive today
-    python scripts/archive_daily_data.py 2026-02-14    # archive specific date
-    python scripts/archive_daily_data.py --backfill    # archive all dates in current data
+    python scripts/archive_daily_data.py                # log today's data
+    python scripts/archive_daily_data.py 2026-02-14    # log specific date
+    python scripts/archive_daily_data.py --backfill    # log all dates from current data
 """
 import json
 import sys
@@ -21,14 +21,14 @@ from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "dashboard_data.json"
-ARCHIVE_DIR = ROOT / "data" / "archives"
+ENERGY_LOG_DIR = ROOT / "data" / "energy_logs"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Archive daily solar data")
-    parser.add_argument("date", nargs="?", help="Date to archive (YYYY-MM-DD), default: today")
-    parser.add_argument("--backfill", action="store_true", help="Archive all dates in dashboard_data.json")
-    parser.add_argument("--force", action="store_true", help="Overwrite existing archive (use with caution)")
+    parser = argparse.ArgumentParser(description="Create daily energy logs")
+    parser.add_argument("date", nargs="?", help="Date to log (YYYY-MM-DD), default: today")
+    parser.add_argument("--backfill", action="store_true", help="Log all dates in dashboard_data.json")
+    parser.add_argument("--force", action="store_true", help="Overwrite existing log (use with caution)")
     return parser.parse_args()
 
 
@@ -76,18 +76,18 @@ def extract_records_for_date(data, target_date):
     return records_for_date, daily_summary
 
 
-def create_archive(data, target_date, force=False):
+def create_energy_log(data, target_date, force=False):
     """
-    Create an immutable archive file for the given date.
-    Returns True if archive was created, False if skipped.
+    Create an immutable energy log file for the given date.
+    Returns True if log was created, False if skipped.
     """
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    ENERGY_LOG_DIR.mkdir(parents=True, exist_ok=True)
     
-    archive_file = ARCHIVE_DIR / f"solar_energy_{target_date}.json"
+    log_file = ENERGY_LOG_DIR / f"solar_energy_{target_date}.json"
     
-    # Check if archive already exists
-    if archive_file.exists() and not force:
-        print(f"  ⚠️  Archive already exists: {archive_file.name} (use --force to overwrite)")
+    # Check if log already exists
+    if log_file.exists() and not force:
+        print(f"  ⚠️  Energy log already exists: {log_file.name} (use --force to overwrite)")
         return False
     
     # Extract records
@@ -97,15 +97,15 @@ def create_archive(data, target_date, force=False):
         print(f"  ⚠️  No data found for {target_date}")
         return False
     
-    # Build archive structure
+    # Build energy log structure
     meta = data.get("meta", {})
-    archive = {
+    energy_log = {
         "date": target_date,
         "plant_id": meta.get("plant_id"),
         "meta": {
             "plant_capacity_kw": meta.get("plant_capacity_kw"),
             "location": meta.get("location"),
-            "archived_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "logged_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "record_count": len(records),
             "sampling_interval": "hourly",
             "data_source": meta.get("data_source", "live_portal"),
@@ -114,17 +114,17 @@ def create_archive(data, target_date, force=False):
         "records": records
     }
     
-    # Write archive (immutable)
-    with open(archive_file, "w") as f:
-        json.dump(archive, f, indent=2)
+    # Write energy log (immutable)
+    with open(log_file, "w") as f:
+        json.dump(energy_log, f, indent=2)
     
-    size_kb = archive_file.stat().st_size / 1024
-    print(f"  ✅ Created: {archive_file.name} ({size_kb:.1f} KB, {len(records)} records)")
+    size_kb = log_file.stat().st_size / 1024
+    print(f"  ✅ Created: {log_file.name} ({size_kb:.1f} KB, {len(records)} records)")
     return True
 
 
-def backfill_archives(data, force=False):
-    """Archive all dates found in the current dashboard_data.json."""
+def backfill_energy_logs(data, force=False):
+    """Create energy logs for all dates found in the current dashboard_data.json."""
     history = data.get("history", [])
     if not history:
         print("✗ No history records to backfill")
@@ -139,13 +139,13 @@ def backfill_archives(data, force=False):
             dates.add(date)
     
     dates = sorted(dates)
-    print(f"📦 Found {len(dates)} unique dates to archive")
+    print(f"📦 Found {len(dates)} unique dates to log")
     
     created = 0
     skipped = 0
     
     for date in dates:
-        if create_archive(data, date, force):
+        if create_energy_log(data, date, force):
             created += 1
         else:
             skipped += 1
@@ -157,22 +157,22 @@ def main():
     args = parse_args()
     
     print("=" * 60)
-    print("📁 Daily Data Archiver")
+    print("� Daily Energy Logger")
     print("=" * 60)
     
     data = load_dashboard_data()
     
     if args.backfill:
-        backfill_archives(data, args.force)
+        backfill_energy_logs(data, args.force)
     else:
-        # Archive specific date
+        # Log specific date
         if args.date:
             target_date = args.date
         else:
             target_date = datetime.now().strftime("%Y-%m-%d")
         
         print(f"📅 Target date: {target_date}")
-        create_archive(data, target_date, args.force)
+        create_energy_log(data, target_date, args.force)
     
     print("=" * 60)
 

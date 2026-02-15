@@ -203,19 +203,19 @@ def main():
     print("\n═══ Analytics Engine ═══")
     enrich_analytics()
     
-    # Archive today's data (immutable daily snapshot)
-    print("\n═══ Daily Archive ═══")
+    # Log today's data (immutable daily energy log)
+    print("\n═══ Daily Energy Log ═══")
     try:
-        archive_cmd = [sys.executable, str(ROOT / "scripts" / "archive_daily_data.py")]
-        result = subprocess.run(archive_cmd, capture_output=True, text=True, timeout=30)
+        log_cmd = [sys.executable, str(ROOT / "scripts" / "archive_daily_data.py")]
+        result = subprocess.run(log_cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
             for line in (result.stdout or "").strip().split("\n")[-3:]:
                 if line.strip():
                     print(f"  {line}")
         else:
-            print(f"  ⚠️  Archive failed: {result.stderr[:200]}")
+            print(f"  ⚠️  Logging failed: {result.stderr[:200]}")
     except Exception as e:
-        print(f"  ⚠️  Archive error: {e}")
+        print(f"  ⚠️  Logging error: {e}")
     
     # Build lightweight dashboard summary
     print("\n═══ Dashboard Summary ═══")
