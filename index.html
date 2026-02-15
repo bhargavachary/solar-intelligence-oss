@@ -374,14 +374,14 @@
         <div class="kpi">
             <div class="kpi-icon" style="background:var(--purple-bg)">🔋</div>
             <div class="kpi-label">Lifetime Yield</div>
-            <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit">kWh</span></div>
-            <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span></div>
+            <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit" id="kpi-total-unit">MWh</span></div>
+            <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span> <span style="font-size:10px;color:var(--text-tertiary)">@ ₹7/kWh</span></div>
         </div>
         <div class="kpi">
             <div class="kpi-icon" style="background:var(--blue-bg)">🛡️</div>
             <div class="kpi-label">Health Score</div>
             <div class="kpi-value"><span id="kpi-health">--</span><span class="kpi-unit" id="kpi-grade"></span></div>
-            <div class="kpi-detail">Quality: <span id="kpi-quality">--</span>%</div>
+            <div class="kpi-detail">Data Quality: <span id="kpi-quality">--</span>%</div>
         </div>
         <div class="kpi">
             <div class="kpi-icon" style="background:var(--cyan-bg)">📊</div>
@@ -448,7 +448,7 @@
                 </div>
                 <div style="border-top:1px solid var(--separator);padding-top:12px">
                     <div class="stat-row"><span class="stat-label">Expected revenue</span><span class="stat-value">₹<span id="annual-revenue">--</span></span></div>
-                    <div class="stat-row"><span class="stat-label">CO₂ offset</span><span class="stat-value"><span id="annual-co2">--</span> kg</span></div>
+                    <div class="stat-row"><span class="stat-label">CO₂ offset</span><span class="stat-value"><span id="annual-co2">--</span></span></div>
                 </div>
             </div>
         </div>
@@ -562,11 +562,12 @@
     </div>
 
     <footer class="footer">
-        Solar Intelligence v4.1 · Auto-refresh every 10s · Maintained with Love by Bhargav and Copilot<br>
+        Solar Intelligence v4.2 · Auto-refresh every 10 s · Maintained with Love by Bhargav and Copilot<br>
         <span style="font-size:11px">
             <a href="https://github.com/bhargavachary/waaree_api_access">GitHub</a> ·
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
-            Plant: <span id="footer-plant">--</span>
+            Plant: <span id="footer-plant">--</span> ·
+            Data: <span id="footer-source" style="font-weight:600">--</span>
         </span>
     </footer>
 </div>
@@ -645,6 +646,21 @@
     function fmtTime(v) { var d = parseTs(v); return d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--'; }
     function fmtDateTime(v) { var d = parseTs(v); return d ? d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--'; }
     function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+
+    // Smart unit formatting — keep numbers human-readable
+    function fmtEnergy(kwh) {
+        if (kwh >= 1000) return { value: (kwh / 1000).toFixed(2), unit: 'MWh' };
+        return { value: kwh.toFixed(1), unit: 'kWh' };
+    }
+    function fmtMoney(inr) {
+        if (inr >= 100000) return '₹' + (inr / 100000).toFixed(2) + ' L';
+        if (inr >= 1000) return '₹' + (inr / 1000).toFixed(1) + 'K';
+        return '₹' + inr.toLocaleString('en-IN');
+    }
+    function fmtCO2(kg) {
+        if (kg >= 1000) return (kg / 1000).toFixed(1) + ' tonnes';
+        return kg.toFixed(0) + ' kg';
+    }
 
     Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
     Chart.defaults.font.size = 11;
@@ -743,13 +759,16 @@
         setText('kpi-cap', num(meta.plant_capacity_kw || 2.32).toFixed(2));
         setText('kpi-daily', l ? l.daily.toFixed(2) : '--');
         if (l) {
-            setText('kpi-total', l.total.toLocaleString('en-IN', {maximumFractionDigits: 0}));
+            var lt = fmtEnergy(l.total);
+            setText('kpi-total', lt.value);
+            setText('kpi-total-unit', lt.unit);
+            setText('kpi-income', fmtMoney(l.income));
         }
-        setText('kpi-income', l ? l.income.toLocaleString('en-IN', {maximumFractionDigits:0}) : '--');
         var h = (analytics && analytics.health) || {};
         setText('kpi-health', h.score != null ? h.score : '--');
         setText('kpi-grade', h.grade ? ' ' + h.grade : '');
-        setText('kpi-quality', (analytics && analytics.performance) ? analytics.performance.performance_ratio_pct : '--');
+        var dq = (analytics && analytics.health && analytics.health.factors) ? analytics.health.factors.data_quality : null;
+        setText('kpi-quality', dq != null ? Math.round(dq) : '--');
         var pr = (analytics && analytics.performance) ? analytics.performance.performance_ratio_pct : '--';
         setText('kpi-pr', pr);
         var trendEl = document.getElementById('kpi-trend');
@@ -766,9 +785,11 @@
         function ico(emoji, text) { return '<div class="insight-item"><span class="insight-icon">' + emoji + '</span><span>' + text + '</span></div>'; }
         if (!l) { items.push(ico('📭', 'No telemetry records found yet.')); }
         else {
-            var capPct = (l.power / num(2.32) * 100).toFixed(0);
-            items.push(ico('⚡', 'Current output: <strong>' + l.power.toFixed(2) + ' kW</strong> (' + capPct + '% of capacity)'));
-            if (l.daily > 0) items.push(ico('📈', "Today's yield: <strong>" + l.daily.toFixed(2) + ' kWh</strong> — ' + (l.daily / 12 * 100).toFixed(0) + '% of daily target'));
+            var cap = num(meta.plant_capacity_kw || 2.32);
+            var capPct = (l.power / cap * 100).toFixed(0);
+            items.push(ico('⚡', 'Current output: <strong>' + l.power.toFixed(2) + ' kW</strong> (' + capPct + '% of ' + cap.toFixed(2) + ' kW capacity)'));
+            var dailyTarget = num(meta.daily_realistic_max_kwh || 12);
+            if (l.daily > 0) items.push(ico('📈', "Today's yield: <strong>" + l.daily.toFixed(2) + ' kWh</strong> — ' + (l.daily / dailyTarget * 100).toFixed(0) + '% of ' + dailyTarget.toFixed(0) + ' kWh target'));
             if (l.weather) items.push(ico('🌤️', 'Weather: <strong>' + l.weather + '</strong>'));
             var trend = analytics ? analytics.power_trend : null;
             if (trend && trend.direction === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> (slope: +' + trend.slope_kw_per_sample + ' kW/sample, R²=' + trend.r_squared + ')'));
@@ -820,26 +841,27 @@
         var cf = perf.capacity_factor_pct || 0;
         var up = (summary && summary.uptime_pct) || 0;
         var dq = (summary && summary.data_quality_score) || 0;
-        setText('pb-pr', pr + '%'); document.getElementById('pb-pr-fill').style.width = pr + '%';
-        setText('pb-cf', cf + '%'); document.getElementById('pb-cf-fill').style.width = Math.min(cf * 5, 100) + '%';
+        setText('pb-pr', pr + '%'); document.getElementById('pb-pr-fill').style.width = Math.min(pr, 100) + '%';
+        setText('pb-cf', cf + '%'); document.getElementById('pb-cf-fill').style.width = Math.min(cf, 100) + '%';
         setText('pb-uptime', up + '%'); document.getElementById('pb-uptime-fill').style.width = up + '%';
         setText('pb-dq', dq + '%'); document.getElementById('pb-dq-fill').style.width = dq + '%';
         var deg = perf.degradation;
-        if (deg && deg.confidence !== 'insufficient_data') setText('degradation-est', deg.degradation_pct_year + '%/yr (' + deg.confidence + ')');
-        else setText('degradation-est', 'Collecting data…');
+        if (deg && deg.confidence === 'high') setText('degradation-est', deg.degradation_pct_year + '%/yr');
+        else if (deg && deg.confidence === 'medium') setText('degradation-est', '~' + deg.degradation_pct_year + '%/yr (est.)');
+        else setText('degradation-est', 'Needs more data');
     }
 
     function updateStats(analytics) {
         var s = analytics ? analytics.statistics : null; if (!s) return;
         var p = s.power || {}, v = s.voltage || {}, d = s.daily_yield || {};
-        setText('st-power-mean', (p.mean != null ? p.mean : '--') + ' kW');
-        setText('st-power-median', (p.median != null ? p.median : '--') + ' kW');
-        setText('st-power-std', (p.std != null ? p.std : '--') + ' kW');
-        setText('st-power-iqr', (p.q25 != null ? p.q25 : '--') + ' — ' + (p.q75 != null ? p.q75 : '--') + ' kW');
-        setText('st-power-range', (p.min != null ? p.min : '--') + ' — ' + (p.max != null ? p.max : '--') + ' kW');
-        setText('st-voltage', (v.mean != null ? v.mean : '--') + ' ± ' + (v.std != null ? v.std : '--') + ' V');
-        setText('st-daily-max', (d.max_observed != null ? d.max_observed : '--') + ' kWh');
-        setText('st-ewma', ((analytics.power_trend && analytics.power_trend.forecast_next_kw != null) ? analytics.power_trend.forecast_next_kw : '--') + ' kW');
+        setText('st-power-mean', (p.mean != null ? num(p.mean).toFixed(3) : '--') + ' kW');
+        setText('st-power-median', (p.median != null ? num(p.median).toFixed(3) : '--') + ' kW');
+        setText('st-power-std', (p.std != null ? num(p.std).toFixed(3) : '--') + ' kW');
+        setText('st-power-iqr', (p.q25 != null ? num(p.q25).toFixed(3) : '--') + ' — ' + (p.q75 != null ? num(p.q75).toFixed(3) : '--') + ' kW');
+        setText('st-power-range', (p.min != null ? num(p.min).toFixed(2) : '--') + ' — ' + (p.max != null ? num(p.max).toFixed(2) : '--') + ' kW');
+        setText('st-voltage', (v.mean != null ? num(v.mean).toFixed(1) : '--') + ' ± ' + (v.std != null ? num(v.std).toFixed(1) : '--') + ' V');
+        setText('st-daily-max', (d.max_observed != null ? num(d.max_observed).toFixed(2) : '--') + ' kWh');
+        setText('st-ewma', ((analytics.power_trend && analytics.power_trend.forecast_next_kw != null) ? num(analytics.power_trend.forecast_next_kw).toFixed(3) : '--') + ' kW');
     }
 
     function updateOperational(meta, records, m) {
@@ -1043,7 +1065,9 @@
         var severityBadge = document.getElementById('alert-severity');
 
         if (monitoring.status === 'drop_detected' && monitoring.alerts && monitoring.alerts.length > 0) {
-            var significant = monitoring.alerts.filter(function(a) { return a.deficit_pct > 30; });
+            var nowHour = new Date().getHours();
+            var isSolarHours = nowHour >= 7 && nowHour <= 17;
+            var significant = monitoring.alerts.filter(function(a) { return a.deficit_pct > 30 && isSolarHours; });
             if (significant.length === 0) { section.style.display = 'none'; return; }
 
             section.style.display = 'block';
@@ -1088,8 +1112,8 @@
         setText('best-quarter-months', best.months);
         setText('weak-quarter', weak.q + ': ' + Math.round(weak.val) + ' kWh');
         setText('weak-quarter-months', weak.months);
-        setText('annual-revenue', Math.round(forecast.annual * 7).toLocaleString());
-        setText('annual-co2', Math.round(forecast.annual * 0.82).toLocaleString());
+        setText('annual-revenue', fmtMoney(Math.round(forecast.annual * 7)));
+        setText('annual-co2', fmtCO2(Math.round(forecast.annual * 0.82)));
     }
 
     // ══════════════════════════════
@@ -1121,6 +1145,15 @@
             updateTable(records);
             renderPowerChart(records, analytics, num(meta.plant_capacity_kw || 2.32));
             renderVoltageChart(records);
+
+            // Detect data source from meta (tagged by update_data.py)
+            var source = meta.data_source || '';
+            if (!source) {
+                // Fallback: synthetic data has weather field + engine 4.1
+                var hasWeather = records.some(function(r) { return r.weather && r.weather.length > 0; });
+                source = hasWeather ? 'simulated' : 'live_portal';
+            }
+            setText('footer-source', source === 'live_portal' ? '🟢 Live Portal' : '🧪 Simulated');
             renderMonthlyChart(forecast);
 
             if (analytics && analytics.daily_progress) renderDailyProgressChart(analytics.daily_progress);

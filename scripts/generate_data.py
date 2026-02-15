@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-Solar Data Generator
-====================
-Generates realistic solar telemetry data for a 2.32 kW plant.
+Solar Data Generator — SIMULATION / TEST ONLY
+==============================================
+Generates *synthetic* solar telemetry data for a 2.32 kW plant.
 Uses bell-curve insolation model based on Berhampur, Odisha (19.3°N, 84.8°E).
+
+⚠️  This script produces SIMULATED data for offline testing and development.
+    For production (real numbers from the Waaree portal), use:
+
+        python scripts/update_data.py          # tries live scrape first
+        python waaree_deep_crawler.py --fresh-cycles 1   # direct scrape
 
 Output: data/dashboard_data.json (consumed by index.html)
 
 Usage:
-    python scripts/generate_data.py              # Generate today's data
-    python scripts/generate_data.py --days 7      # Generate 7 days of history
-    python scripts/generate_data.py --days 30     # Generate 30 days of history
+    python scripts/generate_data.py              # Simulate today's data
+    python scripts/generate_data.py --days 7      # Simulate 7 days of history
+    python scripts/generate_data.py --days 30     # Simulate 30 days of history
 """
 import json
 import math
