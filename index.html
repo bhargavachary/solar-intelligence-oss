@@ -608,9 +608,9 @@
         }
     }
 
-    // ── Data path: local uses root, GitHub Pages uses data/ ──
+    // ── Data path: prefer `data/dashboard_data.json` for both local & GH Pages
     function dataPath() {
-        if (isLocal) return 'dashboard_data.json';
+        // root `dashboard_data.json` was removed during cleanup — always use `data/`
         return 'data/dashboard_data.json';
     }
 
