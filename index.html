@@ -1087,9 +1087,18 @@
     // ══════════════════════════════
     function normalizeRecords(payload) {
         var meta = (payload && typeof payload === 'object' && !Array.isArray(payload)) ? (payload.meta || {}) : {};
-        var raw = Array.isArray(payload) ? payload : (payload && payload.history ? payload.history : []);
         var analytics = (payload && payload.analytics) || null;
         var summary = (payload && payload.summary) || {};
+        
+        // Schema v5.0+ compatibility: live + last_7_days instead of history array
+        var raw = [];
+        if (meta.schema_version === "5.0" && payload.live) {
+            // New structure: build synthetic history from live reading
+            raw = [payload.live];
+        } else {
+            // Legacy structure: history array
+            raw = Array.isArray(payload) ? payload : (payload && payload.history ? payload.history : []);
+        }
 
         var records = raw.map(function(r) {
             return {

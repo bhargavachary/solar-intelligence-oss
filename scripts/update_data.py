@@ -202,6 +202,34 @@ def main():
     # Enrich with analytics
     print("\n═══ Analytics Engine ═══")
     enrich_analytics()
+    
+    # Archive today's data (immutable daily snapshot)
+    print("\n═══ Daily Archive ═══")
+    try:
+        archive_cmd = [sys.executable, str(ROOT / "scripts" / "archive_daily_data.py")]
+        result = subprocess.run(archive_cmd, capture_output=True, text=True, timeout=30)
+        if result.returncode == 0:
+            for line in (result.stdout or "").strip().split("\n")[-3:]:
+                if line.strip():
+                    print(f"  {line}")
+        else:
+            print(f"  ⚠️  Archive failed: {result.stderr[:200]}")
+    except Exception as e:
+        print(f"  ⚠️  Archive error: {e}")
+    
+    # Build lightweight dashboard summary
+    print("\n═══ Dashboard Summary ═══")
+    try:
+        builder_cmd = [sys.executable, str(ROOT / "scripts" / "build_dashboard_summary.py")]
+        result = subprocess.run(builder_cmd, capture_output=True, text=True, timeout=30)
+        if result.returncode == 0:
+            for line in (result.stdout or "").strip().split("\n")[-3:]:
+                if line.strip():
+                    print(f"  {line}")
+        else:
+            print(f"  ⚠️  Builder failed: {result.stderr[:200]}")
+    except Exception as e:
+        print(f"  ⚠️  Builder error: {e}")
 
     # Validate
     print("\n═══ Validation ═══")
