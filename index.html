@@ -559,7 +559,6 @@
             </div>
         </div>
         <div class="header-nav">
-            <a class="header-link" href="https://bhargavachary.in/">← Home</a>
             <span id="mode-badge" class="mode-badge readonly">👁️ Read Only</span>
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Switch light/dark mode">
                 <div class="theme-toggle-knob" id="theme-icon">☀️</div>
@@ -571,6 +570,7 @@
                 <div id="status-label" class="status-label">Initializing</div>
                 <div id="status-time" class="status-time">--</div>
             </div>
+            <a class="header-link" href="https://bhargavachary.in/" style="margin-left: 12px;">Home ↗</a>
         </div>
     </header>
 
@@ -828,8 +828,8 @@
             </div>
             <div class="calc-input-row">
                 <label>Usage During Generation Hours</label>
-                <input type="range" id="calc-genhours-slider" min="10" max="90" step="5" value="50">
-                <div class="calc-val"><span id="calc-genhours-pct">50</span><span style="font-size:11px;color:var(--text-secondary)">%</span></div>
+                <input type="range" id="calc-genhours-slider" min="10" max="90" step="5" value="40">
+                <div class="calc-val"><span id="calc-genhours-pct">40</span><span style="font-size:11px;color:var(--text-secondary)">%</span></div>
             </div>
             <div class="bill-compare" id="bill-compare">
                 <div class="bill-col">
@@ -1891,7 +1891,7 @@
     function syncBillCalc() {
         var consumption = parseInt(calcSlider ? calcSlider.value : 250, 10);
         var solarGen = parseInt(calcSolarSlider ? calcSolarSlider.value : 300, 10);
-        var genHoursPct = parseInt(calcGenHoursSlider ? calcGenHoursSlider.value : 50, 10);
+        var genHoursPct = parseInt(calcGenHoursSlider ? calcGenHoursSlider.value : 40, 10);
         setText('calc-units', consumption);
         setText('calc-solar-units', solarGen);
         setText('calc-genhours-pct', genHoursPct);
