@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Update Feb 16 energy log with detailed intraday curve from mobile app"""
+"""Update Feb 16 energy log with detailed intraday curve from mobile app
+CORRECTED: Peak ~2 kW around 12:30-13:00 PM, max instantaneous ~2.0 kW
+"""
 
 import json
 from datetime import datetime
@@ -14,41 +16,42 @@ final_monthly_kwh = 31.8
 final_total_kwh = 79.6
 
 # Create detailed intraday records based on mobile app curve
-# Visual inspection shows peak ~1.05 kW around 11:30 AM
+# Visual inspection shows peak ~2.0 kW around 12:30-13:00 PM
 base_date = "2026-02-16"
 plant_id = "628c63b5-06c3-4b1b-a06a-556e87fd4a81"
 
-# Intraday power curve (visual estimation from mobile app screenshot)
+# Intraday power curve (CORRECTED from mobile app screenshot)
+# User reported: peak ~2 kW around 1 PM, max instantaneous ~1.8 kW
 # Time, Power (kW), Cumulative Energy (kWh estimate before scaling)
 curve_data = [
-    ("06:30", 0.02, 0.0),
-    ("07:00", 0.08, 0.02),
-    ("07:30", 0.18, 0.05),
-    ("08:00", 0.32, 0.12),
-    ("08:30", 0.48, 0.24),
-    ("09:00", 0.62, 0.40),
-    ("09:30", 0.78, 0.62),
-    ("10:00", 0.88, 0.89),
-    ("10:30", 0.96, 1.21),
-    ("11:00", 1.02, 1.57),
-    ("11:30", 1.05, 1.96),
-    ("12:00", 1.04, 2.37),
-    ("12:30", 1.02, 2.78),
-    ("13:00", 0.98, 3.18),
-    ("13:30", 0.91, 3.56),
-    ("14:00", 0.82, 3.91),
-    ("14:30", 0.71, 4.22),
-    ("15:00", 0.59, 4.49),
-    ("15:30", 0.46, 4.71),
-    ("16:00", 0.33, 4.88),
-    ("16:30", 0.22, 5.00),
-    ("17:00", 0.12, 5.08),
-    ("17:30", 0.05, 5.11),
-    ("18:00", 0.01, 5.12),
+    ("06:30", 0.04, 0.0),
+    ("07:00", 0.15, 0.05),
+    ("07:30", 0.35, 0.15),
+    ("08:00", 0.62, 0.35),
+    ("08:30", 0.95, 0.68),
+    ("09:00", 1.24, 1.15),
+    ("09:30", 1.48, 1.72),
+    ("10:00", 1.68, 2.40),
+    ("10:30", 1.82, 3.15),
+    ("11:00", 1.90, 3.95),
+    ("11:30", 1.95, 4.78),
+    ("12:00", 1.98, 5.64),
+    ("12:30", 2.00, 6.50),  # Peak ~2 kW
+    ("13:00", 1.97, 7.36),  # Around 1 PM as user mentioned
+    ("13:30", 1.88, 8.19),
+    ("14:00", 1.72, 8.96),
+    ("14:30", 1.51, 9.65),
+    ("15:00", 1.25, 10.23),
+    ("15:30", 0.96, 10.70),
+    ("16:00", 0.66, 11.05),
+    ("16:30", 0.40, 11.30),
+    ("17:00", 0.20, 11.42),
+    ("17:30", 0.08, 11.47),
+    ("18:00", 0.02, 11.49),
 ]
 
 # Scale cumulative energy to match actual daily total (11.3 kWh)
-scale_factor = final_daily_kwh / 5.12
+scale_factor = final_daily_kwh / 11.49
 records = []
 
 for time_str, power_kw, cumulative_raw in curve_data:

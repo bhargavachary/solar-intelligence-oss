@@ -348,6 +348,27 @@ def build_summary(energy_logs, verbose=False):
     today_log = energy_logs[-1]
     today_records = today_log.get("records", [])
     
+    # Apply ML-based processing if available
+    ml_enhanced = {}
+    try:
+        import sys
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from ml_time_series_processor import process_today_with_ml
+        if verbose:
+            print("🤖 Applying ML-based time series processing...")
+        ml_result = process_today_with_ml(energy_logs)
+        ml_enhanced = {
+            'ml_health_score': ml_result.get('health_score', {}),
+            'ml_forecast': ml_result.get('forecast', {}),
+            'ml_processed': True,
+        }
+        if verbose:
+            print(f"   ML Health: {ml_result.get('health_score', {}).get('overall_score')} ({ml_result.get('health_score', {}).get('grade')})")
+    except Exception as e:
+        if verbose:
+            print(f"⚠️  ML processing unavailable: {e}")
+        ml_enhanced = {'ml_processed': False}
+    
     summary = {
         "meta": {
             "schema_version": "5.0",
@@ -361,6 +382,7 @@ def build_summary(energy_logs, verbose=False):
                 "first": energy_logs[0].get("date"),
                 "last": energy_logs[-1].get("date"),
             },
+            **ml_enhanced,  # Add ML processing metadata
         },
         "live": get_latest_reading(energy_logs),
         "last_7_days": get_last_n_days(energy_logs, 7),
