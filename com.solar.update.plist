@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.solar.update</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/bhargav/repos/solar_intelligence/update-local.sh</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/bhargav/repos/solar_intelligence</string>
+    
+    <key>StandardOutPath</key>
+    <string>/tmp/solar-update.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/tmp/solar-update-error.log</string>
+    
+    <key>StartCalendarInterval</key>
+    <array>
+        <!-- 7:00 AM IST -->
+        <dict>
+            <key>Hour</key>
+            <integer>7</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- 10:00 AM IST -->
+        <dict>
+            <key>Hour</key>
+            <integer>10</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- 1:00 PM IST -->
+        <dict>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- 4:00 PM IST -->
+        <dict>
+            <key>Hour</key>
+            <integer>16</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <!-- 7:00 PM IST -->
+        <dict>
+            <key>Hour</key>
+            <integer>19</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
+    
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

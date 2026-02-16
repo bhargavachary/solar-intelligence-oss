@@ -3,16 +3,16 @@
 # Logs: /tmp/solar-update.log
 
 # 7:00 AM IST
-0 7 * * * cd /Users/bhargav/repos/waaree_api_access && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
+0 7 * * * cd /Users/bhargav/repos/solar_intelligence && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
 
 # 10:00 AM IST
-0 10 * * * cd /Users/bhargav/repos/waaree_api_access && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
+0 10 * * * cd /Users/bhargav/repos/solar_intelligence && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
 
 # 1:00 PM IST
-0 13 * * * cd /Users/bhargav/repos/waaree_api_access && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
+0 13 * * * cd /Users/bhargav/repos/solar_intelligence && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
 
 # 4:00 PM IST
-0 16 * * * cd /Users/bhargav/repos/waaree_api_access && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
+0 16 * * * cd /Users/bhargav/repos/solar_intelligence && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
 
 # 7:00 PM IST
-0 19 * * * cd /Users/bhargav/repos/waaree_api_access && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1
+0 19 * * * cd /Users/bhargav/repos/solar_intelligence && /bin/bash update-local.sh >> /tmp/solar-update.log 2>&1

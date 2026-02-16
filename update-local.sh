@@ -31,13 +31,12 @@ if [ ! -f "credentials.json" ]; then
     exit 1
 fi
 
-echo "🔄 Fetching LIVE data from Waaree portal..."
-echo "⚠️  NO FALLBACK TO SYNTHETIC DATA - Portal must be accessible"
-/Users/bhargav/repos/waaree_api_access/venv/bin/python3 waaree_deep_crawler.py
+echo "🔄 Running data pipeline (fetch → process → push)..."
+/Users/bhargav/repos/solar_intelligence/venv/bin/python3 scripts/update_data.py --source live
 
-if [ ! -f "scraped_data.json" ]; then
-    echo "❌ Scraper failed - no REAL data available from portal"
-    echo "❌ Aborting update - will NOT use fake/synthetic data"
+# Ensure pipeline produced the dashboard file
+if [ ! -f "data/dashboard_data.json" ]; then
+    echo "❌ Data pipeline failed — data/dashboard_data.json not created"
     exit 1
 fi
 
@@ -45,7 +44,7 @@ echo "✅ REAL portal data fetched successfully"
 echo ""
 
 echo "🔄 Running data pipeline..."
-/Users/bhargav/repos/waaree_api_access/venv/bin/python3 scripts/update_data.py --source live
+/Users/bhargav/repos/solar_intelligence/venv/bin/python3 scripts/update_data.py --source live
 
 echo "✅ Data pipeline complete"
 echo ""
