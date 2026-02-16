@@ -1122,38 +1122,56 @@
         // Schema v5.0+ compatibility: live + last_7_days instead of history array
         var raw = [];
         if (meta.schema_version === "5.0" && payload.live) {
-            // New structure: live + last_7_days → synthetic hourly data
+            var live = payload.live;
+            // Compute true monthly yield from all last_7_days entries
+            var computedMonthly = 0;
             if (payload.last_7_days && payload.last_7_days.length > 0) {
-                var today = payload.last_7_days[payload.last_7_days.length - 1];
-                var numRecords = today.record_count || 12;
-                // Compute true monthly yield from all last_7_days entries (all are this month)
-                var computedMonthly = payload.last_7_days.reduce(function(s,d){ return s + (d.yield_kwh||0); }, 0);
-                var monthlyVal = Math.max(computedMonthly, payload.live.monthly_yield_kwh || 0);
-                // Generate synthetic hourly records based on daily summary
+                computedMonthly = payload.last_7_days.reduce(function(s,d){ return s + (d.yield_kwh||0); }, 0);
+            }
+            var monthlyVal = Math.max(computedMonthly, live.monthly_yield_kwh || 0);
+
+            // Build hourly curve from historical days for chart context
+            var today = (payload.last_7_days && payload.last_7_days.length > 0)
+                ? payload.last_7_days[payload.last_7_days.length - 1] : null;
+            if (today && today.record_count > 1) {
+                var numRecords = Math.max(today.record_count, 2);
                 for (var i = 0; i < numRecords; i++) {
-                    var hour = 6 + i;  // 6 AM to 5 PM
+                    var hour = 6 + Math.round(i * 11 / (numRecords - 1));
                     var timestamp = today.date + ' ' + (hour < 10 ? '0' : '') + hour + ':30:00';
                     var progress = i / (numRecords - 1);
                     var bellCurve = Math.sin(progress * Math.PI);
-                    var power = today.peak_power_kw * bellCurve;
-                    var dailyYield = today.yield_kwh * Math.pow(progress, 0.7);
-                    
+                    // Avoid zero at endpoints by clamping to 5% of peak
+                    var power = today.peak_power_kw * Math.max(bellCurve, 0.05);
+                    if (i === 0) power = today.peak_power_kw * 0.08;
+                    if (i === numRecords - 1) power = today.peak_power_kw * 0.05;
+                    var dailyYield = today.yield_kwh * Math.min(Math.pow(progress, 0.7), 1.0);
                     raw.push({
                         timestamp: timestamp,
                         current_power_kw: power,
                         daily_yield_kwh: dailyYield,
                         monthly_yield_kwh: monthlyVal,
-                        total_yield_kwh: payload.live.total_yield_kwh,
-                        income_inr: payload.live.income_inr,
-                        voltage_v: 230 + (Math.random() * 4 - 2),
+                        total_yield_kwh: live.total_yield_kwh,
+                        income_inr: live.income_inr,
+                        voltage_v: live.voltage_v || (230 + (Math.random() * 4 - 2)),
                         current_a: power * 1000 / 230,
                         status: 'Online'
                     });
                 }
-            } else {
-                // Fallback: single live reading
-                raw = [payload.live];
             }
+
+            // Always append the REAL live reading as the latest record
+            raw.push({
+                timestamp: live.timestamp,
+                current_power_kw: live.power_kw,
+                daily_yield_kwh: live.daily_yield_kwh,
+                monthly_yield_kwh: monthlyVal,
+                total_yield_kwh: live.total_yield_kwh,
+                income_inr: live.income_inr,
+                voltage_v: live.voltage_v || 0,
+                current_a: live.current_a || 0,
+                temperature_c: live.temperature_c || 0,
+                status: live.status || 'Online'
+            });
         } else {
             // Legacy structure: history array
             raw = Array.isArray(payload) ? payload : (payload && payload.history ? payload.history : []);
@@ -1787,7 +1805,7 @@
             updateSolarBankFlow(records, meta, forecast);
             
             // Update footer with last updated timestamp
-            var lastUpdated = meta && meta.last_updated ? meta.last_updated : (d.live && d.live.timestamp ? d.live.timestamp : null);
+            var lastUpdated = (meta && meta.generated_at) || (meta && meta.last_updated) || (payload.live && payload.live.timestamp) || null;
             if (lastUpdated) {
                 var dt = parseTs(lastUpdated);
                 if (dt) {
