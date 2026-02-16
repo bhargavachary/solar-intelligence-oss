@@ -369,6 +369,49 @@ def build_summary(energy_logs, verbose=False):
             print(f"⚠️  ML processing unavailable: {e}")
         ml_enhanced = {'ml_processed': False}
     
+    # Apply weather & loss analysis for today
+    weather_enhanced = {}
+    try:
+        from weather_loss_analyzer import get_weather_data, analyze_losses, analyze_hourly_generation
+        if verbose:
+            print("☁️  Fetching weather data and analyzing losses...")
+        
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        weather = get_weather_data(date=today_date)
+        
+        # Get today's energy log
+        today_log = None
+        for log in energy_logs:
+            if log.get('date') == today_date:
+                today_log = log
+                break
+        
+        if today_log:
+            daily_yield = today_log.get('daily_summary', {}).get('total_yield_kwh', 0)
+            capacity = meta.get('plant_capacity_kw', 2.32)
+            
+            hourly_analysis = analyze_hourly_generation(today_log)
+            losses = analyze_losses(daily_yield, capacity, weather)
+            
+            weather_enhanced = {
+                'weather': weather,
+                'hourly_analysis': hourly_analysis,
+                'loss_analysis': losses,
+                'weather_processed': True,
+            }
+            
+            if verbose:
+                print(f"   Weather: {weather.get('temperature', {}).get('avg_daylight', 0):.1f}°C, {weather.get('cloud_cover_avg', 0):.0f}% clouds")
+                print(f"   Peak Hour: {hourly_analysis.get('peak_hour', {}).get('hour')}:00 → {hourly_analysis.get('peak_hour', {}).get('energy_kwh')} kWh")
+                print(f"   Efficiency: {losses.get('efficiency_pct')}% ({losses.get('performance_rating')})")
+        else:
+            weather_enhanced = {'weather_processed': False, 'reason': 'No data for today'}
+            
+    except Exception as e:
+        if verbose:
+            print(f"⚠️  Weather analysis unavailable: {e}")
+        weather_enhanced = {'weather_processed': False, 'error': str(e)}
+    
     summary = {
         "meta": {
             "schema_version": "5.0",
@@ -383,6 +426,7 @@ def build_summary(energy_logs, verbose=False):
                 "last": energy_logs[-1].get("date"),
             },
             **ml_enhanced,  # Add ML processing metadata
+            **weather_enhanced,  # Add weather & loss analysis
         },
         "live": get_latest_reading(energy_logs),
         "last_7_days": get_last_n_days(energy_logs, 7),

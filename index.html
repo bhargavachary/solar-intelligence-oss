@@ -197,9 +197,9 @@
         /* ═══════════════════════════════════════
            KPI HERO CARDS
            ═══════════════════════════════════════ */
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-        @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 700px) { .kpi-grid { grid-template-columns: 1fr; } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
         .kpi {
             background: var(--surface);
             backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
@@ -220,6 +220,9 @@
         .kpi:nth-child(3)::before { background: linear-gradient(90deg, #bf5af2, #af52de); }
         .kpi:nth-child(4)::before { background: linear-gradient(90deg, #0a84ff, #0071e3); }
         .kpi:nth-child(5)::before { background: linear-gradient(90deg, #64d2ff, #32ade6); }
+        .kpi:nth-child(6)::before { background: linear-gradient(90deg, #ffd60a, #ff9f0a); }
+        .kpi:nth-child(7)::before { background: linear-gradient(90deg, #ff453a, #ff6961); }
+        .kpi:nth-child(8)::before { background: linear-gradient(90deg, #32d74b, #30db5b); }
         .kpi-icon {
             width: 40px; height: 40px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -602,40 +605,56 @@
     </div>
 
     <!-- ═══ KPI HERO ROW ═══ -->
-    <div class="section-label">Overview</div>
+    <div class="section-label">Real-Time Performance</div>
     <div class="kpi-grid">
-        <div class="kpi" data-tip="Instantaneous power output right now from the inverter. Peaks at solar noon (~1.5 kW for this 2.32 kW system). Shows 0 at night.">
+        <div class="kpi" data-tip="Instantaneous power output right now from the inverter. Peaks at solar noon. Shows 0 at night.">
             <div class="kpi-icon" style="background:var(--orange-bg)">⚡</div>
             <div class="kpi-label">Live Power</div>
             <div class="kpi-value"><span id="kpi-power">--</span><span class="kpi-unit">kW</span></div>
-            <div class="kpi-detail">Peak today: <strong id="kpi-peak">--</strong> kW · Cap: <span id="kpi-cap">2.32</span> kW</div>
+            <div class="kpi-detail">Instant: <strong id="kpi-peak">--</strong> kW peak today</div>
         </div>
-        <div class="kpi" data-tip="Total energy generated today (sunrise to now). A good clear day in Berhampur yields 10-12 kWh for a 2.32 kW system.">
+        <div class="kpi" data-tip="Total energy generated today (sunrise to now). Berhampur typically yields 10-12 kWh on clear days.">
             <div class="kpi-icon" style="background:var(--green-bg)">📈</div>
             <div class="kpi-label">Today's Yield</div>
             <div class="kpi-value"><span id="kpi-daily">--</span><span class="kpi-unit">kWh</span></div>
-            <div class="kpi-detail">Target: 10–12 kWh on a good day</div>
+            <div class="kpi-detail">Hour peak: <strong id="kpi-hourly-peak">--</strong> kWh</div>
         </div>
-        <div class="kpi" data-tip="Cumulative energy generated this calendar month. Resets on the 1st. Expected ~300-370 kWh/month for Feb in Berhampur.">
-            <div class="kpi-icon" style="background:var(--cyan-bg)">📅</div>
+        <div class="kpi" data-tip="System efficiency based on weather conditions, losses explained by actual atmospheric data.">
+            <div class="kpi-icon" style="background:var(--blue-bg)">⚙️</div>
+            <div class="kpi-label">System Efficiency</div>
+            <div class="kpi-value"><span id="kpi-efficiency">--</span><span class="kpi-unit">%</span></div>
+            <div class="kpi-detail"><span id="kpi-efficiency-rating">--</span> performance</div>
+        </div>
+        <div class="kpi" data-tip="Current weather conditions in Golanthara (Berhampur) affecting solar performance.">
+            <div class="kpi-icon" style="background:var(--cyan-bg)">☁️</div>
+            <div class="kpi-label">Weather Impact</div>
+            <div class="kpi-value"><span id="kpi-weather-temp">--</span><span class="kpi-unit">°C</span></div>
+            <div class="kpi-detail"><span id="kpi-cloud-cover">--</span>% clouds · <span id="kpi-humidity">--</span>% humidity</div>
+        </div>
+    </div>
+
+    <div class="section-label">Cumulative & Health</div>
+    <div class="kpi-grid">
+        <div class="kpi" data-tip="Cumulative energy generated this calendar month. Resets on the 1st.">
+            <div class="kpi-icon" style="background:var(--purple-bg)">📅</div>
             <div class="kpi-label">Monthly Yield</div>
             <div class="kpi-value"><span id="kpi-monthly">--</span><span class="kpi-unit" id="kpi-monthly-unit">kWh</span></div>
             <div class="kpi-detail">This month's total generation</div>
         </div>
-        <div class="kpi" data-tip="All-time energy generated since installation. This is the cumulative total from the inverter's lifetime counter. Your system has generated 68.3 kWh since commissioning.">
-            <div class="kpi-icon" style="background:var(--purple-bg)">🔋</div>
+        <div class="kpi" data-tip="All-time energy generated since installation. Cumulative total from the inverter's lifetime counter.">
+            <div class="kpi-icon" style="background:var(--orange-bg)">🔋</div>
             <div class="kpi-label">Lifetime Yield</div>
             <div class="kpi-value"><span id="kpi-total">--</span><span class="kpi-unit" id="kpi-total-unit">MWh</span></div>
             <div class="kpi-detail">Income: ₹<span id="kpi-income">--</span> <span style="font-size:10px;color:var(--text-tertiary)">@ ₹7/kWh</span></div>
         </div>
-        <div class="kpi" data-tip="Composite health score (0-100) based on power consistency, voltage stability, yield efficiency, data quality, and uptime. A+ means all parameters are within expected ranges.">
-            <div class="kpi-icon" style="background:var(--blue-bg)">🛡️</div>
+        <div class="kpi" data-tip="ML-computed health score based on consistency, performance, yield efficiency, anomalies, and degradation trends.">
+            <div class="kpi-icon" style="background:var(--green-bg)">🛡️</div>
             <div class="kpi-label">Health Score</div>
             <div class="kpi-value"><span id="kpi-health">--</span><span class="kpi-unit" id="kpi-grade"></span></div>
             <div class="kpi-detail">Data Quality: <span id="kpi-quality">--</span>%</div>
         </div>
-        <div class="kpi" data-tip="Ratio of actual yield to theoretical maximum yield. PR = Actual ÷ (Capacity × PSH × Days). Values above 75% are excellent. Accounts for all losses (heat, wiring, inverter, soiling).">
-            <div class="kpi-icon" style="background:var(--cyan-bg)">📊</div>
+        <div class="kpi" data-tip="Performance Ratio: actual yield vs theoretical maximum. Values above 75% are excellent for real-world conditions.">
+            <div class="kpi-icon" style="background:var(--yellow-bg)">📊</div>
             <div class="kpi-label">Performance Ratio</div>
             <div class="kpi-value"><span id="kpi-pr">--</span><span class="kpi-unit">%</span></div>
             <div class="kpi-detail"><span id="kpi-trend" class="kpi-trend stable">● stable</span></div>
@@ -1304,8 +1323,39 @@
         var l = m.latest;
         setText('kpi-power', l ? l.power.toFixed(2) : '--');
         setText('kpi-peak', m.peakPower.toFixed(2));
-        setText('kpi-cap', num(meta.plant_capacity_kw || 2.32).toFixed(2));
         setText('kpi-daily', l ? l.daily.toFixed(2) : '--');
+        
+        // Hourly peak generation
+        var hourlyPeak = meta.hourly_analysis && meta.hourly_analysis.peak_hour 
+            ? meta.hourly_analysis.peak_hour.energy_kwh.toFixed(2) 
+            : '--';
+        setText('kpi-hourly-peak', hourlyPeak);
+        
+        // System efficiency from loss analysis
+        var efficiency = meta.loss_analysis && meta.loss_analysis.efficiency_pct 
+            ? meta.loss_analysis.efficiency_pct.toFixed(1) 
+            : '--';
+        setText('kpi-efficiency', efficiency);
+        var efficiencyRating = meta.loss_analysis && meta.loss_analysis.performance_rating 
+            ? meta.loss_analysis.performance_rating 
+            : '--';
+        setText('kpi-efficiency-rating', efficiencyRating);
+        
+        // Weather data
+        var weather = meta.weather || {};
+        var temp = weather.temperature && weather.temperature.avg_daylight 
+            ? weather.temperature.avg_daylight.toFixed(1) 
+            : '--';
+        setText('kpi-weather-temp', temp);
+        var clouds = weather.cloud_cover_avg != null 
+            ? Math.round(weather.cloud_cover_avg) 
+            : '--';
+        setText('kpi-cloud-cover', clouds);
+        var humidity = weather.humidity_avg != null 
+            ? Math.round(weather.humidity_avg) 
+            : '--';
+        setText('kpi-humidity', humidity);
+        
         if (l) {
             var mt = fmtEnergy(l.monthly || 0);
             setText('kpi-monthly', mt.value);
@@ -1377,6 +1427,64 @@
             if (trendDir === 'rising') items.push(ico('🔺', 'Power trend <strong>rising</strong> — morning ramp-up'));
             else if (trendDir === 'falling') items.push(ico('🌅', 'Power trend <strong>falling</strong> — afternoon decline (normal solar behavior)'));
             else if (trendDir) items.push(ico('➡️', 'Power trend <strong>stable</strong> — near solar noon'));
+
+            // Weather & Loss Analysis (with detailed breakdown)
+            var weather = metaRef.weather || {};
+            var lossAnalysis = metaRef.loss_analysis || {};
+            if (weather.location && !weather.error) {
+                items.push(ico('📍', 'Location: <strong>' + weather.location + '</strong> — real-time weather conditions integrated'));
+                
+                // System efficiency summary
+                if (lossAnalysis.efficiency_pct != null) {
+                    var effRating = lossAnalysis.performance_rating || '';
+                    var effColor = lossAnalysis.efficiency_pct >= 90 ? '✨' : lossAnalysis.efficiency_pct >= 80 ? '✅' : '⚠️';
+                    items.push(ico(effColor, 'System efficiency: <strong>' + lossAnalysis.efficiency_pct.toFixed(1) + '%</strong> (' + effRating + ' performance)'));
+                }
+                
+                // Loss breakdown explanation
+                if (lossAnalysis.breakdown) {
+                    var breakdown = lossAnalysis.breakdown;
+                    var majorLosses = [];
+                    
+                    if (breakdown.temperature && breakdown.temperature.loss_pct > 0.5) {
+                        majorLosses.push('Temperature: ' + breakdown.temperature.loss_pct.toFixed(1) + '% — ' + breakdown.temperature.reason);
+                    }
+                    if (breakdown.cloud_cover && breakdown.cloud_cover.loss_pct > 0.5) {
+                        majorLosses.push('Cloud cover: ' + breakdown.cloud_cover.loss_pct.toFixed(1) + '% — ' + breakdown.cloud_cover.reason);
+                    }
+                    if (breakdown.humidity && breakdown.humidity.loss_pct > 0.5) {
+                        majorLosses.push('Humidity: ' + breakdown.humidity.loss_pct.toFixed(1) + '% — ' + breakdown.humidity.reason);
+                    }
+                    
+                    if (majorLosses.length > 0) {
+                        items.push(ico('🌤️', '<strong>Weather-based losses:</strong> ' + majorLosses.join(' • ')));
+                    }
+                    
+                    // System losses (always present)
+                    var systemLosses = [];
+                    if (breakdown.inverter_conversion) systemLosses.push('Inverter: ' + breakdown.inverter_conversion.loss_pct + '%');
+                    if (breakdown.wiring_resistance) systemLosses.push('Wiring: ' + breakdown.wiring_resistance.loss_pct + '%');
+                    if (breakdown.soiling) systemLosses.push('Soiling: ' + breakdown.soiling.loss_pct + '%');
+                    
+                    if (systemLosses.length > 0) {
+                        items.push(ico('⚙️', '<strong>System losses:</strong> ' + systemLosses.join(' • ') + ' (normal for all solar systems)'));
+                    }
+                }
+                
+                // Why is today's generation at current level?
+                if (lossAnalysis.theoretical_max_kwh && l.daily > 0) {
+                    var theoreticalMax = lossAnalysis.theoretical_max_kwh;
+                    var totalLoss = lossAnalysis.total_loss_pct || 0;
+                    items.push(ico('📐', '<strong>Generation explained:</strong> Theoretical max ' + theoreticalMax.toFixed(1) + ' kWh minus ' + totalLoss.toFixed(1) + '% losses = ' + l.daily.toFixed(1) + ' kWh actual'));
+                }
+                
+                // Hourly peak clarity
+                var hourlyAnalysis = metaRef.hourly_analysis || {};
+                if (hourlyAnalysis.peak_hour) {
+                    var ph = hourlyAnalysis.peak_hour;
+                    items.push(ico('⏰', '<strong>Peak hour:</strong> ' + ph.hour + ':00 generated <strong>' + ph.energy_kwh.toFixed(2) + ' kWh</strong> (avg power ' + ph.avg_power_kw.toFixed(2) + ' kW over ' + ph.samples + ' samples)'));
+                }
+            }
 
             // Grid voltage
             if (m.avgVolt > 0) {
