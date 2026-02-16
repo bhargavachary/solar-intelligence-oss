@@ -149,7 +149,7 @@
       "status": "Online"
     }
   ],
-  "stats": {
+  "daily_summary": {
     "total_yield_kwh": 10.1,
     "peak_power_kw": 2.204,
     "avg_power_kw": 2.056,
