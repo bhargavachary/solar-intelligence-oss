@@ -31,6 +31,16 @@ jobs:
         with:
           chrome-version: stable
       
+      - name: Setup Chrome environment
+        run: |
+          # Create directories for Chrome
+          mkdir -p /home/runner/.cache/chromium
+          mkdir -p /tmp/.X11-unix
+          
+          # Set environment variables for Chrome
+          echo "CHROME_BIN=$(which google-chrome || which chrome || which chromium-browser)" >> $GITHUB_ENV
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+      
       - name: Create credentials
         run: |
           cat > credentials.json <<'CREDS'
@@ -47,7 +57,20 @@ jobs:
       - name: Run scraper
         continue-on-error: true
         run: |
-          timeout 180 python waaree_deep_crawler.py || echo "Scraper completed/timed out"
+          # Set display for headless Chrome
+          export DISPLAY=:99
+          # Run with timeout and proper error handling
+          timeout 180 python waaree_deep_crawler.py 2>&1 | tee scraper.log || echo "Scraper exit code: $?"
+          
+          # Check if any data was scraped
+          if [ -f scraped_data.json ]; then
+            echo "✅ Scraper succeeded - scraped_data.json found"
+            ls -lh scraped_data.json
+          else
+            echo "❌ Scraper failed - no scraped_data.json"
+            echo "Last 50 lines of log:"
+            tail -50 scraper.log || true
+          fi
       
       - name: Update data pipeline
         run: |
