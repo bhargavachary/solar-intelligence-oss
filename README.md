@@ -69,19 +69,13 @@ Visit **[bhargavachary.in/waaree_api_access/](https://bhargavachary.in/waaree_ap
 git clone https://github.com/bhargavachary/waaree_api_access.git
 cd waaree_api_access
 
-# Generate data
-python scripts/generate_data.py
+# Update with live portal data
+python scripts/update_data.py --source auto
 
 # Serve locally
 python -m http.server 8005
 
 # Open http://localhost:8005 — local dev mode with 10s refresh
-```
-
-### Generate Multi-day History
-
-```bash
-python scripts/generate_data.py --days 7
 ```
 
 ## 🔬 Analytics Engine
@@ -111,13 +105,13 @@ The `solar_analytics.py` module is a **pure Python** (no numpy/sklearn) analytic
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
-│  generate_data   │────▶│  solar_analytics  │────▶│   data/      │
-│  (bell curve     │     │  (ML enrichment)  │     │   dashboard  │
-│   + physics)     │     │                   │     │   _data.json │
+│ waaree_deep_     │────▶│  solar_analytics  │────▶│   data/      │
+│ crawler.py       │     │  (ML enrichment)  │     │   energy_logs│
+│ (live portal)    │     │                   │     │   dashboard  │
 └─────────────────┘     └──────────────────┘     └──────┬──────┘
                                                          │
-                    GitHub Actions (3×/day)               │
-                    ───────────────────────               ▼
+                    Scheduled Updates (manual)            │
+                    ──────────────────────────            ▼
                                                   ┌──────────────┐
                                                   │  index.html   │
                                                   │  (client JS   │

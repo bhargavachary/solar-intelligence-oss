@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-Dashboard Summary Builder — Lightweight Web Data
+Dashboard Summary Builder — REAL DATA ONLY
 =================================================
-Aggregates daily archives into a lightweight summary for the web dashboard.
+Aggregates energy logs from LIVE portal data into dashboard summary.
 
-Reads all archives in data/archives/ and builds:
+⚠️ ENFORCEMENT: This script ONLY processes real portal data from energy_logs/.
+   NO synthetic/fake data generation is permitted.
+   All data must originate from waaree_deep_crawler.py portal scraping.
+
+Reads all archives in data/energy_logs/ and builds:
   - Latest live reading
   - Last 7 days summary
   - Monthly aggregates
   - Analytics (if solar_analytics.py is available)
 
-Output: data/dashboard_data.json (optimized for web, ≤20KB target)
+Output: data/dashboard_data.json (optimized for web)
 
 Usage:
     python scripts/build_dashboard_summary.py

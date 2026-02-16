@@ -612,7 +612,7 @@ class BrowserEngine:
             uc_opts.add_argument("--disable-popup-blocking")
             uc_opts.add_argument("--ignore-certificate-errors")
 
-            self.driver = uc.Chrome(options=uc_opts, use_subprocess=True)
+            self.driver = uc.Chrome(options=uc_opts, use_subprocess=True, version_main=144)
         else:
             # ── Standard Selenium with best-effort stealth ──
             log("WARN", "undetected-chromedriver not available, using standard Selenium")
