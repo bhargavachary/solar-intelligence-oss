@@ -62,6 +62,24 @@ try:
 except ImportError:
     HAS_ANALYTICS = False
 
+# Import ensemble extractor (5-strategy voting engine)
+try:
+    from scripts.ensemble_extractor import EnsembleExtractor
+    HAS_ENSEMBLE = True
+except ImportError:
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "ensemble_extractor",
+            os.path.join(os.path.dirname(__file__), "scripts", "ensemble_extractor.py")
+        )
+        _em = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_em)
+        EnsembleExtractor = _em.EnsembleExtractor
+        HAS_ENSEMBLE = True
+    except Exception:
+        HAS_ENSEMBLE = False
+
 
 # ═══════════════════════════════════════════════════════════════
 # CONFIGURATION
@@ -1316,35 +1334,72 @@ class DataExtractor:
                 log("WARN", f"Portal validation weak (score={validation['score']}); attempting extraction anyway.")
                 Diagnostics.capture(driver, "extraction_portal_weak", save_html=True)
 
-            # ── Strategy 1: CSS Selectors ──
-            extracted_css = DataExtractor._extract_via_css(driver)
-            if extracted_css:
-                packet.update(extracted_css)
-                packet["extraction_method"] = "css_selector"
-                log("DATA", "CSS extraction OK.")
+            # ═══════════════════════════════════════════════════════════
+            # ENSEMBLE EXTRACTION (5-strategy voting)
+            # Falls back to legacy sequential extraction if unavailable
+            # ═══════════════════════════════════════════════════════════
+            if HAS_ENSEMBLE:
+                log("DATA", "Using ensemble extractor (5-strategy voting)...")
+                ensemble_result = EnsembleExtractor.extract(driver, wait, body_text=body_text)
 
-            # ── Strategy 2: Regex fallback ──
-            if packet["current_power"] == "0" and packet["daily_yield"] == "0":
-                extracted_regex = DataExtractor._extract_via_regex(body_text)
-                if extracted_regex:
-                    packet.update(extracted_regex)
-                    packet["extraction_method"] = "regex"
-                    log("DATA", "Regex fallback used.")
+                # Map ensemble consensus to packet fields
+                consensus = ensemble_result["data"]
+                for field in ["current_power", "daily_yield", "monthly_yield", "total_yield", "income"]:
+                    val = consensus.get(field, 0)
+                    if val > 0:
+                        packet[field] = str(val)
 
-            # ── Strategy 3: JavaScript extraction ──
-            if packet["current_power"] == "0":
-                js_data = DataExtractor._extract_via_js(driver)
-                if js_data:
-                    packet.update(js_data)
-                    packet["extraction_method"] = "javascript"
-                    log("DATA", "JavaScript extraction used.")
+                packet["extraction_method"] = ensemble_result["extraction_method"]
 
-            # ── Strategy 4: Device tab for voltage/current ──
-            device_data = DataExtractor._explore_device_tab(driver, wait)
-            if device_data:
-                for key in ["voltage_sample", "current_sample", "frequency_hz", "temperature_c"]:
-                    if device_data.get(key, "0") != "0":
-                        packet[key] = device_data[key]
+                # Log confidence
+                confidence = ensemble_result["overall_confidence"]
+                log("DATA", f"Ensemble confidence: {confidence:.0f}%")
+
+                # Also extract supplementary data (voltage/current/freq/temp)
+                supplementary = EnsembleExtractor.extract_supplementary(driver, wait)
+                if supplementary:
+                    field_map = {
+                        "voltage": "voltage_sample",
+                        "current": "current_sample",
+                        "frequency": "frequency_hz",
+                        "temperature": "temperature_c",
+                    }
+                    for src_key, dst_key in field_map.items():
+                        if supplementary.get(src_key, "0") != "0":
+                            packet[dst_key] = supplementary[src_key]
+            else:
+                # ── Legacy sequential extraction (fallback) ──
+                log("WARN", "Ensemble extractor not available; using legacy extraction.")
+
+                # ── Strategy 1: CSS Selectors ──
+                extracted_css = DataExtractor._extract_via_css(driver)
+                if extracted_css:
+                    packet.update(extracted_css)
+                    packet["extraction_method"] = "css_selector"
+                    log("DATA", "CSS extraction OK.")
+
+                # ── Strategy 2: Regex fallback ──
+                if packet["current_power"] == "0" and packet["daily_yield"] == "0":
+                    extracted_regex = DataExtractor._extract_via_regex(body_text)
+                    if extracted_regex:
+                        packet.update(extracted_regex)
+                        packet["extraction_method"] = "regex"
+                        log("DATA", "Regex fallback used.")
+
+                # ── Strategy 3: JavaScript extraction ──
+                if packet["current_power"] == "0":
+                    js_data = DataExtractor._extract_via_js(driver)
+                    if js_data:
+                        packet.update(js_data)
+                        packet["extraction_method"] = "javascript"
+                        log("DATA", "JavaScript extraction used.")
+
+                # ── Strategy 4: Device tab for voltage/current ──
+                device_data = DataExtractor._explore_device_tab(driver, wait)
+                if device_data:
+                    for key in ["voltage_sample", "current_sample", "frequency_hz", "temperature_c"]:
+                        if device_data.get(key, "0") != "0":
+                            packet[key] = device_data[key]
 
             # Post-extraction confidence upgrade: if we captured non-zero core metrics, treat portal as loaded.
             if (to_float(packet.get("current_power")) > 0
@@ -1403,27 +1458,51 @@ class DataExtractor:
             log("DIAG", f"CSS money values found: {values}")
 
             # Extract current power from the sites table column "Power Generating(kW)"
+            # IMPROVED: Find by header text first, fall back to column index
             try:
-                table_cells = driver.find_elements(By.CSS_SELECTOR, ".el-table__body td .cell")
-                for cell in table_cells:
-                    txt = cell.text.strip()
-                    if txt and re.match(r"^[\d.,]+$", txt):
-                        val = float(txt.replace(",", ""))
-                        # The power column typically shows small values (< capacity)
-                        # while yield columns show larger values.
-                        # Power Generating is the 10th column (0-indexed: 9)
-                        # We find it by checking parent column class for column_10
-                        pass
-                # More reliable: use the table header/cell mapping
-                power_cells = driver.find_elements(
-                    By.CSS_SELECTOR, ".el-table_1_column_10 .cell"
+                power_found = False
+
+                # Method A: Header-based column finding (robust against reorder)
+                headers = driver.find_elements(
+                    By.CSS_SELECTOR, ".el-table__header-wrapper th .cell"
                 )
-                for cell in power_cells:
-                    txt = cell.text.strip()
-                    if txt and re.match(r"^[\d.,]+$", txt):
-                        result["current_power"] = txt
-                        log("DIAG", f"Power from sites table: {txt} kW")
+                power_col_idx = None
+                for idx, hdr in enumerate(headers):
+                    txt = hdr.text.strip().lower()
+                    if any(kw in txt for kw in ["power", "generating", "kw"]):
+                        power_col_idx = idx
+                        log("DIAG", f"Power column found at index {idx}: '{hdr.text}'")
                         break
+
+                if power_col_idx is not None:
+                    rows = driver.find_elements(
+                        By.CSS_SELECTOR, ".el-table__body-wrapper .el-table__row"
+                    )
+                    for row in rows:
+                        cells = row.find_elements(By.CSS_SELECTOR, "td .cell")
+                        if power_col_idx < len(cells):
+                            txt = cells[power_col_idx].text.strip()
+                            if txt and re.match(r"^[\d.,]+$", txt):
+                                result["current_power"] = txt
+                                power_found = True
+                                log("DIAG", f"Power via header: {txt} kW")
+                                break
+
+                # Method B: Legacy column selector (fallback)
+                if not power_found:
+                    for col_sel in [".el-table_1_column_10 .cell",
+                                    ".el-table_1_column_9 .cell",
+                                    ".el-table_1_column_11 .cell"]:
+                        power_cells = driver.find_elements(By.CSS_SELECTOR, col_sel)
+                        for cell in power_cells:
+                            txt = cell.text.strip()
+                            if txt and re.match(r"^[\d.,]+$", txt):
+                                result["current_power"] = txt
+                                log("DIAG", f"Power from legacy selector: {txt} kW")
+                                power_found = True
+                                break
+                        if power_found:
+                            break
             except Exception as e:
                 log("DIAG", f"Could not extract power from table: {e}")
 
@@ -1469,7 +1548,12 @@ class DataExtractor:
 
     @staticmethod
     def _extract_via_js(driver):
-        """Use JavaScript to extract text from Vue-rendered DOM elements."""
+        """Use JavaScript to extract text from Vue-rendered DOM elements.
+
+        FIXED: Field mapping now matches CSS strategy:
+        .plant-money spans → [daily_yield, monthly_yield, total_yield, income]
+        Current power comes from the sites table, NOT from .plant-money.
+        """
         result = {}
         try:
             js_code = """
@@ -1483,12 +1567,40 @@ class DataExtractor:
             """
             values = driver.execute_script(js_code)
             if values and len(values) >= 3:
-                result["current_power"] = values[0]
-                result["daily_yield"] = values[1]
+                # FIXED: Correct mapping (was previously assigning values[0] to current_power)
+                # .plant-money spans: [Today Yield, Monthly Yield, Total Yield, Income]
+                result["daily_yield"] = values[0]
+                result["monthly_yield"] = values[1]
                 result["total_yield"] = values[2]
                 if len(values) >= 4:
                     result["income"] = values[3]
                 log("DIAG", f"JS extracted: {values}")
+
+            # Extract current power from sites table via JS
+            js_power = """
+            var headers = document.querySelectorAll('.el-table__header-wrapper th .cell');
+            var powerIdx = -1;
+            for (var i = 0; i < headers.length; i++) {
+                var t = headers[i].textContent.toLowerCase();
+                if (t.indexOf('power') !== -1 || t.indexOf('generating') !== -1) {
+                    powerIdx = i; break;
+                }
+            }
+            if (powerIdx === -1) return null;
+            var rows = document.querySelectorAll('.el-table__body-wrapper .el-table__row');
+            for (var r = 0; r < rows.length; r++) {
+                var cells = rows[r].querySelectorAll('td .cell');
+                if (powerIdx < cells.length) {
+                    var txt = cells[powerIdx].textContent.trim();
+                    if (/^[\\d.,]+$/.test(txt)) return txt;
+                }
+            }
+            return null;
+            """
+            power_val = driver.execute_script(js_power)
+            if power_val:
+                result["current_power"] = power_val
+                log("DIAG", f"JS power from table: {power_val}")
         except Exception as e:
             log("WARN", f"JS extraction error: {e}")
         return result if result else None
