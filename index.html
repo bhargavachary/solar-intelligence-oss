@@ -1202,7 +1202,9 @@
             return (a.ts ? a.ts.getTime() : 0) - (b.ts ? b.ts.getTime() : 0);
         });
 
-        return { meta: meta, records: records, analytics: analytics, summary: summary };
+        // Preserve today's actual peak from data (synthetic bell curve may understate it)
+        var todayPeak = (today && today.peak_power_kw) ? today.peak_power_kw : 0;
+        return { meta: meta, records: records, analytics: analytics, summary: summary, todayPeak: todayPeak };
     }
 
     function computeMetrics(records) {
@@ -1764,6 +1766,17 @@
             var result = normalizeRecords(payload);
             var meta = result.meta, records = result.records, analytics = result.analytics, summary = result.summary;
             var m = computeMetrics(records);
+            // Use actual peak from data if higher than synthetic records peak
+            var dataPeak = result.todayPeak || 0;
+            if (analytics && analytics.production_monitoring && analytics.production_monitoring.peak_power_kw) {
+                dataPeak = Math.max(dataPeak, analytics.production_monitoring.peak_power_kw);
+            }
+            if (analytics && analytics.statistics && analytics.statistics.power && analytics.statistics.power.max) {
+                dataPeak = Math.max(dataPeak, analytics.statistics.power.max);
+            }
+            if (dataPeak > m.peakPower) {
+                m.peakPower = dataPeak;
+            }
 
             var forecast;
             if (analytics && analytics.seasonal_forecast) {
