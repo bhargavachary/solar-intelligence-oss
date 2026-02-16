@@ -33,7 +33,7 @@ fi
 
 echo "🔄 Fetching LIVE data from Waaree portal..."
 echo "⚠️  NO FALLBACK TO SYNTHETIC DATA - Portal must be accessible"
-python waaree_deep_crawler.py
+/Users/bhargav/repos/waaree_api_access/venv/bin/python3 waaree_deep_crawler.py
 
 if [ ! -f "scraped_data.json" ]; then
     echo "❌ Scraper failed - no REAL data available from portal"
@@ -45,7 +45,7 @@ echo "✅ REAL portal data fetched successfully"
 echo ""
 
 echo "🔄 Running data pipeline..."
-python scripts/update_data.py --source live
+/Users/bhargav/repos/waaree_api_access/venv/bin/python3 scripts/update_data.py --source live
 
 echo "✅ Data pipeline complete"
 echo ""
