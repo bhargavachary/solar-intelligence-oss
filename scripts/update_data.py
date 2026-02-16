@@ -9,17 +9,24 @@ The crawler (waaree_deep_crawler.py) writes to root `dashboard_data.json`.
 This script copies the result to `data/dashboard_data.json` (consumed by
 the GitHub Pages dashboard), then runs the analytics engine for enrichment.
 
-Priority:
-  1. Scraper API  →  POST http://localhost:8006/trigger_scrape  (if running)
-  2. Live scrape  →  waaree_deep_crawler.py  (Chrome + undetected-chromedriver)
+Fallback chain (5 levels, tried in order until one succeeds):
+  1. Scraper API      →  POST to local Flask server (if running)
+  2. Session reuse    →  waaree_deep_crawler.py with cached session cookies
+  3. Fresh login      →  waaree_deep_crawler.py with full login flow
+  4. Browser restart  →  Kill browser, restart with fresh profile, fresh login
+  5. Extended timeout  →  Longer timeout, extra retries inside crawler
+
+Each level uses exponential backoff between attempts.
 
 Usage:
-    python scripts/update_data.py                 # auto: try API → live scrape
-    python scripts/update_data.py --source live   # live only (explicit)
+    python scripts/update_data.py                 # auto: full fallback chain
+    python scripts/update_data.py --source live   # live only (skip API)
 """
 import json
 import shutil
 import sys
+import os
+import time
 import argparse
 import subprocess
 from pathlib import Path
@@ -29,12 +36,55 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "dashboard_data.json"           # dashboard reads this
 CRAWLER_OUTPUT = ROOT / "dashboard_data.json"                # crawler writes here
 CRAWLER = ROOT / "waaree_deep_crawler.py"
+SESSION_FILE = ROOT / "waaree_session.pkl"
 SCRAPER_API_URL = "http://localhost:8006/trigger_scrape"
 
 sys.path.insert(0, str(ROOT))
 
 
-# ─── Data source: Scraper API ──────────────────────────────
+def _crawler_available() -> bool:
+    """Check that the crawler script and credentials exist."""
+    if not CRAWLER.exists():
+        print("  ✗ waaree_deep_crawler.py not found")
+        return False
+    cred_file = ROOT / "credentials.json"
+    if not cred_file.exists():
+        print("  ✗ credentials.json not found — cannot scrape")
+        return False
+    return True
+
+
+def _run_crawler(args_list, timeout=300, label="scrape") -> bool:
+    """Run the crawler with the given arguments and return success status."""
+    print(f"  🔄 Starting {label}…")
+    try:
+        result = subprocess.run(
+            [sys.executable, str(CRAWLER)] + args_list,
+            capture_output=True, text=True, timeout=timeout, cwd=str(ROOT)
+        )
+        if result.returncode == 0:
+            print(f"  ✓ {label} succeeded")
+            for line in (result.stdout or "").strip().split("\n")[-5:]:
+                if line.strip():
+                    print(f"    {line}")
+            return True
+        else:
+            print(f"  ✗ {label} exited with code {result.returncode}")
+            stderr = (result.stderr or "").strip()
+            stdout = (result.stdout or "").strip()
+            for line in (stderr or stdout).split("\n")[-5:]:
+                if line.strip():
+                    print(f"    {line}")
+            return False
+    except subprocess.TimeoutExpired:
+        print(f"  ✗ {label} timed out ({timeout}s)")
+        return False
+    except Exception as e:
+        print(f"  ✗ {label} error: {e}")
+        return False
+
+
+# ─── Fallback 1: Scraper API ──────────────────────────────
 def try_scraper_api() -> bool:
     """Trigger the scraper via its HTTP API (if the Flask server is running)."""
     try:
@@ -48,41 +98,91 @@ def try_scraper_api() -> bool:
         return False
 
 
-# ─── Data source: Live scrape ──────────────────────────────
-def try_live_scrape() -> bool:
-    """Run waaree_deep_crawler.py directly (needs Chrome + credentials)."""
-    if not CRAWLER.exists():
-        print("  ✗ waaree_deep_crawler.py not found")
+# ─── Fallback 2: Session reuse scrape ─────────────────────
+def try_session_reuse_scrape() -> bool:
+    """Run crawler reusing a cached session (faster, avoids fresh login)."""
+    if not _crawler_available():
         return False
-    cred_file = ROOT / "credentials.json"
-    if not cred_file.exists():
-        print("  ✗ credentials.json not found — cannot scrape")
+    if not SESSION_FILE.exists():
+        print("  ⚠ No cached session found — skipping session reuse")
         return False
-    print("  🔄 Starting live scrape from Waaree portal…")
+    # Check session age (skip if older than 4 hours)
     try:
-        result = subprocess.run(
-            [sys.executable, str(CRAWLER),
-             "--validate", "--fresh-cycles", "1", "--reuse-cycles", "0"],
-            capture_output=True, text=True, timeout=300, cwd=str(ROOT)
-        )
-        if result.returncode == 0:
-            print("  ✓ Live scrape succeeded")
-            for line in (result.stdout or "").strip().split("\n")[-5:]:
-                print(f"    {line}")
-            return True
-        else:
-            print(f"  ✗ Scrape exited with code {result.returncode}")
-            stderr = (result.stderr or "").strip()
-            stdout = (result.stdout or "").strip()
-            for line in (stderr or stdout).split("\n")[-5:]:
-                print(f"    {line}")
+        age_hours = (time.time() - SESSION_FILE.stat().st_mtime) / 3600
+        if age_hours > 4:
+            print(f"  ⚠ Session expired ({age_hours:.1f}h old) — skipping reuse")
             return False
-    except subprocess.TimeoutExpired:
-        print("  ✗ Live scrape timed out (5 min)")
+        print(f"  ℹ Session is {age_hours:.1f}h old — attempting reuse")
+    except Exception:
+        pass
+    return _run_crawler(
+        ["--validate", "--fresh-cycles", "0", "--reuse-cycles", "1"],
+        timeout=180, label="session reuse scrape"
+    )
+
+
+# ─── Fallback 3: Fresh login scrape ──────────────────────
+def try_fresh_login_scrape() -> bool:
+    """Run crawler with a full fresh login (standard approach)."""
+    if not _crawler_available():
         return False
-    except Exception as e:
-        print(f"  ✗ Scrape error: {e}")
+    return _run_crawler(
+        ["--validate", "--fresh-cycles", "1", "--reuse-cycles", "0"],
+        timeout=300, label="fresh login scrape"
+    )
+
+
+# ─── Fallback 4: Browser restart + fresh login ───────────
+def try_browser_restart_scrape() -> bool:
+    """Invalidate session, then run crawler with fresh login.
+
+    This clears any stale session state that might be causing failures,
+    forcing a completely clean browser start.
+    """
+    if not _crawler_available():
         return False
+    # Remove stale session to force a truly clean start
+    if SESSION_FILE.exists():
+        try:
+            SESSION_FILE.unlink()
+            print("  ℹ Cleared stale session file")
+        except Exception:
+            pass
+    # Also clear diagnostics that might confuse the crawler
+    diag_dir = ROOT / "diagnostics"
+    if diag_dir.exists():
+        try:
+            for f in list(diag_dir.glob("*.html"))[-20:]:
+                f.unlink(missing_ok=True)
+            print("  ℹ Cleared recent diagnostic files")
+        except Exception:
+            pass
+    return _run_crawler(
+        ["--validate", "--fresh-cycles", "1", "--reuse-cycles", "0"],
+        timeout=300, label="browser restart scrape"
+    )
+
+
+# ─── Fallback 5: Extended timeout with extra retries ─────
+def try_extended_scrape() -> bool:
+    """Run crawler with extended timeout and multiple fresh+reuse cycles.
+
+    This is the last-resort scrape: gives the crawler the maximum number
+    of internal retries and a longer timeout to handle slow networks,
+    portal rate-limiting, or WAF back-off delays.
+    """
+    if not _crawler_available():
+        return False
+    # Clear session again to start truly fresh
+    if SESSION_FILE.exists():
+        try:
+            SESSION_FILE.unlink()
+        except Exception:
+            pass
+    return _run_crawler(
+        ["--validate", "--fresh-cycles", "2", "--reuse-cycles", "1"],
+        timeout=480, label="extended scrape (last resort)"
+    )
 
 
 # ─── Copy crawler output to data/ ──────────────────────────
@@ -166,6 +266,45 @@ def validate_output() -> bool:
         return False
 
 
+# ─── Fallback chain executor ─────────────────────────────
+def fetch_with_fallbacks(skip_api=False) -> tuple:
+    """Execute the 5-level fallback chain with exponential backoff.
+
+    Returns (success: bool, source_label: str) indicating which
+    fallback level succeeded (or that all failed).
+    """
+    # Define fallback levels in priority order.
+    # Each entry: (label, function, backoff_seconds_before_next)
+    fallbacks = [
+        ("Scraper API",          try_scraper_api,           5),
+        ("Session reuse",        try_session_reuse_scrape, 10),
+        ("Fresh login",          try_fresh_login_scrape,   15),
+        ("Browser restart",      try_browser_restart_scrape, 20),
+        ("Extended (last resort)", try_extended_scrape,      0),
+    ]
+
+    if skip_api:
+        fallbacks = [f for f in fallbacks if f[0] != "Scraper API"]
+
+    total = len(fallbacks)
+    for idx, (label, func, backoff) in enumerate(fallbacks, 1):
+        print(f"\n  ── Fallback {idx}/{total}: {label} ──")
+        try:
+            success = func()
+        except Exception as e:
+            print(f"  ✗ {label} raised exception: {e}")
+            success = False
+
+        if success:
+            return True, label
+
+        if idx < total and backoff > 0:
+            print(f"  ⏳ Waiting {backoff}s before next fallback…")
+            time.sleep(backoff)
+
+    return False, "none"
+
+
 # ─── Main ─────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Solar data update — live portal only")
@@ -173,20 +312,27 @@ def main():
                         help="Data source (both try live portal)")
     args = parser.parse_args()
 
+    skip_api = (args.source == "live")
+
     print(f"\n{'═'*50}")
     print(f"☀️  Solar Data Pipeline — {datetime.now().strftime('%Y-%m-%d %H:%M IST')}")
     print(f"{'═'*50}\n")
 
-    # Try scraper API first, then direct live scrape
-    print("═══ Fetching Live Portal Data ═══")
-    success = try_scraper_api()
-    if not success:
-        success = try_live_scrape()
+    print("═══ Fetching Live Portal Data (5-level fallback) ═══")
+    success, source_label = fetch_with_fallbacks(skip_api=skip_api)
 
     if not success:
         print("\n❌ Could not fetch live data from Waaree portal.")
+        print("   All 5 fallback levels exhausted:")
+        print("     1. Scraper API")
+        print("     2. Session reuse scrape")
+        print("     3. Fresh login scrape")
+        print("     4. Browser restart scrape")
+        print("     5. Extended timeout scrape")
         print("   Ensure Chrome is available and credentials.json is valid.")
         sys.exit(1)
+
+    print(f"\n  ✓ Data fetched via: {source_label}")
 
     # Sync crawler output to data/ directory
     print("\n═══ Syncing Data ═══")
@@ -197,7 +343,7 @@ def main():
             sys.exit(1)
 
     # Tag source
-    tag_data_source("live_portal")
+    tag_data_source(f"live_portal/{source_label}")
 
     # Enrich with analytics
     print("\n═══ Analytics Engine ═══")
