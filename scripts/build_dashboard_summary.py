@@ -344,6 +344,10 @@ def build_summary(energy_logs, verbose=False):
     first_log = energy_logs[0]
     meta = first_log.get("meta", {})
     
+    # Include today's detailed records for intraday curve visualization
+    today_log = energy_logs[-1]
+    today_records = today_log.get("records", [])
+    
     summary = {
         "meta": {
             "schema_version": "5.0",
@@ -360,6 +364,7 @@ def build_summary(energy_logs, verbose=False):
         },
         "live": get_latest_reading(energy_logs),
         "last_7_days": get_last_n_days(energy_logs, 7),
+        "today_records": today_records,  # Detailed intraday curve data
         "monthly": aggregate_monthly(energy_logs),
         "analytics": compute_analytics(energy_logs),
     }

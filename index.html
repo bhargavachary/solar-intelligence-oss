@@ -1130,10 +1130,29 @@
             }
             var monthlyVal = Math.max(computedMonthly, live.monthly_yield_kwh || 0);
 
-            // Build hourly curve from historical days for chart context
+            // Use actual detailed records if available, otherwise synthesize from summary
             var today = (payload.last_7_days && payload.last_7_days.length > 0)
                 ? payload.last_7_days[payload.last_7_days.length - 1] : null;
-            if (today && today.record_count > 1) {
+            
+            if (payload.today_records && Array.isArray(payload.today_records) && payload.today_records.length > 0) {
+                // Use actual detailed records from energy log
+                raw = payload.today_records.map(function(r) {
+                    return {
+                        timestamp: r.timestamp,
+                        current_power_kw: r.current_power_kw,
+                        daily_yield_kwh: r.daily_yield_kwh,
+                        monthly_yield_kwh: r.monthly_yield_kwh,
+                        total_yield_kwh: r.total_yield_kwh,
+                        income_inr: r.income_inr,
+                        voltage_v: r.voltage_v || 0,
+                        current_a: r.current_a || 0,
+                        frequency_hz: r.frequency_hz || 0,
+                        temperature_c: r.temperature_c || 0,
+                        status: r.status || 'Online'
+                    };
+                });
+            } else if (today && today.record_count > 1) {
+                // Synthesize bell curve from summary data (legacy fallback)
                 var numRecords = Math.max(today.record_count, 2);
                 for (var i = 0; i < numRecords; i++) {
                     var hour = 6 + Math.round(i * 11 / (numRecords - 1));
@@ -1157,21 +1176,21 @@
                         status: 'Online'
                     });
                 }
+            } else {
+                // Fallback: just use the live reading
+                raw.push({
+                    timestamp: live.timestamp,
+                    current_power_kw: live.power_kw,
+                    daily_yield_kwh: live.daily_yield_kwh,
+                    monthly_yield_kwh: monthlyVal,
+                    total_yield_kwh: live.total_yield_kwh,
+                    income_inr: live.income_inr,
+                    voltage_v: live.voltage_v || 0,
+                    current_a: live.current_a || 0,
+                    temperature_c: live.temperature_c || 0,
+                    status: live.status || 'Online'
+                });
             }
-
-            // Always append the REAL live reading as the latest record
-            raw.push({
-                timestamp: live.timestamp,
-                current_power_kw: live.power_kw,
-                daily_yield_kwh: live.daily_yield_kwh,
-                monthly_yield_kwh: monthlyVal,
-                total_yield_kwh: live.total_yield_kwh,
-                income_inr: live.income_inr,
-                voltage_v: live.voltage_v || 0,
-                current_a: live.current_a || 0,
-                temperature_c: live.temperature_c || 0,
-                status: live.status || 'Online'
-            });
         } else {
             // Legacy structure: history array
             raw = Array.isArray(payload) ? payload : (payload && payload.history ? payload.history : []);
@@ -1766,16 +1785,9 @@
             var result = normalizeRecords(payload);
             var meta = result.meta, records = result.records, analytics = result.analytics, summary = result.summary;
             var m = computeMetrics(records);
-            // Use actual peak from data if higher than synthetic records peak
-            var dataPeak = result.todayPeak || 0;
-            if (analytics && analytics.production_monitoring && analytics.production_monitoring.peak_power_kw) {
-                dataPeak = Math.max(dataPeak, analytics.production_monitoring.peak_power_kw);
-            }
-            if (analytics && analytics.statistics && analytics.statistics.power && analytics.statistics.power.max) {
-                dataPeak = Math.max(dataPeak, analytics.statistics.power.max);
-            }
-            if (dataPeak > m.peakPower) {
-                m.peakPower = dataPeak;
+            // Use today's actual peak from summary data (overrides computed peak from records)
+            if (result.todayPeak && result.todayPeak > 0) {
+                m.peakPower = result.todayPeak;
             }
 
             var forecast;
