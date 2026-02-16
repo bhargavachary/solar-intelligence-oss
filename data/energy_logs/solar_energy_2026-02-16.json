@@ -4,20 +4,20 @@
   "meta": {
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
-    "archived_at": "2026-02-16 11:16:39",
-    "record_count": 1,
+    "archived_at": "2026-02-16 21:15:50",
+    "record_count": 2,
     "sampling_interval": "hourly",
     "data_source": "live_portal/Browser restart"
   },
   "daily_summary": {
     "date": "2026-02-16",
-    "total_yield_kwh": 3.9,
+    "total_yield_kwh": 11.3,
     "peak_power_kw": 1.67,
     "avg_power_kw": 1.67,
     "avg_voltage_v": 0,
-    "record_count": 1,
+    "record_count": 2,
     "first_reading": "2026-02-16 11:16:38",
-    "last_reading": "2026-02-16 11:16:38"
+    "last_reading": "2026-02-16 21:15:40"
   },
   "records": [
     {
@@ -37,6 +37,25 @@
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "\u00a9 WAAREE = Home > Sites \u00bb MySites GC bhargavachary |_Enduser \u00ab3 One with the Sun \u00ae Overview Total 4 Normal Alarm a) Offline cy 1 e 1 @ 0 G 0 :16:3 @ Stes 11: 16 : 37 2026-02-16 Monday | Status Statist",
       "extraction_method": "css_selector",
+      "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-02-16 21:15:40",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 0.0,
+      "daily_yield_kwh": 11.3,
+      "monthly_yield_kwh": 31.8,
+      "total_yield_kwh": 79.6,
+      "income_inr": 318.4,
+      "voltage_v": 0.0,
+      "current_a": 0.0,
+      "frequency_hz": 0.0,
+      "temperature_c": 0.0,
+      "status": "Online",
+      "portal_loaded": true,
+      "portal_validation_score": 100,
+      "portal_ocr_excerpt": "\u00a9 WAAREE = Home > Sites \u00bb MySites GC bhargavachary |_Enduser \u00ab3 One with the Sun \u00ae Overview & Total @& Normal (o) Alarm a Offline 1 ; 0 0 GC 1 : : 43 Stes a 21:15:4 2026-02-16 Monday | Status Statisti",
+      "extraction_method": "ensemble/css",
       "anomaly_notes": []
     }
   ]
