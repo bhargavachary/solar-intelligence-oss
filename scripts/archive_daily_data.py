@@ -78,24 +78,81 @@ def extract_records_for_date(data, target_date):
 
 def create_energy_log(data, target_date, force=False):
     """
-    Create an immutable energy log file for the given date.
-    Returns True if log was created, False if skipped.
+    Create or UPDATE an energy log file for the given date.
+    
+    If the log already exists:
+      - Merge new records into the existing log (deduplicate by timestamp)
+      - Update the daily summary with new highs
+      - Preserve existing records
+    
+    Returns True if log was created/updated, False if skipped.
     """
     ENERGY_LOG_DIR.mkdir(parents=True, exist_ok=True)
     
     log_file = ENERGY_LOG_DIR / f"solar_energy_{target_date}.json"
     
-    # Check if log already exists
-    if log_file.exists() and not force:
-        print(f"  ⚠️  Energy log already exists: {log_file.name} (use --force to overwrite)")
-        return False
-    
-    # Extract records
+    # Extract records from current dashboard data
     records, daily_summary = extract_records_for_date(data, target_date)
     
     if not records:
         print(f"  ⚠️  No data found for {target_date}")
         return False
+    
+    # If log exists, MERGE records instead of skipping/overwriting
+    if log_file.exists() and not force:
+        try:
+            with open(log_file) as f:
+                existing = json.load(f)
+            
+            existing_records = existing.get("records", [])
+            existing_timestamps = {r.get("timestamp") for r in existing_records}
+            
+            # Add new records that don't already exist
+            new_count = 0
+            for rec in records:
+                if rec.get("timestamp") not in existing_timestamps:
+                    existing_records.append(rec)
+                    new_count += 1
+            
+            if new_count == 0:
+                print(f"  ℹ️  No new records to add for {target_date} ({len(existing_records)} existing)")
+                return False
+            
+            # Re-sort by timestamp
+            existing_records.sort(key=lambda r: r.get("timestamp", ""))
+            
+            # Recompute daily summary with all records
+            powers = [r.get("current_power_kw", 0) for r in existing_records if r.get("current_power_kw")]
+            voltages = [r.get("voltage_v", 0) for r in existing_records if r.get("voltage_v")]
+            latest = existing_records[-1]
+            
+            merged_summary = {
+                "date": target_date,
+                "total_yield_kwh": latest.get("daily_yield_kwh", 0),
+                "peak_power_kw": max(powers) if powers else 0,
+                "avg_power_kw": sum(powers) / len(powers) if powers else 0,
+                "avg_voltage_v": sum(voltages) / len(voltages) if voltages else 0,
+                "record_count": len(existing_records),
+                "first_reading": existing_records[0].get("timestamp"),
+                "last_reading": existing_records[-1].get("timestamp"),
+            }
+            
+            # Update the log
+            existing["records"] = existing_records
+            existing["daily_summary"] = merged_summary
+            existing["meta"]["archived_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            existing["meta"]["record_count"] = len(existing_records)
+            
+            with open(log_file, "w") as f:
+                json.dump(existing, f, indent=2)
+            
+            print(f"  ✅ Merged {new_count} new records into {log_file.name} "
+                  f"(total: {len(existing_records)} records)")
+            return True
+            
+        except Exception as e:
+            print(f"  ⚠️  Merge failed, will recreate: {e}")
+            # Fall through to create fresh
     
     # Build energy log structure
     meta = data.get("meta", {})
@@ -114,7 +171,7 @@ def create_energy_log(data, target_date, force=False):
         "records": records
     }
     
-    # Write energy log (immutable)
+    # Write energy log
     with open(log_file, "w") as f:
         json.dump(energy_log, f, indent=2)
     

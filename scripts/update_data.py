@@ -234,30 +234,45 @@ def validate_output() -> bool:
     try:
         with open(DATA_FILE) as f:
             data = json.load(f)
-        history = data.get("history", [])
-        meta = data.get("meta", {})
-        checks = {
-            "has_meta": bool(meta),
-            "has_history": len(history) > 0,
-            "has_summary": "summary" in data,
-        }
-        n = len(history)
-        source = meta.get("data_source", "?")
-
-        # Sanity checks on values
-        if history:
-            latest = history[-1]
-            total = latest.get("total_yield_kwh", 0)
-            daily = latest.get("daily_yield_kwh", 0)
-            power = latest.get("current_power_kw", 0)
-            checks["total_yield_reasonable"] = 0 <= total <= 50000  # under 50 MWh for a 2kW system
-            checks["daily_yield_reasonable"] = 0 <= daily <= 25     # max ~20 kWh/day for 2.32kW
-            checks["power_reasonable"] = 0 <= power <= 5            # under 5 kW
+        
+        schema = data.get("meta", {}).get("schema_version", "unknown")
+        
+        # Handle both v4.0 (crawler) and v5.0 (build_dashboard_summary) schemas
+        if schema == "5.0":
+            # v5.0 schema: live, last_7_days, monthly, analytics
+            live = data.get("live", {})
+            last7 = data.get("last_7_days", [])
+            checks = {
+                "has_meta": bool(data.get("meta")),
+                "has_live": bool(live),
+                "has_last_7_days": len(last7) > 0,
+            }
+            if live:
+                checks["power_reasonable"] = 0 <= live.get("power_kw", 0) <= 5
+                checks["daily_reasonable"] = 0 <= live.get("daily_yield_kwh", 0) <= 25
+                checks["total_reasonable"] = 0 <= live.get("total_yield_kwh", 0) <= 50000
+            n = len(last7)
+            source = data.get("meta", {}).get("data_source", "?")
+        else:
+            # v4.0 schema: meta, summary, history
+            history = data.get("history", [])
+            checks = {
+                "has_meta": bool(data.get("meta")),
+                "has_history": len(history) > 0,
+                "has_summary": "summary" in data,
+            }
+            n = len(history)
+            source = data.get("meta", {}).get("data_source", "?")
+            if history:
+                latest = history[-1]
+                checks["total_yield_reasonable"] = 0 <= latest.get("total_yield_kwh", 0) <= 50000
+                checks["daily_yield_reasonable"] = 0 <= latest.get("daily_yield_kwh", 0) <= 25
+                checks["power_reasonable"] = 0 <= latest.get("current_power_kw", 0) <= 5
 
         all_ok = all(checks.values())
         status = "✓" if all_ok else "✗"
         failed = [k for k, v in checks.items() if not v]
-        print(f"  {status} Validation: {n} records, source={source}")
+        print(f"  {status} Validation: schema={schema}, {n} records/days, source={source}")
         if failed:
             print(f"    Failed checks: {', '.join(failed)}")
         return all_ok
@@ -345,11 +360,9 @@ def main():
     # Tag source
     tag_data_source(f"live_portal/{source_label}")
 
-    # Enrich with analytics
-    print("\n═══ Analytics Engine ═══")
-    enrich_analytics()
-    
-    # Log today's data (immutable daily energy log)
+    # Log today's data FIRST (merge records into daily energy log)
+    # This must happen BEFORE build_dashboard_summary so the fresh data
+    # is available in energy_logs for the v5.0 rebuild.
     print("\n═══ Daily Energy Log ═══")
     try:
         log_cmd = [sys.executable, str(ROOT / "scripts" / "archive_daily_data.py")]
@@ -362,10 +375,28 @@ def main():
             print(f"  ⚠️  Logging failed: {result.stderr[:200]}")
     except Exception as e:
         print(f"  ⚠️  Logging error: {e}")
-    
-    # NOTE: build_dashboard_summary.py is DISABLED during live updates
-    # It rebuilds from energy_logs and would overwrite fresh crawler data.
-    # Only use it manually for historical rebuilds: python scripts/build_dashboard_summary.py
+
+    # Rebuild dashboard summary (v5.0 schema) from all energy_logs
+    # This aggregates all days including today's freshly archived data
+    # and writes the proper v5.0 format to data/dashboard_data.json
+    print("\n═══ Dashboard Summary (v5.0) ═══")
+    try:
+        build_cmd = [sys.executable, str(ROOT / "scripts" / "build_dashboard_summary.py")]
+        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=30)
+        if result.returncode == 0:
+            for line in (result.stdout or "").strip().split("\n")[-3:]:
+                if line.strip():
+                    print(f"  {line}")
+        else:
+            print(f"  ⚠️  Summary build failed: {result.stderr[:200]}")
+            print("  ℹ️  Keeping v4.0 crawler output as dashboard data")
+    except Exception as e:
+        print(f"  ⚠️  Summary build error: {e}")
+        print("  ℹ️  Keeping v4.0 crawler output as dashboard data")
+
+    # Enrich with analytics
+    print("\n═══ Analytics Engine ═══")
+    enrich_analytics()
 
     # Validate
     print("\n═══ Validation ═══")
@@ -375,18 +406,29 @@ def main():
     if DATA_FILE.exists():
         with open(DATA_FILE) as f:
             data = json.load(f)
-        latest = data.get("history", [{}])[-1]
+        schema = data.get("meta", {}).get("schema_version", "?")
         source = data.get("meta", {}).get("data_source", "unknown")
-        total = latest.get("total_yield_kwh", 0)
-        daily = latest.get("daily_yield_kwh", 0)
-        print(f"\n{'═'*50}")
-        print(f"📊 Dashboard updated  •  Source: {source}")
-        print(f"   {len(data.get('history', []))} records  •  "
-              f"Latest: {latest.get('timestamp', '--')}")
-        print(f"   Power: {latest.get('current_power_kw', '--')} kW  •  "
-              f"Daily: {daily} kWh  •  "
-              f"Lifetime: {total} kWh")
-        print(f"{'═'*50}\n")
+        
+        if schema == "5.0":
+            live = data.get("live", {})
+            n_days = len(data.get("last_7_days", []))
+            print(f"\n{'═'*50}")
+            print(f"📊 Dashboard updated (v5.0)  •  Source: {source}")
+            print(f"   {n_days} days  •  Latest: {live.get('timestamp', '--')}")
+            print(f"   Power: {live.get('power_kw', '--')} kW  •  "
+                  f"Daily: {live.get('daily_yield_kwh', 0)} kWh  •  "
+                  f"Lifetime: {live.get('total_yield_kwh', 0)} kWh")
+            print(f"{'═'*50}\n")
+        else:
+            latest = data.get("history", [{}])[-1]
+            print(f"\n{'═'*50}")
+            print(f"📊 Dashboard updated (v{schema})  •  Source: {source}")
+            print(f"   {len(data.get('history', []))} records  •  "
+                  f"Latest: {latest.get('timestamp', '--')}")
+            print(f"   Power: {latest.get('current_power_kw', '--')} kW  •  "
+                  f"Daily: {latest.get('daily_yield_kwh', 0)} kWh  •  "
+                  f"Lifetime: {latest.get('total_yield_kwh', 0)} kWh")
+            print(f"{'═'*50}\n")
 
     sys.exit(0 if ok else 1)
 
