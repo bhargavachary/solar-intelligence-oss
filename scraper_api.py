@@ -33,8 +33,8 @@ last_scrape = {
     "message": "No scrapes yet"
 }
 
-VENV_PYTHON = "/Users/bhargav/Documents/GitHub/waaree_api_access/venv/bin/python3"
-CRAWLER_SCRIPT = "/Users/bhargav/Documents/GitHub/waaree_api_access/waaree_deep_crawler.py"
+VENV_PYTHON = "/Users/bhargav/repos/waaree_api_access/venv/bin/python3"
+CRAWLER_SCRIPT = "/Users/bhargav/repos/waaree_api_access/waaree_deep_crawler.py"
 LOCK_FILE = "/tmp/waaree_scraper.lock"
 
 
@@ -120,7 +120,7 @@ def status():
     """Get current scraper status and last run info"""
     # Read latest dashboard data timestamp
     try:
-        with open('/Users/bhargav/Documents/GitHub/waaree_api_access/data/dashboard_data.json', 'r') as f:
+        with open('/Users/bhargav/repos/waaree_api_access/data/dashboard_data.json', 'r') as f:
             data = json.load(f)
             last_data_update = data.get('summary', {}).get('latest_timestamp')
     except:

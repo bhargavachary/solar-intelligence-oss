@@ -34,7 +34,7 @@ Defined in [requirements.txt](requirements.txt):
 ### Install (recommended: project virtual environment)
 
 ```bash
-cd /Users/bhargav/Documents/GitHub/waaree_api_access
+cd /Users/bhargav/repos/waaree_api_access
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -68,13 +68,13 @@ Field notes:
 
 ### Start crawler
 ```bash
-cd /Users/bhargav/Documents/GitHub/waaree_api_access
+cd /Users/bhargav/repos/waaree_api_access
 python waaree_deep_crawler.py
 ```
 
 ### Start dashboard server
 ```bash
-cd /Users/bhargav/Documents/GitHub/waaree_api_access
+cd /Users/bhargav/repos/waaree_api_access
 python3 -m http.server 8005
 ```
 

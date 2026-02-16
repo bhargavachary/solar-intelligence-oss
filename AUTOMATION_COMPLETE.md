@@ -77,7 +77,7 @@ Should show fresh data 5x daily.
 
 ### Manual Update (Test Now)
 ```bash
-cd /Users/bhargav/Documents/GitHub/waaree_api_access
+cd /Users/bhargav/repos/waaree_api_access
 ./update-local.sh
 ```
 
@@ -94,7 +94,7 @@ crontab -r
 
 ### Restart Automation
 ```bash
-crontab /Users/bhargav/Documents/GitHub/waaree_api_access/solar-crontab.txt
+crontab /Users/bhargav/repos/waaree_api_access/solar-crontab.txt
 ```
 
 ---

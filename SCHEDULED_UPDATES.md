@@ -48,7 +48,7 @@ tail -f /tmp/solar-update.log
 
 ### Manually Trigger (for testing)
 ```bash
-cd /Users/bhargav/Documents/GitHub/waaree_api_access
+cd /Users/bhargav/repos/waaree_api_access
 ./update-local.sh
 ```
 
@@ -66,7 +66,7 @@ Edit the schedule directly in your default editor.
 
 ### Reinstall Schedule
 ```bash
-crontab /Users/bhargav/Documents/GitHub/waaree_api_access/solar-crontab.txt
+crontab /Users/bhargav/repos/waaree_api_access/solar-crontab.txt
 ```
 
 ---
@@ -103,13 +103,13 @@ crontab /Users/bhargav/Documents/GitHub/waaree_api_access/solar-crontab.txt
 
 3. **Verify Chrome is working:**
    ```bash
-   cd /Users/bhargav/Documents/GitHub/waaree_api_access
+   cd /Users/bhargav/repos/waaree_api_access
    ./update-local.sh
    ```
 
 4. **Reinstall schedule:**
    ```bash
-   crontab /Users/bhargav/Documents/GitHub/waaree_api_access/solar-crontab.txt
+   crontab /Users/bhargav/repos/waaree_api_access/solar-crontab.txt
    ```
 
 ### Mac Must Be Awake
