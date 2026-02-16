@@ -1,0 +1,32 @@
+name: Test Update Solar Data
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Test secrets
+        run: |
+          echo "Username set: ${{ secrets.WAAREE_USERNAME != '' }}"
+          echo "Password set: ${{ secrets.WAAREE_PASSWORD != '' }}"
+          echo "Plant ID set: ${{ secrets.WAAREE_PLANT_ID != '' }}"
+      
+      - name: Check data directory
+        run: |
+          ls -la data/
+          echo "Dashboard data:"
+          cat data/dashboard_data.json | jq '.meta'
