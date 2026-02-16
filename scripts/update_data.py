@@ -363,19 +363,9 @@ def main():
     except Exception as e:
         print(f"  ⚠️  Logging error: {e}")
     
-    # Build lightweight dashboard summary
-    print("\n═══ Dashboard Summary ═══")
-    try:
-        builder_cmd = [sys.executable, str(ROOT / "scripts" / "build_dashboard_summary.py")]
-        result = subprocess.run(builder_cmd, capture_output=True, text=True, timeout=30)
-        if result.returncode == 0:
-            for line in (result.stdout or "").strip().split("\n")[-3:]:
-                if line.strip():
-                    print(f"  {line}")
-        else:
-            print(f"  ⚠️  Builder failed: {result.stderr[:200]}")
-    except Exception as e:
-        print(f"  ⚠️  Builder error: {e}")
+    # NOTE: build_dashboard_summary.py is DISABLED during live updates
+    # It rebuilds from energy_logs and would overwrite fresh crawler data.
+    # Only use it manually for historical rebuilds: python scripts/build_dashboard_summary.py
 
     # Validate
     print("\n═══ Validation ═══")
