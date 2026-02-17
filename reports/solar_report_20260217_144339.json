@@ -1,0 +1,122 @@
+{
+  "report_generated": "2026-02-17T14:43:39.301606",
+  "report_period": "February 17, 2026",
+  "system_overview": {
+    "plant_name": "DJA Kuteer",
+    "location": "Berhampur, Golanthara Ganjam Odisha",
+    "capacity_kw": 2.32,
+    "installation_date": "2026-02-14 09:15:09 IST+0530",
+    "status": "Online",
+    "owner": "D K Bhargav Achary",
+    "owner_email": "bhargav.achary13@gmail.com",
+    "owner_phone": "9178320962"
+  },
+  "hardware_details": {
+    "inverter_sn": "B0VS3320598K520",
+    "inverter_id": "8212a76e-0625-4452-bb06-45b2295de7a6",
+    "inverter_type": "WAAREE",
+    "inverter_model": "S3",
+    "communication_module_sn": "B09W6DUF584A114",
+    "communication_module_type": "W6",
+    "module_firmware": "1.07",
+    "module_signal": "4/4 bars",
+    "pv_string_count": 1,
+    "battery_enabled": false,
+    "wifi_meter": false
+  },
+  "live_status": {
+    "current_power_kw": 1.355,
+    "today_generation_kwh": 9.4,
+    "total_generation_kwh": 89,
+    "last_data_update": "2026-02-17 14:42:11 IST+0530",
+    "feed_in_date": "2026-02-14 09:38:00 IST+0530"
+  },
+  "daily_performance": {
+    "date": "2026-02-17",
+    "total_kwh": 9.4,
+    "peak_power_kw": 1.355,
+    "hourly_breakdown": [
+      {
+        "hour": 8,
+        "kwh": 0.2
+      },
+      {
+        "hour": 9,
+        "kwh": 0.6
+      },
+      {
+        "hour": 10,
+        "kwh": 1.0
+      },
+      {
+        "hour": 11,
+        "kwh": 1.3
+      },
+      {
+        "hour": 12,
+        "kwh": 1.4
+      },
+      {
+        "hour": 13,
+        "kwh": 1.6
+      },
+      {
+        "hour": 14,
+        "kwh": 1.6
+      },
+      {
+        "hour": 15,
+        "kwh": 1.0
+      }
+    ],
+    "hours_active": 8
+  },
+  "monthly_performance": {
+    "year_month": "February 2026",
+    "total_kwh": 41.2,
+    "days_active": 4,
+    "daily_average_kwh": 10.3,
+    "best_day": 11.299999999999997,
+    "best_day_date": "Feb 16",
+    "daily_breakdown": [
+      {
+        "day": "Feb 14",
+        "kwh": 9.4
+      },
+      {
+        "day": "Feb 15",
+        "kwh": 11.1
+      },
+      {
+        "day": "Feb 16",
+        "kwh": 11.3
+      },
+      {
+        "day": "Feb 17",
+        "kwh": 9.4
+      }
+    ]
+  },
+  "yearly_performance": {
+    "year": 2026,
+    "total_kwh": 41.2,
+    "months_active": 1,
+    "monthly_breakdown": [
+      {
+        "month": "Feb",
+        "kwh": 41.2
+      }
+    ]
+  },
+  "efficiency_metrics": {
+    "capacity_utilization": "58.4%",
+    "daily_performance_ratio": "81.0%",
+    "system_days_operating": 4
+  },
+  "api_information": {
+    "api_key_status": "Valid",
+    "daily_quota": 1440,
+    "calls_remaining": 1440,
+    "usage_today": 0
+  }
+}
