@@ -24,8 +24,8 @@ via a reverse-engineered REST API and renders an interactive single-page dashboa
         ┌──────────┴──────────┐
         ▼                     ▼
 ┌───────────────┐     ┌──────────────────┐
-│ scraper_api.py│     │ generate_report  │
-│ (Flask :8006) │     │ (CLI reports)    │
+│ scraper_api.py│     │ update_data.py   │
+│ (Flask :8006) │     │ (pipeline CLI)   │
 │               │     └──────────────────┘
 │ /trigger_scrape│
 │ /api/live      │
@@ -50,19 +50,20 @@ via a reverse-engineered REST API and renders an interactive single-page dashboa
 | **API Client** | `waaree_api_client.py` | Core library: auth, signature, all API calls |
 | **API Server** | `scraper_api.py` | Flask HTTP server for dashboard updates |
 | **Dashboard** | `index.html` | Single-file interactive dashboard (Chart.js) |
-| **Report Generator** | `generate_report.py` | CLI tool for comprehensive system reports |
-| **Update Script** | `update-local.sh` | One-command data refresh + git push |
+| **Update Pipeline** | `update_data.py` | Complete fetch → log → CSV → push pipeline |
+| **Update Script** | `update-local.sh` | Thin wrapper around `update_data.py` |
 | **Data** | `data/dashboard.json` | Live dashboard payload (schema v5.0) |
 | **Energy Logs** | `data/energy_logs/` | Daily JSON logs (immutable historical record) |
+| **CSV History** | `data/energy_history.csv` | Consolidated daily table (rows=days, cols=hours) |
 | **Credentials** | `credentials.json` | Portal login (gitignored) |
 | **Token Cache** | `.waaree_token.json` | Cached JWT token (gitignored) |
 
 ## Data Flow
 
-1. `update-local.sh` (or cron) calls `waaree_api_client.py`
-2. Client authenticates with Waaree portal (MD5 signature + JWT)
-3. Fetches: current power, hourly/daily/monthly generation
-4. `scraper_api.py` builds schema v5.0 JSON → writes `data/dashboard.json`
+1. `update-local.sh` (or cron) calls `update_data.py`
+2. Pipeline authenticates via `waaree_api_client.py` (MD5 signature + JWT)
+3. `scraper_api.py` builds schema v5.0 JSON → writes `data/dashboard.json`
+4. `update_data.py` archives daily energy log + updates CSV history
 5. Git push triggers GitHub Pages deploy
 6. `index.html` loads `data/dashboard.json` and renders charts/cards
 

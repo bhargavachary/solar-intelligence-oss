@@ -41,23 +41,17 @@ Create `credentials.json` in the project root:
 ### CLI Data Access
 
 ```bash
-# Live dashboard summary
-python3 waaree_api_client.py --dashboard
+# Fetch latest data (no push)
+python3 update_data.py
 
-# Today's hourly generation
-python3 waaree_api_client.py --hourly
+# Fetch + commit + push to GitHub Pages
+python3 update_data.py --push
 
-# This month's daily breakdown
-python3 waaree_api_client.py --monthly
-
-# This year's monthly summary
-python3 waaree_api_client.py --yearly
-
-# JSON output (for piping/scripting)
-python3 waaree_api_client.py --dashboard --json
-
-# Generate full system report
-python3 generate_report.py
+# Raw API client commands
+python3 waaree_api_client.py --dashboard      # Live summary
+python3 waaree_api_client.py --hourly          # Hourly generation
+python3 waaree_api_client.py --monthly         # Monthly breakdown
+python3 waaree_api_client.py --dashboard --json # JSON output
 ```
 
 ### Local API Server
@@ -91,7 +85,7 @@ Add to crontab (`crontab -e`):
 
 ```cron
 # Solar data update every 5 minutes during daylight (6 AM - 7 PM IST)
-*/5 6-19 * * * cd /path/to/solar-intelligence && ./update-local.sh >> /tmp/solar-update.log 2>&1
+*/5 6-19 * * * cd /path/to/solar-intelligence && .venv/bin/python3 update_data.py --push >> update.log 2>&1
 ```
 
 ## Data Schema (v5.0)
