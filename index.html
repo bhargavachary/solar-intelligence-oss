@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>☀️ Bhargav's Solar Dashboard — 2.32 kW</title>
-    <meta name="description" content="Real-time solar energy monitoring dashboard for a 2.32 kW rooftop system in Berhampur, Odisha. Live power, yield, forecasts and ML analytics." />
+    <title>☀️ Solar Intelligence — Live Dashboard</title>
+    <meta name="description" content="Next-gen real-time solar energy monitoring dashboard. Live power tracking, analytics, forecasting, and financial insights for rooftop PV." />
     <meta name="author" content="Bhargav Achary" />
 
     <!-- Open Graph -->
@@ -562,9 +562,474 @@
             .kpi-value { font-size: 28px; }
             .roi-grid { grid-template-columns: 1fr; }
         }
+
+
+        /* ═══════════════════════════════════════
+           NEXT-GEN ENHANCEMENTS
+           ═══════════════════════════════════════ */
+
+        /* ── Aurora Gradient Background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: -1;
+            background: radial-gradient(ellipse at 20% 50%, rgba(255, 159, 10, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 50%, rgba(10, 132, 255, 0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 0%, rgba(191, 90, 242, 0.04) 0%, transparent 50%);
+            animation: auroraShift 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes auroraShift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(2%, -1%) rotate(1deg); }
+            50% { transform: translate(-1%, 2%) rotate(-1deg); }
+            75% { transform: translate(-2%, -1%) rotate(0.5deg); }
+        }
+        [data-theme="light"] body::before {
+            background: radial-gradient(ellipse at 20% 50%, rgba(194, 65, 12, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 50%, rgba(29, 78, 216, 0.03) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 0%, rgba(109, 40, 217, 0.03) 0%, transparent 50%);
+        }
+
+        /* ── Scroll Progress Bar ── */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--orange), var(--purple));
+            z-index: 9999;
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ── Scroll Reveal Animations ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* ── Staggered KPI entrance ── */
+        .kpi-grid .kpi {
+            opacity: 0;
+            transform: translateY(24px) scale(0.96);
+            animation: kpiEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .kpi-grid .kpi:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-grid .kpi:nth-child(2) { animation-delay: 0.2s; }
+        .kpi-grid .kpi:nth-child(3) { animation-delay: 0.3s; }
+        .kpi-grid .kpi:nth-child(4) { animation-delay: 0.4s; }
+        @keyframes kpiEntrance {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Live Power Glow ── */
+        .kpi-power-glow {
+            position: relative;
+        }
+        .kpi-power-glow::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, rgba(255,159,10,0.3), rgba(255,103,35,0.15));
+            z-index: -1;
+            opacity: 0;
+            animation: powerGlow 3s ease-in-out infinite;
+            filter: blur(12px);
+        }
+        @keyframes powerGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.03); }
+        }
+        .power-value-live {
+            background: linear-gradient(135deg, var(--accent), #ff6723);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Enhanced 3D Card Hover ── */
+        .card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        .card.tilt-active {
+            transition: box-shadow 0.3s ease, background 0.4s ease, border-color 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .card:active { transform: translateY(-2px) scale(0.995); }
+
+        /* ── Click-to-Expand Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--surface-elevated);
+            border-radius: 20px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: 0 32px 96px rgba(0,0,0,0.4);
+            border: 1px solid var(--separator);
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .modal-close:hover { background: var(--accent-light); transform: scale(1.1); }
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+        }
+        .modal-section {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--separator);
+        }
+        .modal-section:last-child { border-bottom: none; }
+        .modal-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        /* ── Expandable indicator ── */
+        .card-expandable {
+            cursor: pointer;
+            position: relative;
+        }
+        .card-expandable::after {
+            content: '↗';
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--surface-secondary);
+            color: var(--text-tertiary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s, transform 0.3s, background 0.2s;
+        }
+        .card-expandable:hover::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .card-expandable:hover::after {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        /* ── Gradient Text for Hero Values ── */
+        .gradient-text-orange {
+            background: linear-gradient(135deg, #ff9f0a 0%, #ff6723 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-text-green {
+            background: linear-gradient(135deg, #30d158 0%, #34c759 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-text-blue {
+            background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-text-purple {
+            background: linear-gradient(135deg, #bf5af2 0%, #5e5ce6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        [data-theme="light"] .gradient-text-orange {
+            background: linear-gradient(135deg, #c2410c, #9a3412);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        [data-theme="light"] .gradient-text-green {
+            background: linear-gradient(135deg, #15803d, #166534);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* ── Animated Counter ── */
+        .count-animate {
+            display: inline-block;
+            transition: transform 0.15s;
+        }
+        .count-animate.tick {
+            transform: translateY(-2px);
+        }
+
+        /* ── Enhanced Section Labels ── */
+        .section-label {
+            position: relative;
+            padding-left: 14px;
+        }
+        .section-label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--orange));
+        }
+
+        /* ── Animated Health Ring ── */
+        #health-arc {
+            transition: stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+                        stroke 0.5s ease;
+        }
+
+        /* ── Performance Bar Shimmer ── */
+        .perf-bar-fill {
+            position: relative;
+            overflow: hidden;
+        }
+        .perf-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: barShimmer 3s ease-in-out infinite;
+        }
+        @keyframes barShimmer {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+
+        /* ── Loading Skeleton ── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface-secondary) 0%, var(--surface) 50%, var(--surface-secondary) 100%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s ease-in-out infinite;
+            border-radius: 8px;
+        }
+        @keyframes skeletonShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ── Enhanced Tooltip Arrow ── */
+        [data-tip]::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 3px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--surface-elevated);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 101;
+        }
+        [data-tip]:hover::before {
+            opacity: 1;
+        }
+
+        /* ── Chart Canvas Hover ── */
+        canvas { transition: filter 0.3s ease; }
+        .card:hover canvas { filter: brightness(1.05) contrast(1.02); }
+
+        /* ── ROI Stat Number Bounce ── */
+        .roi-stat:hover .roi-stat-value {
+            animation: numberBounce 0.5s ease;
+        }
+        @keyframes numberBounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.12); }
+            60% { transform: scale(0.95); }
+        }
+
+        /* ── Solar Bank Flow Animation ── */
+        .sb-flow {
+            position: relative;
+        }
+        .sb-arrow {
+            animation: arrowFlow 2s ease-in-out infinite;
+        }
+        @keyframes arrowFlow {
+            0%, 100% { opacity: 0.4; transform: translateX(0); }
+            50% { opacity: 1; transform: translateX(4px); }
+        }
+        @media (max-width: 700px) {
+            @keyframes arrowFlow {
+                0%, 100% { opacity: 0.4; transform: rotate(90deg) translateX(0); }
+                50% { opacity: 1; transform: rotate(90deg) translateX(4px); }
+            }
+        }
+
+        /* ── Enhanced Footer ── */
+        .footer {
+            position: relative;
+            padding-top: 32px;
+        }
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 1px;
+        }
+
+        /* ── KPI Icon Hover ── */
+        .kpi:hover .kpi-icon {
+            transform: scale(1.15) rotate(-5deg);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .kpi-icon {
+            transition: transform 0.3s ease;
+        }
+
+        /* ── Bill Compare Enhanced ── */
+        .bill-vs-amount {
+            position: relative;
+        }
+        .bill-vs-amount::after {
+            content: '↓';
+            display: block;
+            font-size: 12px;
+            opacity: 0.5;
+            animation: savingsBounce 2s ease-in-out infinite;
+        }
+        @keyframes savingsBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+        }
+
+        /* ── Info Callout Hover ── */
+        .info-callout {
+            transition: border-left-color 0.3s, background 0.3s, transform 0.2s;
+        }
+        .info-callout:hover {
+            transform: translateX(4px);
+        }
+
+        /* ── Tariff Table Row Highlight ── */
+        .tariff-table tbody tr {
+            transition: background 0.2s, transform 0.2s;
+        }
+        .tariff-table tbody tr:hover {
+            transform: translateX(4px);
+        }
+
+        /* ── Animated Status Dot ── */
+        .status-dot.live {
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(48, 209, 88, 0); }
+        }
+
+        /* ── Smooth Theme Transition ── */
+        *, *::before, *::after {
+            transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+            transition-duration: 0s;
+        }
+        body.theme-transitioning *,
+        body.theme-transitioning *::before,
+        body.theme-transitioning *::after {
+            transition-duration: 0.4s !important;
+            transition-timing-function: ease !important;
+        }
+
+        /* ── Version Badge ── */
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 100px;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
     </style>
 </head>
 <body>
+<div class="scroll-progress" id="scroll-progress"></div>
 <div class="container">
     <!-- ═══ HEADER ═══ -->
     <header class="header">
@@ -607,10 +1072,10 @@
     <!-- ═══ KPI HERO ROW ═══ -->
     <div class="section-label">Real-Time Performance</div>
     <div class="kpi-grid">
-        <div class="kpi" data-tip="Instantaneous power output right now from the inverter. Peaks at solar noon. Shows 0 at night.">
+        <div class="kpi kpi-power-glow" data-tip="Instantaneous power output right now from the inverter. Peaks at solar noon. Shows 0 at night.">
             <div class="kpi-icon" style="background:var(--orange-bg)">⚡</div>
             <div class="kpi-label">Live Power</div>
-            <div class="kpi-value"><span id="kpi-power">--</span><span class="kpi-unit">kW</span></div>
+            <div class="kpi-value"><span id="kpi-power" class="gradient-text-orange count-animate">--</span><span class="kpi-unit">kW</span></div>
             <div class="kpi-detail">Instant: <strong id="kpi-peak">--</strong> kW peak today</div>
         </div>
         <div class="kpi" data-tip="Total energy generated today (sunrise to now). Berhampur typically yields 10-12 kWh on clear days.">
@@ -662,10 +1127,10 @@
     </div>
 
     <!-- ═══ SECTION: GENERATION TRENDS ═══ -->
-    <div class="section-label">Generation Trends</div>
+    <div class="section-label reveal">Generation Trends</div>
 
-    <div class="grid-2">
-        <div class="card" data-tip="Intra-day power output curve. Follows a sinusoidal shape: rises after sunrise, peaks at solar noon, falls to zero at sunset. EWMA trend line smooths short-term fluctuations.">
+    <div class="grid-2 reveal">
+        <div class="card card-expandable" data-expand="power" data-tip="Intra-day power output curve. Follows a sinusoidal shape: rises after sunrise, peaks at solar noon, falls to zero at sunset. EWMA trend line smooths short-term fluctuations.">
             <div class="card-header">
                 <span class="card-title">Power Generation Curve</span>
                 <span class="card-badge" id="badge-method">--</span>
@@ -681,8 +1146,8 @@
         </div>
     </div>
 
-    <div class="grid-2">
-        <div class="card" data-tip="Daily energy production for recent days. Green bars = above average, blue = normal, red = below expected. Zero-yield days indicate commissioning or system offline.">
+    <div class="grid-2 reveal">
+        <div class="card card-expandable" data-expand="daily" data-tip="Daily energy production for recent days. Green bars = above average, blue = normal, red = below expected. Zero-yield days indicate commissioning or system offline.">
             <div class="card-header">
                 <span class="card-title">Daily Yield History</span>
                 <span class="card-badge" id="badge-daily-avg">--</span>
@@ -736,10 +1201,10 @@
     </div>
 
     <!-- ═══ SECTION: SYSTEM HEALTH ═══ -->
-    <div class="section-label">System Health &amp; Performance</div>
+    <div class="section-label reveal">System Health &amp; Performance</div>
 
-    <div class="grid-3">
-        <div class="card" data-tip="Grid voltage and inverter output current throughout the day. Healthy voltage range is 210-250V. Current rises with power output. Both drop to zero at night.">
+    <div class="grid-3 reveal">
+        <div class="card card-expandable" data-expand="voltage" data-tip="Grid voltage and inverter output current throughout the day. Healthy voltage range is 210-250V. Current rises with power output. Both drop to zero at night.">
             <div class="card-header">
                 <span class="card-title">Voltage &amp; Current</span>
                 <span class="card-badge" id="badge-voltage">--</span>
@@ -779,10 +1244,10 @@
     </div>
 
     <!-- ═══ SECTION: FORECASTING ═══ -->
-    <div class="section-label">Forecasting &amp; Operations</div>
+    <div class="section-label reveal">Forecasting &amp; Operations</div>
 
-    <div class="grid-2">
-        <div class="card" data-tip="Month-by-month generation forecast using Berhampur's Peak Sun Hours (PSH) and seasonal irradiance data. Current month is highlighted. Monsoon months (Jul-Aug) show lowest output.">
+    <div class="grid-2 reveal">
+        <div class="card card-expandable" data-expand="forecast" data-tip="Month-by-month generation forecast using Berhampur's Peak Sun Hours (PSH) and seasonal irradiance data. Current month is highlighted. Monsoon months (Jul-Aug) show lowest output.">
             <div class="card-header">
                 <span class="card-title">Monthly Generation Forecast</span>
                 <span class="card-badge">Berhampur Model</span>
@@ -807,10 +1272,10 @@
     </div>
 
     <!-- ═══ SECTION: TPSODL NET METERING / SOLAR BANK ═══ -->
-    <div class="section-label">TPSODL Net Metering · Solar Bank</div>
+    <div class="section-label reveal">TPSODL Net Metering · Solar Bank</div>
 
     <!-- How Solar Bank Works -->
-    <div class="card" style="margin-bottom:16px" data-tip="TPSODL net metering works like a bank: surplus solar units are 'deposited' to the grid during the day and 'withdrawn' at night. 10% banking charges apply (wheeling/transmission losses). Monthly settlement; annual true-up.">
+    <div class="card reveal" style="margin-bottom:16px" data-tip="TPSODL net metering works like a bank: surplus solar units are 'deposited' to the grid during the day and 'withdrawn' at night. 10% banking charges apply (wheeling/transmission losses). Monthly settlement; annual true-up.">
         <div class="card-header">
             <span class="card-title">🏦 How the Solar Bank Works</span>
             <span class="card-badge" style="background:var(--green-bg);color:var(--green)">Net Metering</span>
@@ -943,7 +1408,7 @@
     </div>
 
     <!-- ROI & Payback -->
-    <div class="card" style="margin-bottom:16px" data-tip="ROI calculation based on actual Odisha subsidy stack (PM Surya Ghar + State subsidy). Net investment ~₹45-50K for a 2kW system; payback under 2 years with typical household consumption.">
+    <div class="card reveal" style="margin-bottom:16px" data-tip="ROI calculation based on actual Odisha subsidy stack (PM Surya Ghar + State subsidy). Net investment ~₹45-50K for a 2kW system; payback under 2 years with typical household consumption.">
         <div class="card-header">
             <span class="card-title">💰 Return on Investment</span>
             <span class="card-badge" id="roi-plant-size">2.32 kW System</span>
@@ -983,10 +1448,10 @@
     </div>
 
     <!-- ═══ SECTION: DATA & ANALYTICS ═══ -->
-    <div class="section-label">Data &amp; Analytics</div>
+    <div class="section-label reveal">Data &amp; Analytics</div>
 
-    <div class="grid-2-equal">
-        <div class="card" data-tip="Statistical analysis of today's power readings: mean, median, standard deviation, quartiles, and range. EWMA (Exponentially Weighted Moving Average) forecasts the next reading.">
+    <div class="grid-2-equal reveal">
+        <div class="card card-expandable" data-expand="stats" data-tip="Statistical analysis of today's power readings: mean, median, standard deviation, quartiles, and range. EWMA (Exponentially Weighted Moving Average) forecasts the next reading.">
             <div class="card-header">
                 <span class="card-title">Statistical Summary</span>
                 <span class="card-badge">Analytics Engine</span>
@@ -1018,8 +1483,18 @@
         </div>
     </div>
 
+
+    <!-- ═══ CLICK-TO-EXPAND MODAL ═══ -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content" id="modal-content">
+            <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-title" id="modal-title">Details</div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <footer class="footer">
-        Solar Intelligence v5.1 · Maintained with Love by Bhargav and Copilot<br>
+        <span class="version-badge">v6.0</span> Solar Intelligence · Designed with precision by Bhargav &amp; Copilot<br>
         <span style="font-size:11px">
             <a href="https://bhargavachary.in/">bhargavachary.in</a> ·
             Last Updated: <span id="footer-last-updated" style="font-weight:600">--</span>
@@ -1128,7 +1603,7 @@
         else { badge.textContent = '👁️ Read Only'; badge.className = 'mode-badge readonly'; }
     }
 
-    function dataPath() { return 'data/dashboard_data.json'; }
+    function dataPath() { return 'data/dashboard.json'; }
 
     // ══════════════════════════════
     // DATA NORMALIZATION
@@ -1917,7 +2392,7 @@
             renderPowerChart(records, analytics, num(meta.plant_capacity_kw || 2.32));
             renderVoltageChart(records);
 
-            // Detect data source from meta (tagged by update_data.py)
+            // Detect data source from meta
             var source = meta.data_source || '';
             if (!source) {
                 var hasModel = records.some(function(r) { return r.method === 'deterministic_model'; });
@@ -2196,6 +2671,228 @@
             fetch('http://localhost:8006/trigger_scrape', { method: 'POST' }).catch(function(){});
         }, 5 * 60 * 1000);
     }
+
+
+    // ══════════════════════════════
+    // NEXT-GEN: SCROLL PROGRESS BAR
+    // ══════════════════════════════
+    (function() {
+        var bar = document.getElementById('scroll-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            var progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            bar.style.width = progress + '%';
+        }, { passive: true });
+    })();
+
+    // ══════════════════════════════
+    // NEXT-GEN: SCROLL REVEAL
+    // ══════════════════════════════
+    (function() {
+        var reveals = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            reveals.forEach(function(el) { observer.observe(el); });
+        } else {
+            // Fallback: show all immediately
+            reveals.forEach(function(el) { el.classList.add('visible'); });
+        }
+    })();
+
+    // ══════════════════════════════
+    // NEXT-GEN: COUNTER ANIMATION
+    // ══════════════════════════════
+    var _counterRaf = null;
+    function animateCounter(element, targetValue, duration, decimals) {
+        if (!element) return;
+        var startValue = parseFloat(element.textContent) || 0;
+        if (isNaN(targetValue) || targetValue === startValue) {
+            element.textContent = targetValue.toFixed(decimals || 0);
+            return;
+        }
+        var startTime = null;
+        duration = duration || 800;
+        decimals = decimals || 2;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            // Ease out cubic
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = startValue + (targetValue - startValue) * eased;
+            element.textContent = current.toFixed(decimals);
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    // Override setText to animate counters for KPI values
+    var _origSetText = setText;
+    var _counterTargets = ['kpi-power', 'kpi-daily', 'kpi-monthly', 'kpi-total', 'kpi-efficiency', 'kpi-health', 'kpi-pr'];
+    setText = function(id, v) {
+        if (_counterTargets.indexOf(id) !== -1) {
+            var el = document.getElementById(id);
+            if (el) {
+                var numVal = parseFloat(String(v).replace(/[^\d.\-]/g, ''));
+                if (!isNaN(numVal) && v !== '--') {
+                    var decimals = String(v).indexOf('.') !== -1 ? (String(v).split('.')[1] || '').length : 0;
+                    animateCounter(el, numVal, 900, decimals);
+                    return;
+                }
+            }
+        }
+        _origSetText(id, v);
+    };
+
+    // ══════════════════════════════
+    // NEXT-GEN: 3D CARD TILT EFFECT
+    // ══════════════════════════════
+    (function() {
+        var cards = document.querySelectorAll('.card');
+        cards.forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                var rect = card.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                var centerX = rect.width / 2;
+                var centerY = rect.height / 2;
+                var rotateX = ((y - centerY) / centerY) * -3;
+                var rotateY = ((x - centerX) / centerX) * 3;
+                card.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-4px)';
+                card.classList.add('tilt-active');
+            });
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = '';
+                card.classList.remove('tilt-active');
+            });
+        });
+    })();
+
+    // ══════════════════════════════
+    // NEXT-GEN: CLICK-TO-EXPAND MODAL
+    // ══════════════════════════════
+    (function() {
+        var overlay = document.getElementById('modal-overlay');
+        var closeBtn = document.getElementById('modal-close');
+        var title = document.getElementById('modal-title');
+        var body = document.getElementById('modal-body');
+
+        var expandContent = {
+            power: function() {
+                return {
+                    title: '\u26a1 Power Generation — Detailed View',
+                    body: '<div class="modal-section"><h3>About This Chart</h3><p style="font-size:14px;line-height:1.7;color:var(--text-secondary)">The power generation curve shows your inverter\'s real-time output throughout the day. It follows a characteristic bell shape: rising after sunrise (~6:30 AM), peaking at solar noon (~12:30 PM), and declining to zero at sunset (~6:00 PM).</p></div>' +
+                    '<div class="modal-section"><h3>Key Metrics</h3>' +
+                    '<div class="stat-row"><span class="stat-label">Current Power</span><span class="stat-value">' + (document.getElementById('kpi-power').textContent || '--') + ' kW</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Today\'s Peak</span><span class="stat-value">' + (document.getElementById('kpi-peak').textContent || '--') + ' kW</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Today\'s Yield</span><span class="stat-value">' + (document.getElementById('kpi-daily').textContent || '--') + ' kWh</span></div>' +
+                    '</div>' +
+                    '<div class="modal-section"><h3>Understanding Power Output</h3><p style="font-size:13px;line-height:1.7;color:var(--text-secondary)"><strong>Peak output</strong> occurs when sunlight is perpendicular to panel surfaces. Factors that reduce output include cloud cover, high ambient temperature (>40\u00b0C causes ~0.4%/\u00b0C loss), panel soiling, and shading from nearby structures. The <strong>EWMA trend line</strong> (dashed) uses Exponentially Weighted Moving Average to smooth variations and forecast short-term output.</p></div>'
+                };
+            },
+            daily: function() {
+                return {
+                    title: '\ud83d\udcc8 Daily Yield — Analysis',
+                    body: '<div class="modal-section"><h3>Daily Performance</h3><p style="font-size:14px;line-height:1.7;color:var(--text-secondary)">Each bar represents total energy generated in a day. Green bars exceed the average, blue bars are normal, and red bars indicate below-expected performance.</p></div>' +
+                    '<div class="modal-section"><h3>Statistics</h3>' +
+                    '<div class="stat-row"><span class="stat-label">Average Daily Yield</span><span class="stat-value">' + (document.getElementById('daily-avg').textContent || '--') + ' kWh</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Best Day</span><span class="stat-value">' + (document.getElementById('daily-best').textContent || '--') + ' kWh</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Trend</span><span class="stat-value">' + (document.getElementById('daily-trend').textContent || '--') + '</span></div>' +
+                    '</div>' +
+                    '<div class="modal-section"><h3>What Affects Daily Yield?</h3><p style="font-size:13px;line-height:1.7;color:var(--text-secondary)">Daily energy output depends on: <strong>Solar irradiance</strong> (sun intensity), <strong>day length</strong> (longer days = more energy), <strong>temperature</strong> (panels lose efficiency above 25\u00b0C), <strong>cloud cover</strong> (direct vs diffuse sunlight), and <strong>panel cleanliness</strong> (dust/bird droppings reduce output by 2-5%).</p></div>'
+                };
+            },
+            voltage: function() {
+                return {
+                    title: '\u26a1 Voltage & Current — Grid Quality',
+                    body: '<div class="modal-section"><h3>Understanding Grid Parameters</h3><p style="font-size:14px;line-height:1.7;color:var(--text-secondary)">Grid voltage should stay within <strong>210-250V</strong> for safe operation. Current rises proportionally with power output. The inverter automatically disconnects if voltage goes outside safe limits (anti-islanding protection).</p></div>' +
+                    '<div class="modal-section"><h3>Current Readings</h3>' +
+                    '<div class="stat-row"><span class="stat-label">Grid Voltage</span><span class="stat-value">' + (document.getElementById('op-voltage').textContent || '--') + '</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Output Current</span><span class="stat-value">' + (document.getElementById('op-current').textContent || '--') + '</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Grid Frequency</span><span class="stat-value">' + (document.getElementById('op-freq').textContent || '--') + '</span></div>' +
+                    '</div>' +
+                    '<div class="modal-section"><h3>Red Flags to Watch</h3><p style="font-size:13px;line-height:1.7;color:var(--text-secondary)">\u26a0\ufe0f Voltage >250V: Grid overvoltage, inverter may trip. \u26a0\ufe0f Voltage <210V: Undervoltage, reduced output. \u26a0\ufe0f Frequency \u2260 50Hz: Grid instability. All of these are grid-side issues, not solar system faults.</p></div>'
+                };
+            },
+            forecast: function() {
+                return {
+                    title: '\ud83d\udd2e Monthly Forecast — Seasonal Model',
+                    body: '<div class="modal-section"><h3>Methodology</h3><p style="font-size:14px;line-height:1.7;color:var(--text-secondary)">This forecast uses <strong>Peak Sun Hours (PSH)</strong> data specific to the plant location, adjusted for seasonal irradiance, monsoon patterns, humidity, and historical cloud cover data. The model accounts for real-world derating factors.</p></div>' +
+                    '<div class="modal-section"><h3>Seasonal Patterns</h3><p style="font-size:13px;line-height:1.7;color:var(--text-secondary)"><strong>Best months (Mar-May):</strong> Long days, clear skies, moderate temperatures. <strong>Monsoon (Jun-Sep):</strong> Heavy cloud cover reduces output by 30-50%. <strong>Winter (Nov-Jan):</strong> Shorter days but clear skies, moderate output. <strong>Cyclone season (Oct-Nov):</strong> Occasional disruptions possible.</p></div>' +
+                    '<div class="modal-section"><h3>Annual Summary</h3>' +
+                    '<div class="stat-row"><span class="stat-label">Projected Annual</span><span class="stat-value">' + (document.getElementById('forecast-annual').textContent || '--') + ' kWh</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">This Month</span><span class="stat-value">' + (document.getElementById('forecast-month').textContent || '--') + ' kWh</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Monsoon Drop</span><span class="stat-value">' + (document.getElementById('forecast-monsoon').textContent || '--') + '</span></div>' +
+                    '</div>'
+                };
+            },
+            stats: function() {
+                return {
+                    title: '\ud83d\udcca Statistical Analysis — Deep Dive',
+                    body: '<div class="modal-section"><h3>Power Distribution</h3><p style="font-size:14px;line-height:1.7;color:var(--text-secondary)">Statistics are computed from today\'s telemetry samples. The <strong>mean</strong> represents average output, while <strong>median</strong> is more robust to outliers (e.g., brief cloud shadows). Standard deviation (\u03c3) measures output variability — lower is better.</p></div>' +
+                    '<div class="modal-section"><h3>Key Metrics</h3>' +
+                    '<div class="stat-row"><span class="stat-label">Power Mean</span><span class="stat-value">' + (document.getElementById('st-power-mean').textContent || '--') + '</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Power Median</span><span class="stat-value">' + (document.getElementById('st-power-median').textContent || '--') + '</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">Std Deviation (\u03c3)</span><span class="stat-value">' + (document.getElementById('st-power-std').textContent || '--') + '</span></div>' +
+                    '<div class="stat-row"><span class="stat-label">IQR (Q25-Q75)</span><span class="stat-value">' + (document.getElementById('st-power-iqr').textContent || '--') + '</span></div>' +
+                    '</div>' +
+                    '<div class="modal-section"><h3>Interpretation Guide</h3><p style="font-size:13px;line-height:1.7;color:var(--text-secondary)"><strong>Performance Ratio (PR):</strong> Actual output \u00f7 theoretical maximum. >80% = excellent. <strong>Capacity Factor (CF):</strong> Average output \u00f7 nameplate capacity. 15-20% is typical for India. <strong>EWMA:</strong> Time-series smoothing that gives more weight to recent readings for trend detection.</p></div>'
+                };
+            }
+        };
+
+        // Wire up expandable cards
+        document.querySelectorAll('.card-expandable').forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                // Don't expand if clicking on a slider/input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                var key = card.getAttribute('data-expand');
+                if (key && expandContent[key]) {
+                    var content = expandContent[key]();
+                    title.textContent = content.title;
+                    body.innerHTML = content.body;
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        });
+
+        // Close modal
+        function closeModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    })();
+
+    // ══════════════════════════════
+    // NEXT-GEN: SMOOTH THEME TRANSITION
+    // ══════════════════════════════
+    (function() {
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.add('theme-transitioning');
+            setTimeout(function() {
+                document.body.classList.remove('theme-transitioning');
+            }, 500);
+        }, true); // capture phase — fires before the original handler
+    })();
+
 
 })();
 </script>

@@ -9,7 +9,7 @@ Usage:
     python3 scraper_api.py
 
 Endpoints:
-    POST /trigger_scrape   - Fetch fresh data & update dashboard_data.json (returns immediately)
+    POST /trigger_scrape   - Fetch fresh data & update dashboard.json (returns immediately)
     GET  /status           - Check last update status
     GET  /health           - Health check
     GET  /api/live         - Get live solar data (JSON)
@@ -36,7 +36,7 @@ CORS(app)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_FILE = os.path.join(SCRIPT_DIR, "credentials.json")
 TOKEN_FILE = os.path.join(SCRIPT_DIR, ".waaree_token.json")
-DASHBOARD_DATA_FILE = os.path.join(SCRIPT_DIR, "data", "dashboard_data.json")
+DASHBOARD_DATA_FILE = os.path.join(SCRIPT_DIR, "data", "dashboard.json")
 TARIFF_INR_PER_KWH = 5.0  # ₹/kWh for income calculation
 
 # ── Global State ──

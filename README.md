@@ -1,139 +1,77 @@
-<div align="center">
+# ☀️ Solar Intelligence
 
-# ☀️ Solar Intelligence Dashboard
+Real-time solar energy monitoring dashboard for a **5 kW rooftop PV system** in Hyderabad, India.
+Live data fetched from **Waaree / FoxESS Cloud** via reverse-engineered REST API — no Selenium, no browser automation.
 
-**Real-time monitoring for a 2.32 kW rooftop solar plant**
-
-[![Live Dashboard](https://img.shields.io/badge/🔴_Live-Dashboard-ff9f0a?style=for-the-badge)](https://bhargavachary.in/waaree_api_access/)
-[![Update Data](https://img.shields.io/github/actions/workflow/status/bhargavachary/waaree_api_access/update-data.yml?style=for-the-badge&label=Data%20Pipeline&logo=github-actions)](https://github.com/bhargavachary/waaree_api_access/actions)
-[![GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222?style=for-the-badge&logo=github)](https://bhargavachary.in/waaree_api_access/)
-
-<br>
-
-<a href="https://bhargavachary.in/waaree_api_access/">
-  <img src="assets/screenshot.png" alt="Dashboard Preview" width="800" style="border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.2)" />
-</a>
-
-<br><br>
-
-*Apple-inspired glassmorphism dashboard with ML analytics, anomaly detection, and seasonal forecasting — all running client-side.*
-
-</div>
+**[→ Live Dashboard](https://bhargavachary.github.io/solar_intelligence/)**
 
 ---
 
-## 🌟 Features
-
-| Feature | Description |
-|---------|-------------|
-| ⚡ **Live Power Monitoring** | Real-time power output, daily yield, and lifetime generation |
-| 📊 **ML Analytics Engine** | EWMA smoothing, linear regression trends, Z-score anomaly detection |
-| 🔮 **Seasonal Forecasting** | Berhampur solar irradiance model with monthly predictions |
-| 🛡️ **Health Scoring** | Composite index from performance ratio, uptime, and data quality |
-| 🎨 **Glassmorphism Design** | Apple-inspired dark/light mode with ambient gradient animations |
-| 📱 **Fully Responsive** | Desktop, tablet, and mobile optimized |
-| 🤖 **Auto-updating** | GitHub Actions pipeline refreshes data 3× daily |
-| 📈 **Interactive Charts** | Power curves, voltage/current dual-axis, monthly bar charts |
-
-## 🏗️ Architecture
+## Architecture
 
 ```
-waaree_api_access/
-├── index.html                    # Dashboard (HTML + CSS + JS, schema v5.0)
-├── data/
-│   ├── dashboard_data.json       # Lightweight summary (~1.3 KB)
-│   └── energy_logs/              # Immutable daily logs (source of truth)
-│       ├── solar_energy_2026-02-15.json
-│       └── ...
-├── scripts/
-│   ├── archive_daily_data.py     # Create immutable daily energy logs
-│   ├── build_dashboard_summary.py # Aggregate logs → dashboard
-│   ├── update_data.py            # Integrated pipeline (scrape → log → build)
-│   └── waaree_deep_crawler.py    # Live portal scraper
-├── solar_analytics.py            # Pure Python ML analytics engine
-├── docs/
-│   └── DATA_MANAGEMENT.md        # Data architecture guide
-└── .github/workflows/
-    └── update-data.yml           # Scheduled pipeline (3×/day)
+credentials.json          ← plant credentials (git-ignored)
+waaree_api_client.py      ← core API client (login, plants, devices, generation)
+scraper_api.py            ← Flask HTTP server wrapping the API client
+generate_report.py        ← CLI report generator
+update-local.sh           ← one-command: fetch → log → commit → push
+
+data/
+  dashboard.json          ← live payload consumed by index.html
+  energy_logs/            ← immutable daily JSON archives
+
+index.html                ← single-file dashboard (HTML + CSS + JS)
+assets/                   ← static assets (icons, images)
+
+docs/
+  01-ARCHITECTURE.md      ← system design and data flow
+  02-API-REFERENCE.md     ← complete FoxESS Cloud API reference
+  03-SETUP-AND-OPERATIONS.md ← setup, deployment and scheduling
 ```
 
-## 🚀 Quick Start
-
-### View Live
-Visit **[bhargavachary.in/waaree_api_access/](https://bhargavachary.in/waaree_api_access/)** — read-only mode, auto-refreshes every 60s.
-
-### Run Locally
+## Quick Start
 
 ```bash
-# Clone
-git clone https://github.com/bhargavachary/waaree_api_access.git
-cd waaree_api_access
+# 1. Clone and install
+git clone https://github.com/bhargavachary/solar_intelligence.git
+cd solar_intelligence
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 
-# Update with live portal data
-python scripts/update_data.py --source auto
+# 2. Create credentials.json with: username, password, plant_id, capacity, location
 
-# Serve locally
-python -m http.server 8005
+# 3. Fetch live data
+python3 waaree_api_client.py --dashboard --json > data/dashboard.json
 
-# Open http://localhost:8005 — local dev mode with 10s refresh
+# 4. One-command update (fetch, log, commit, push)
+./update-local.sh
 ```
 
-## 🔬 Analytics Engine
+## API Client CLI
 
-The `solar_analytics.py` module is a **pure Python** (no numpy/sklearn) analytics suite:
-
-- **Anomaly Detection** — Z-score + IQR dual-method flagging
-- **EWMA Smoothing** — Exponentially Weighted Moving Average with forecast
-- **Linear Regression** — Trend detection with R² confidence
-- **Seasonal Model** — Berhampur PSH (Peak Sun Hours) monthly scaling
-- **Performance Ratio** — IEEE-standard PR calculation
-- **Health Scoring** — Weighted composite index (A+ to F grading)
-- **Degradation Estimation** — Annual % decline tracking
-
-## ☀️ Plant Details
-
-| Spec | Value |
-|------|-------|
-| **Manufacturer** | N/A |
-| **Capacity** | 2.32 kW |
-| **Type** | Rooftop Grid-tied |
-| **Location** | Berhampur, Odisha (19.3°N, 84.8°E) |
-| **Peak Sun Hours** | 3.5 – 7.0 hrs (seasonal) |
-| **Est. Annual Yield** | ~3,200 kWh |
-
-## 🔧 Data Pipeline
-
-```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
-│ waaree_deep_     │────▶│  solar_analytics  │────▶│   data/      │
-│ crawler.py       │     │  (ML enrichment)  │     │   energy_logs│
-│ (live portal)    │     │                   │     │   dashboard  │
-└─────────────────┘     └──────────────────┘     └──────┬──────┘
-                                                         │
-                    Scheduled Updates (manual)            │
-                    ──────────────────────────            ▼
-                                                  ┌──────────────┐
-                                                  │  index.html   │
-                                                  │  (client JS   │
-                                                  │   rendering)  │
-                                                  └──────────────┘
+```bash
+python3 waaree_api_client.py --dashboard        # full dashboard payload
+python3 waaree_api_client.py --hourly            # hourly generation
+python3 waaree_api_client.py --monthly           # monthly totals
+python3 waaree_api_client.py --yearly            # lifetime yearly totals
 ```
 
-## 📂 Other Tools
+## Dashboard
 
-| Script | Purpose |
-|--------|---------|
-| `waaree_deep_crawler.py` | Selenium scraper for digital.waaree.com |
-| `scraper_api.py` | Flask API server for local scrape triggers |
-| `validate_dashboard.py` | 112-test validation suite (Grade A+) |
-| `mock_inverter.py` | RS-485 inverter simulator for testing |
+The dashboard is a single `index.html` file deployed on **GitHub Pages**.
+It loads `data/dashboard.json` at runtime — no build step, no framework.
 
-## 📄 License
+Features: live power display, 7-day trend charts, monthly analytics,
+dark/light theme, responsive layout, glassmorphism design with CSS animations.
 
-MIT © [Bhargav Achary](https://bhargavachary.in/)
+## Documentation
 
----
+| Doc | Contents |
+|-----|----------|
+| [01-ARCHITECTURE](docs/01-ARCHITECTURE.md) | System design, data schema v5.0, flow diagrams |
+| [02-API-REFERENCE](docs/02-API-REFERENCE.md) | FoxESS Cloud endpoints, auth, signature algorithm |
+| [03-SETUP-AND-OPERATIONS](docs/03-SETUP-AND-OPERATIONS.md) | Installation, scheduling, troubleshooting |
 
-<div align="center">
-  <sub>Maintained with Love by Bhargav and Copilot</sub>
-</div>
+## License
+
+Private project. © Bhargav Achary

@@ -274,7 +274,7 @@ on the Waaree portal:
 | `scraper_api.py`         | Flask HTTP server (replaces Selenium scraper)   |
 | `credentials.json`       | Username, password, plant config                |
 | `.waaree_token.json`     | Cached JWT token (auto-created)                 |
-| `data/dashboard_data.json` | Dashboard data file (read by `index.html`)    |
+| `data/dashboard.json`      | Dashboard data file (read by `index.html`)    |
 | `scraper_api_old.py`     | Old Selenium-based scraper server (deprecated)  |
 | `waaree_deep_crawler.py` | Old Selenium crawler (deprecated, 2122 lines)   |
 
