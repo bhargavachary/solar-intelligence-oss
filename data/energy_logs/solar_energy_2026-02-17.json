@@ -1,0 +1,62 @@
+{
+  "date": "2026-02-17",
+  "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+  "meta": {
+    "plant_capacity_kw": 2.32,
+    "location": "Berhampur, Odisha",
+    "archived_at": "2026-02-17 13:03:00",
+    "record_count": 2,
+    "sampling_interval": "hourly",
+    "data_source": "live_portal/Fresh login"
+  },
+  "daily_summary": {
+    "date": "2026-02-17",
+    "total_yield_kwh": 6.7,
+    "peak_power_kw": 1.56,
+    "avg_power_kw": 1.56,
+    "avg_voltage_v": 0,
+    "record_count": 2,
+    "first_reading": "2026-02-17 13:01:19",
+    "last_reading": "2026-02-17 13:02:53"
+  },
+  "records": [
+    {
+      "timestamp": "2026-02-17 13:01:19",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 1.56,
+      "daily_yield_kwh": 6.7,
+      "monthly_yield_kwh": 38.5,
+      "total_yield_kwh": 86.3,
+      "income_inr": 345.2,
+      "voltage_v": 0.0,
+      "current_a": 0.0,
+      "frequency_hz": 0.0,
+      "temperature_c": 0.0,
+      "status": "Online",
+      "portal_loaded": true,
+      "portal_validation_score": 70,
+      "portal_ocr_excerpt": "",
+      "extraction_method": "ensemble/css",
+      "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-02-17 13:02:53",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 1.56,
+      "daily_yield_kwh": 6.7,
+      "monthly_yield_kwh": 38.5,
+      "total_yield_kwh": 86.3,
+      "income_inr": 345.2,
+      "voltage_v": 0.0,
+      "current_a": 0.0,
+      "frequency_hz": 0.0,
+      "temperature_c": 0.0,
+      "status": "Online",
+      "portal_loaded": true,
+      "portal_validation_score": 70,
+      "portal_ocr_excerpt": "",
+      "extraction_method": "ensemble/css",
+      "anomaly_notes": []
+    }
+  ]
+}
