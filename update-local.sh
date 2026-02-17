@@ -27,15 +27,30 @@ if [ ! -f "$PYTHON" ]; then
     echo "❌ Python venv not found at .venv/"; exit 1
 fi
 
-# 1. Fetch live data via API → data/dashboard.json
+# 1. Fetch live data via API → data/dashboard.json (using schema v5.0 builder)
 echo "🔄 Fetching live data from Waaree API..."
-$PYTHON waaree_api_client.py --dashboard --json > data/dashboard.json.tmp
-mv data/dashboard.json.tmp data/dashboard.json
+$PYTHON << 'PYSCRIPT'
+import json, os, sys
+from scraper_api import build_dashboard_json
+from waaree_api_client import WaareeAPIClient
+
+creds_file = os.path.join(os.getcwd(), 'credentials.json')
+token_file = os.path.join(os.getcwd(), '.waaree_token.json')
+with open(creds_file) as f:
+    creds = json.load(f)
+
+client = WaareeAPIClient(creds['username'], creds['password'], token_file=token_file)
+client.login()
+data = build_dashboard_json(client)
+
+with open('data/dashboard.json', 'w') as f:
+    json.dump(data, f, indent=2, default=str)
+PYSCRIPT
 echo "✅ data/dashboard.json updated"
 
 # 2. Archive today's energy log
 echo "🔄 Archiving energy log..."
-$PYTHON -c "
+$PYTHON << 'PYSCRIPT'
 from waaree_api_client import WaareeAPIClient
 import json, os
 from datetime import datetime
@@ -49,14 +64,25 @@ station_id = plants[0]['stationID'] if plants else ''
 devices = client.get_devices()
 device = devices[0] if devices else {}
 now = datetime.now()
+
+# get_daily_generation returns list of tuples: [(day, kwh), ...]
 daily = client.get_daily_generation(station_id, now.year, now.month) if station_id else []
 today_str = now.strftime('%Y-%m-%d')
-today_kwh = next((d.get('generation', 0) for d in daily if d.get('index') == now.day), device.get('generationToday', 0))
+
+# Find today's kwh from daily data
+today_kwh = 0.0
+for day, kwh in daily:
+    if day == now.day:
+        today_kwh = kwh
+        break
+if today_kwh == 0.0 and isinstance(device, dict):
+    today_kwh = device.get('generationToday', 0.0)
+
 log = {
     'date': today_str,
-    'daily_kwh': round(today_kwh, 2),
-    'total_kwh': device.get('generationTotal', 0),
-    'peak_power_kw': device.get('power', 0),
+    'daily_kwh': round(float(today_kwh), 2),
+    'total_kwh': round(float(device.get('generationTotal', 0) if isinstance(device, dict) else 0), 2),
+    'peak_power_kw': round(float(device.get('power', 0) if isinstance(device, dict) else 0), 3),
     'source': 'api',
     'logged_at': now.isoformat()
 }
@@ -65,7 +91,7 @@ os.makedirs('data/energy_logs', exist_ok=True)
 with open(log_file, 'w') as f:
     json.dump(log, f, indent=2)
 print(f'✅ Energy log saved: {log_file}')
-"
+PYSCRIPT
 
 # 3. Commit and push
 if [[ "$1" != "--no-push" ]]; then
