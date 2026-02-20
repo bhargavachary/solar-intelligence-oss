@@ -1,12 +1,12 @@
 {
   "date": "2026-02-20",
-  "daily_kwh": 2.9,
-  "monthly_kwh": 67.8,
-  "total_kwh": 115.6,
-  "peak_power_kw": 1.0,
+  "daily_kwh": 7.5,
+  "monthly_kwh": 72.4,
+  "total_kwh": 120.2,
+  "peak_power_kw": 1.7,
   "status": "Online",
   "source": "api",
-  "logged_at": "2026-02-20T05:01:47.593405",
+  "logged_at": "2026-02-20T07:46:23.312835",
   "hourly": [
     {
       "hour": 8,
@@ -25,8 +25,23 @@
     },
     {
       "hour": 11,
-      "power_kw": 0.7,
-      "cumulative_kwh": 2.6
+      "power_kw": 1.4,
+      "cumulative_kwh": 3.3
+    },
+    {
+      "hour": 12,
+      "power_kw": 1.6,
+      "cumulative_kwh": 4.9
+    },
+    {
+      "hour": 13,
+      "power_kw": 1.7,
+      "cumulative_kwh": 6.6
+    },
+    {
+      "hour": 14,
+      "power_kw": 0.3,
+      "cumulative_kwh": 6.9
     }
   ]
 }
