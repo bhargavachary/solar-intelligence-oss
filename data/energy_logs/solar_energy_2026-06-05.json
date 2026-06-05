@@ -6,7 +6,7 @@
   "peak_power_kw": 0.3,
   "status": "Unknown",
   "source": "api",
-  "logged_at": "2026-06-05T05:59:30.495364",
+  "logged_at": "2026-06-05T08:44:46.861245",
   "hourly": [
     {
       "hour": 10,
