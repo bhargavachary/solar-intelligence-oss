@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-08-04 12:23:49",
+    "generated_at": "2026-08-04 15:43:39",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
@@ -16,16 +16,16 @@
     "points": 11,
     "peak_power_kw": 1.7,
     "avg_power_kw": 0.87,
-    "latest_timestamp": "2026-08-04 17:52:35 IST+0530",
-    "latest_power_kw": 0.061,
+    "latest_timestamp": "2026-08-04 18:48:30 IST+0530",
+    "latest_power_kw": 0,
     "latest_daily_yield_kwh": 9.9,
     "latest_monthly_yield_kwh": 34.8,
     "latest_total_yield_kwh": 762.8,
     "data_quality_score": 100
   },
   "live": {
-    "timestamp": "2026-08-04 17:52:35 IST+0530",
-    "power_kw": 0.061,
+    "timestamp": "2026-08-04 18:48:30 IST+0530",
+    "power_kw": 0,
     "daily_yield_kwh": 9.9,
     "monthly_yield_kwh": 34.8,
     "total_yield_kwh": 762.8,
@@ -33,7 +33,7 @@
     "voltage_v": 0,
     "current_a": 0,
     "temperature_c": 0,
-    "status": "Online"
+    "status": "Unknown"
   },
   "last_7_days": [
     {
@@ -78,7 +78,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -97,7 +97,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -116,7 +116,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -135,7 +135,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -154,7 +154,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -173,7 +173,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -192,7 +192,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -211,7 +211,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -230,7 +230,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -249,7 +249,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -268,7 +268,7 @@
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Online",
+      "status": "Unknown",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -287,16 +287,16 @@
     "health": {
       "overall_score": 92.0,
       "grade": "A+",
-      "uptime_pct": 99.8,
+      "uptime_pct": 0,
       "degradation_pct": 0.5,
       "factors": {
         "performance_ratio": 73.6,
-        "capacity_factor": 2.6,
+        "capacity_factor": 0.0,
         "consistency": 45.3,
         "data_quality": 100
       }
     },
-    "capacity_factor_pct": 2.6,
+    "capacity_factor_pct": 0.0,
     "performance_ratio_pct": 73.6,
     "statistics": {
       "power": {
@@ -337,7 +337,7 @@
     ],
     "power_trend": {
       "ewma": [
-        0.061
+        0
       ],
       "trend_direction": "stable"
     },

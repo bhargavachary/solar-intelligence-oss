@@ -4,9 +4,9 @@
   "monthly_kwh": 34.8,
   "total_kwh": 762.8,
   "peak_power_kw": 1.7,
-  "status": "Online",
+  "status": "Unknown",
   "source": "api",
-  "logged_at": "2026-08-04T12:23:52.641887",
+  "logged_at": "2026-08-04T15:43:42.850162",
   "hourly": [
     {
       "hour": 7,
