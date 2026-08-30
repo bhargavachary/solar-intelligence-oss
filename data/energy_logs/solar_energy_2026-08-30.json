@@ -1,11 +1,22 @@
 {
   "date": "2026-08-30",
   "daily_kwh": 0,
-  "monthly_kwh": 203.5,
+  "monthly_kwh": 203.9,
   "total_kwh": 0,
-  "peak_power_kw": 0,
+  "peak_power_kw": 0.3,
   "status": "Online",
   "source": "api",
-  "logged_at": "2026-08-30T01:41:16.859231",
-  "hourly": []
+  "logged_at": "2026-08-30T04:35:47.341306",
+  "hourly": [
+    {
+      "hour": 9,
+      "power_kw": 0.1,
+      "cumulative_kwh": 0.1
+    },
+    {
+      "hour": 10,
+      "power_kw": 0.3,
+      "cumulative_kwh": 0.4
+    }
+  ]
 }
