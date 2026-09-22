@@ -1,12 +1,12 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-09-22 01:42:34",
+    "generated_at": "2026-09-22 04:37:38",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
     "data_source": "waaree_api",
-    "log_count": 21,
+    "log_count": 22,
     "date_range": {
       "first": "2026-09-01",
       "last": "2026-09-22"
@@ -14,35 +14,28 @@
   },
   "summary": {
     "points": 0,
-    "peak_power_kw": 0.05,
-    "avg_power_kw": 0.876,
-    "latest_timestamp": "2026-09-22 07:07:33 IST+0530",
-    "latest_power_kw": 0.05,
-    "latest_daily_yield_kwh": 0,
-    "latest_monthly_yield_kwh": 183.9,
-    "latest_total_yield_kwh": 1124.8,
+    "peak_power_kw": 0,
+    "avg_power_kw": 0.836,
+    "latest_timestamp": "2026-09-22 10:05:29 IST+0530",
+    "latest_power_kw": 0,
+    "latest_daily_yield_kwh": 0.1,
+    "latest_monthly_yield_kwh": 184.0,
+    "latest_total_yield_kwh": 1124.9,
     "data_quality_score": 100
   },
   "live": {
-    "timestamp": "2026-09-22 07:07:33 IST+0530",
-    "power_kw": 0.05,
-    "daily_yield_kwh": 0,
-    "monthly_yield_kwh": 183.9,
-    "total_yield_kwh": 1124.8,
-    "income_inr": 0.0,
+    "timestamp": "2026-09-22 10:05:29 IST+0530",
+    "power_kw": 0,
+    "daily_yield_kwh": 0.1,
+    "monthly_yield_kwh": 184.0,
+    "total_yield_kwh": 1124.9,
+    "income_inr": 0.5,
     "voltage_v": 0,
     "current_a": 0,
     "temperature_c": 0,
-    "status": "Online"
+    "status": "Fault"
   },
   "last_7_days": [
-    {
-      "date": "2026-09-15",
-      "yield_kwh": 8.2,
-      "peak_power_kw": 1.508,
-      "avg_power_kw": 0.82,
-      "record_count": 12
-    },
     {
       "date": "2026-09-16",
       "yield_kwh": 11.1,
@@ -84,13 +77,20 @@
       "peak_power_kw": 1.508,
       "avg_power_kw": 0.48,
       "record_count": 12
+    },
+    {
+      "date": "2026-09-22",
+      "yield_kwh": 0.1,
+      "peak_power_kw": 1.508,
+      "avg_power_kw": 0.01,
+      "record_count": 0
     }
   ],
   "today_records": [],
   "monthly": {
     "september_2026": {
-      "yield_kwh": 183.9,
-      "days_active": 21,
+      "yield_kwh": 184.0,
+      "days_active": 22,
       "peak_power_kw": 0
     }
   },
@@ -98,26 +98,26 @@
     "health": {
       "overall_score": 92.0,
       "grade": "A+",
-      "uptime_pct": 99.8,
+      "uptime_pct": 0,
       "degradation_pct": 0.5,
       "factors": {
-        "performance_ratio": 0,
-        "capacity_factor": 2.2,
-        "consistency": 18.7,
+        "performance_ratio": 0.7,
+        "capacity_factor": 0.0,
+        "consistency": 0.8,
         "data_quality": 100
       }
     },
-    "capacity_factor_pct": 2.2,
-    "performance_ratio_pct": 0,
+    "capacity_factor_pct": 0.0,
+    "performance_ratio_pct": 0.7,
     "statistics": {
       "power": {
-        "mean": 0.876,
-        "median": 0.876,
+        "mean": 0.836,
+        "median": 0.836,
         "std": 0.5,
-        "q25": 0.35,
-        "q75": 1.226,
+        "q25": 0.335,
+        "q75": 1.171,
         "min": 0.02,
-        "max": 0.05
+        "max": 0
       },
       "voltage": {
         "mean": 230.4,
@@ -125,7 +125,7 @@
       },
       "daily_yield": {
         "max_observed": 12.3,
-        "expected_today": 8.76
+        "expected_today": 8.36
       }
     },
     "daily_progress": [
@@ -212,19 +212,23 @@
       {
         "date": "2026-09-21",
         "yield_kwh": 4.8
+      },
+      {
+        "date": "2026-09-22",
+        "yield_kwh": 0.1
       }
     ],
     "power_trend": {
       "ewma": [
-        0.05
+        0
       ],
       "trend_direction": "stable"
     },
     "production_monitoring": {
       "alerts": [],
-      "avg_daily_yield_kwh": 8.76,
-      "peak_power_kw": 0.05,
-      "consistency_score": 18.7
+      "avg_daily_yield_kwh": 8.36,
+      "peak_power_kw": 0,
+      "consistency_score": 0.8
     },
     "seasonal_forecast": {
       "annual_kwh": 3320.0,
