@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-09-25 07:38:48",
+    "generated_at": "2026-09-25 10:36:24",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
@@ -16,7 +16,7 @@
     "points": 0,
     "peak_power_kw": 0,
     "avg_power_kw": 0.8,
-    "latest_timestamp": "2026-09-25 13:04:18 IST+0530",
+    "latest_timestamp": "2026-09-25 16:02:13 IST+0530",
     "latest_power_kw": 0,
     "latest_daily_yield_kwh": 0,
     "latest_monthly_yield_kwh": 192.0,
@@ -24,7 +24,7 @@
     "data_quality_score": 100
   },
   "live": {
-    "timestamp": "2026-09-25 13:04:18 IST+0530",
+    "timestamp": "2026-09-25 16:02:13 IST+0530",
     "power_kw": 0,
     "daily_yield_kwh": 0,
     "monthly_yield_kwh": 192.0,
