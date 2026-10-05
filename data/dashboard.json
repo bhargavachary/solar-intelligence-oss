@@ -1,24 +1,24 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-10-04 15:06:52",
+    "generated_at": "2026-10-05 01:57:18",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
     "data_source": "waaree_api",
     "log_count": 0,
     "date_range": {
-      "first": "2026-10-04",
-      "last": "2026-10-04"
+      "first": "2026-10-05",
+      "last": "2026-10-05"
     }
   },
   "summary": {
     "points": 0,
     "peak_power_kw": 0,
-    "avg_power_kw": 0.7,
+    "avg_power_kw": 0.0,
     "latest_timestamp": "2026-10-04 18:21:42 IST+0530",
     "latest_power_kw": 0,
-    "latest_daily_yield_kwh": 7,
+    "latest_daily_yield_kwh": 0,
     "latest_monthly_yield_kwh": 0,
     "latest_total_yield_kwh": 1233.7,
     "data_quality_score": 100
@@ -26,10 +26,10 @@
   "live": {
     "timestamp": "2026-10-04 18:21:42 IST+0530",
     "power_kw": 0,
-    "daily_yield_kwh": 7,
+    "daily_yield_kwh": 0,
     "monthly_yield_kwh": 0,
     "total_yield_kwh": 1233.7,
-    "income_inr": 35.0,
+    "income_inr": 0.0,
     "voltage_v": 0,
     "current_a": 0,
     "temperature_c": 0,
@@ -51,21 +51,21 @@
       "uptime_pct": 0,
       "degradation_pct": 0.5,
       "factors": {
-        "performance_ratio": 52.0,
+        "performance_ratio": 0,
         "capacity_factor": 0.0,
         "consistency": 100,
         "data_quality": 100
       }
     },
     "capacity_factor_pct": 0.0,
-    "performance_ratio_pct": 52.0,
+    "performance_ratio_pct": 0,
     "statistics": {
       "power": {
-        "mean": 0.7,
-        "median": 0.7,
+        "mean": 0.0,
+        "median": 0.0,
         "std": 0.5,
-        "q25": 0.28,
-        "q75": 0.98,
+        "q25": 0.0,
+        "q75": 0.0,
         "min": 0.02,
         "max": 0
       },
@@ -74,8 +74,8 @@
         "std": 1.7
       },
       "daily_yield": {
-        "max_observed": 7,
-        "expected_today": 7.0
+        "max_observed": 0,
+        "expected_today": 0.0
       }
     },
     "daily_progress": [],
@@ -87,7 +87,7 @@
     },
     "production_monitoring": {
       "alerts": [],
-      "avg_daily_yield_kwh": 7.0,
+      "avg_daily_yield_kwh": 0.0,
       "peak_power_kw": 0,
       "consistency_score": 100
     },
