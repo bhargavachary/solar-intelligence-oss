@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-28",
+  "daily_kwh": 0,
+  "monthly_kwh": 237.4,
+  "total_kwh": 1454.3,
+  "peak_power_kw": 0,
+  "status": "Fault",
+  "source": "api",
+  "logged_at": "2026-10-28T01:33:31.048988",
+  "hourly": []
+}
