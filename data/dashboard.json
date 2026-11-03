@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": "5.0",
-    "generated_at": "2026-11-03 04:32:33",
+    "generated_at": "2026-11-03 07:32:11",
     "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
     "plant_capacity_kw": 2.32,
     "location": "Berhampur, Odisha",
@@ -13,27 +13,27 @@
     }
   },
   "summary": {
-    "points": 4,
-    "peak_power_kw": 1.0,
-    "avg_power_kw": 0.567,
-    "latest_timestamp": "2026-11-03 10:01:04 IST+0530",
-    "latest_power_kw": 0.829,
-    "latest_daily_yield_kwh": 2.3,
-    "latest_monthly_yield_kwh": 17.0,
-    "latest_total_yield_kwh": 1483.7,
+    "points": 7,
+    "peak_power_kw": 1.1,
+    "avg_power_kw": 0.633,
+    "latest_timestamp": "2026-11-03 12:58:59 IST+0530",
+    "latest_power_kw": 0,
+    "latest_daily_yield_kwh": 4.3,
+    "latest_monthly_yield_kwh": 19.0,
+    "latest_total_yield_kwh": 1485.7,
     "data_quality_score": 100
   },
   "live": {
-    "timestamp": "2026-11-03 10:01:04 IST+0530",
-    "power_kw": 0.829,
-    "daily_yield_kwh": 2.3,
-    "monthly_yield_kwh": 17.0,
-    "total_yield_kwh": 1483.7,
-    "income_inr": 11.5,
+    "timestamp": "2026-11-03 12:58:59 IST+0530",
+    "power_kw": 0,
+    "daily_yield_kwh": 4.3,
+    "monthly_yield_kwh": 19.0,
+    "total_yield_kwh": 1485.7,
+    "income_inr": 21.5,
     "voltage_v": 0,
     "current_a": 0,
     "temperature_c": 0,
-    "status": "Unknown"
+    "status": "Fault"
   },
   "last_7_days": [
     {
@@ -52,10 +52,10 @@
     },
     {
       "date": "2026-11-03",
-      "yield_kwh": 2.3,
+      "yield_kwh": 4.3,
       "peak_power_kw": 1.508,
-      "avg_power_kw": 0.23,
-      "record_count": 4
+      "avg_power_kw": 0.43,
+      "record_count": 7
     }
   ],
   "today_records": [
@@ -64,14 +64,14 @@
       "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
       "current_power_kw": 0.1,
       "daily_yield_kwh": 0.1,
-      "monthly_yield_kwh": 17.0,
-      "total_yield_kwh": 1483.7,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
       "income_inr": 0.5,
       "voltage_v": 0,
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Unknown",
+      "status": "Fault",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -83,14 +83,14 @@
       "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
       "current_power_kw": 0.4,
       "daily_yield_kwh": 0.5,
-      "monthly_yield_kwh": 17.0,
-      "total_yield_kwh": 1483.7,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
       "income_inr": 2.5,
       "voltage_v": 0,
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Unknown",
+      "status": "Fault",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -102,14 +102,14 @@
       "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
       "current_power_kw": 0.6,
       "daily_yield_kwh": 1.1,
-      "monthly_yield_kwh": 17.0,
-      "total_yield_kwh": 1483.7,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
       "income_inr": 5.5,
       "voltage_v": 0,
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Unknown",
+      "status": "Fault",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -121,14 +121,71 @@
       "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
       "current_power_kw": 1.0,
       "daily_yield_kwh": 2.1,
-      "monthly_yield_kwh": 17.0,
-      "total_yield_kwh": 1483.7,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
       "income_inr": 10.5,
       "voltage_v": 0,
       "current_a": 0,
       "frequency_hz": 0,
       "temperature_c": 0,
-      "status": "Unknown",
+      "status": "Fault",
+      "portal_loaded": true,
+      "portal_validation_score": 100,
+      "portal_ocr_excerpt": "",
+      "extraction_method": "api/direct",
+      "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-11-03 11:30:00",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 1.1,
+      "daily_yield_kwh": 3.2,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
+      "income_inr": 16.0,
+      "voltage_v": 0,
+      "current_a": 0,
+      "frequency_hz": 0,
+      "temperature_c": 0,
+      "status": "Fault",
+      "portal_loaded": true,
+      "portal_validation_score": 100,
+      "portal_ocr_excerpt": "",
+      "extraction_method": "api/direct",
+      "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-11-03 12:30:00",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 0.3,
+      "daily_yield_kwh": 3.5,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
+      "income_inr": 17.5,
+      "voltage_v": 0,
+      "current_a": 0,
+      "frequency_hz": 0,
+      "temperature_c": 0,
+      "status": "Fault",
+      "portal_loaded": true,
+      "portal_validation_score": 100,
+      "portal_ocr_excerpt": "",
+      "extraction_method": "api/direct",
+      "anomaly_notes": []
+    },
+    {
+      "timestamp": "2026-11-03 13:30:00",
+      "plant_id": "628c63b5-06c3-4b1b-a06a-556e87fd4a81",
+      "current_power_kw": 0.4,
+      "daily_yield_kwh": 3.9,
+      "monthly_yield_kwh": 19.0,
+      "total_yield_kwh": 1485.7,
+      "income_inr": 19.5,
+      "voltage_v": 0,
+      "current_a": 0,
+      "frequency_hz": 0,
+      "temperature_c": 0,
+      "status": "Fault",
       "portal_loaded": true,
       "portal_validation_score": 100,
       "portal_ocr_excerpt": "",
@@ -138,9 +195,9 @@
   ],
   "monthly": {
     "november_2026": {
-      "yield_kwh": 17.0,
+      "yield_kwh": 19.0,
       "days_active": 3,
-      "peak_power_kw": 1.0
+      "peak_power_kw": 1.1
     }
   },
   "analytics": {
@@ -150,23 +207,23 @@
       "uptime_pct": 0,
       "degradation_pct": 0.5,
       "factors": {
-        "performance_ratio": 17.1,
-        "capacity_factor": 35.7,
-        "consistency": 18.9,
+        "performance_ratio": 32.0,
+        "capacity_factor": 0.0,
+        "consistency": 20.5,
         "data_quality": 100
       }
     },
-    "capacity_factor_pct": 35.7,
-    "performance_ratio_pct": 17.1,
+    "capacity_factor_pct": 0.0,
+    "performance_ratio_pct": 32.0,
     "statistics": {
       "power": {
-        "mean": 0.567,
-        "median": 0.567,
+        "mean": 0.633,
+        "median": 0.633,
         "std": 0.5,
-        "q25": 0.227,
-        "q75": 0.793,
+        "q25": 0.253,
+        "q75": 0.887,
         "min": 0.02,
-        "max": 1.0
+        "max": 1.1
       },
       "voltage": {
         "mean": 230.4,
@@ -174,7 +231,7 @@
       },
       "daily_yield": {
         "max_observed": 12.2,
-        "expected_today": 5.67
+        "expected_today": 6.33
       }
     },
     "daily_progress": [
@@ -188,20 +245,20 @@
       },
       {
         "date": "2026-11-03",
-        "yield_kwh": 2.3
+        "yield_kwh": 4.3
       }
     ],
     "power_trend": {
       "ewma": [
-        0.829
+        0
       ],
       "trend_direction": "stable"
     },
     "production_monitoring": {
       "alerts": [],
-      "avg_daily_yield_kwh": 5.67,
-      "peak_power_kw": 1.0,
-      "consistency_score": 18.9
+      "avg_daily_yield_kwh": 6.33,
+      "peak_power_kw": 1.1,
+      "consistency_score": 20.5
     },
     "seasonal_forecast": {
       "annual_kwh": 3320.0,
