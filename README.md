@@ -1,89 +1,180 @@
-# ☀️ Solar Intelligence
+# SolarIntelligence ☀️
 
-Real-time solar energy monitoring dashboard for a **2.32 kW rooftop PV system** in **Berhampur, Odisha**.
-Live data fetched from **Waaree / FoxESS Cloud** via reverse-engineered REST API — no Selenium, no browser automation.
+> **Telemetry and data analysis platform for rooftop solar PV generation in Berhampur, Odisha.**  
+> Real-time REST API integration with FoxESS / Waaree Cloud, immutable daily JSON energy archives, and an interactive, client-side dashboard with zero build dependencies.
 
-**[→ Live Dashboard](https://bhargavachary.github.io/solar-intelligence/)**
+[![Dashboard](https://img.shields.io/badge/dashboard-live%20vanilla%20JS-brightgreen.svg)](index.html)
+[![API Client](https://img.shields.io/badge/api%20client-Python%203.9%2B-blue.svg)](waaree_api_client.py)
+[![Tests](https://img.shields.io/badge/tests-20%20passed-brightgreen.svg)](tests/)
+[![Architecture](https://img.shields.io/badge/architecture-Schema%20v5.0-orange.svg)](docs/01-ARCHITECTURE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## Architecture
+## 1. What SolarIntelligence Does
 
-```
-credentials.json          ← plant credentials (git-ignored)
-waaree_api_client.py      ← core API client (login, plants, devices, generation)
-scraper_api.py            ← Flask HTTP server wrapping the API client
-update_data.py            ← pipeline: fetch → log → CSV → commit → push
-update-local.sh           ← shell wrapper for update_data.py
+SolarIntelligence provides automated, high-fidelity data collection and analytics for a **2.32 kW rooftop photovoltaic (PV) array** installed in Berhampur, Odisha, India.
 
-data/
-  dashboard.json          ← live payload consumed by index.html (schema v5.0)
-  energy_history.csv      ← consolidated daily table with hourly power columns
-  energy_logs/            ← immutable daily JSON archives
+- **Automated Data Pipeline:** Pulls generation telemetry directly from the Waaree / FoxESS Cloud REST API using reverse-engineered MD5 authentication signatures and JWT tokens (replacing legacy, fragile Selenium scrapers).
+- **Consolidated CSV History:** Maintains `data/energy_history.csv` with daily totals and hourly generation columns (`h05_kw` to `h19_kw`).
+- **Immutable Daily Logs:** Archives daily generation profiles in `data/energy_logs/` as audit-ready JSON snapshots.
+- **Client-Side Visualizer:** Single-file `index.html` with interactive power curves, 7-day trends, monthly generation charts, and estimated tariff savings.
 
-index.html                ← single-file dashboard (HTML + CSS + JS)
-
-docs/
-  01-ARCHITECTURE.md      ← system design and data flow
-  02-API-REFERENCE.md     ← complete FoxESS Cloud API reference
-  03-SETUP-AND-OPERATIONS.md ← setup, deployment and scheduling
+```text
+  Solar Intelligence Dashboard (Schema v5.0)
+  Plant: 2.32 kW Rooftop PV · Berhampur, Odisha
+  ─────────────────────────────────────────────────────────────
+  Current Power:  1.54 kW   ██████████░░░░  (66.3% capacity)
+  Today's Yield:  3.10 kWh  |  Monthly Yield: 43.40 kWh
+  Total Lifetime: 984.3 kWh |  Est. Value:   ₹15.50 (today)
+  Inverter State: Online    |  Data Quality: 100/100
 ```
 
-## Quick Start
+---
+
+## 2. Why It Exists
+
+Most residential solar inverters in India come bundled with proprietary, ad-heavy mobile applications that:
+- Offer limited data export options or lock raw data behind vendor walls.
+- Provide no automated integration for home automation, personal dashboards, or long-term degradation tracking.
+- Frequently fail to display granular hourly breakdown profiles.
+
+**SolarIntelligence solves this through open engineering:**
+- **Direct API Protocol:** Fast (<1s) authenticated requests to portal endpoints. No headless browsers or emulators.
+- **Data Provenance & Transparency:** Every reading is timestamped and categorized by data origin (`api` vs `estimate`).
+- **Zero-Dependency Frontend:** The visualization runs statically in any browser without npm, node_modules, or server rendering.
+
+---
+
+## 3. Data Provenance & Sensor Boundaries
+
+To ensure engineering rigor, this repository explicitly separates measured sensor telemetry from computed values and hardware limitations:
+
+| Metric | Origin | Measurement Interval | Description / Boundaries |
+|---|---|---|---|
+| `power_kw` | **Measured** | 5–15 min (inverter push) | Instantaneous AC active power reported by the inverter telemetry unit. |
+| `daily_yield_kwh` | **Measured** | Cumulative (daily reset) | Energy accumulator register inside the inverter firmware. |
+| `hourly (h05–h19)` | **Measured** | Hourly aggregated | Hourly energy generation points returned by the FoxESS cloud report API. |
+| `income_inr` | *Computed Estimate* | Per daily update | Calculated as `daily_yield_kwh * 5.0 INR/kWh` (standard Odisha DISCOM grid-tied tariff baseline). Not an official electricity bill statement. |
+| `avg_power_kw` | *Computed* | Daily | Mean active power across active daylight generation hours. |
+| `voltage_v` / `current_a` | *Unavailable* | N/A | Basic cloud API tiers for this residential inverter model omit DC string voltage, DC current, and internal heatsink temperature. These fields report `0` and are not fabricated. |
+
+> [!IMPORTANT]
+> **Safety Notice:** This software is for monitoring and performance evaluation only. It does not control inverter relays, grid synchronization parameters, or electrical disconnects. Always consult a certified electrical technician before servicing PV hardware.
+
+---
+
+## 4. Implementation Status
+
+| Component | Status | Description |
+|---|---|---|
+| **API Client (`waaree_api_client.py`)** | **Production-Ready** | Handles MD5 signature calculation (`path\r\ntoken\r\nlang\r\ntimestamp.5245784`), JWT session renewal, and automatic retry. |
+| **Pipeline CLI (`update_data.py`)** | **Production-Ready** | Reconciles hourly peaks, updates `data/dashboard.json` (Schema v5.0), and updates `data/energy_history.csv`. |
+| **Local API Server (`scraper_api.py`)** | **Production-Ready** | Lightweight Flask API exposing `/api/live`, `/api/hourly`, `/api/daily`, and `/api/dashboard`. |
+| **Single-Page Dashboard (`index.html`)** | **Production-Ready** | Responsive UI with Chart.js, solar diurnal curves, theme switching, and local metric calculation. |
+| **Automated Testing Suite** | **Production-Ready** | Unit tests validating schema invariants, physical bounds, CSV integrity, and deterministic signature generation. |
+
+---
+
+## 5. Architecture & Data Flow
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                 digital.waaree.com (FoxESS)                 │
+│                 REST API (/c/v0, /generic/v0)               │
+└───────────────┬─────────────────────────────────────────────┘
+                │ Authenticated HTTPS (MD5 Signature + JWT)
+                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     waaree_api_client.py                    │
+│   Token Cache (.waaree_token.json) · Automatic Relogin      │
+└───────────────┬─────────────────────────────┬───────────────┘
+                │                             │
+                ▼                             ▼
+┌──────────────────────────────┐ ┌────────────────────────────┐
+│      scraper_api.py          │ │      update_data.py        │
+│   (Flask server on :8006)    │ │   (Batch update pipeline)  │
+└───────────────┬──────────────┘ └────────────┬───────────────┘
+                │                             │
+                ▼                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  data/ Store (Single Source)                │
+│  - data/dashboard.json (Schema v5.0 payload)                │
+│  - data/energy_history.csv (Daily rows with hourly columns) │
+│  - data/energy_logs/solar_energy_YYYY-MM-DD.json            │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ Static JSON Fetch
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Dashboard (index.html)                  │
+│       Served via GitHub Pages or local HTTP server          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. Quick Start & Setup
+
+### Prerequisites
+- Python 3.9+ (`pip install -r requirements.txt`)
+- Modern web browser
+
+### Local Development Setup
 
 ```bash
-# 1. Clone and install
 git clone https://github.com/bhargavachary/solar-intelligence.git
 cd solar-intelligence
-python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# 2. Create credentials.json: { "username": "...", "password": "..." }
-
-# 3. Fetch live data + build CSV + archive log
-python3 update_data.py
-
-# 4. Fetch + commit + push to GitHub Pages
-python3 update_data.py --push
 ```
 
-## API Client CLI
+### Running Automated Tests
 
 ```bash
-python3 waaree_api_client.py --dashboard       # full dashboard payload
-python3 waaree_api_client.py --hourly           # today's hourly generation
-python3 waaree_api_client.py --monthly          # this month's daily totals
-python3 waaree_api_client.py --yearly           # yearly monthly totals
+python3 -m unittest discover -s tests -v
 ```
 
-## Data Format
+### Viewing the Dashboard
+You can inspect the live dashboard immediately with existing archived telemetry:
 
-### `data/energy_history.csv`
+```bash
+python3 -m http.server 8080
+# Open http://localhost:8080 in your browser
 ```
-date,yield_kwh,peak_power_kw,avg_power_kw,h05_kw,h06_kw,...,h19_kw,source
-2026-02-14,9.4,1.508,0.94,,,,,,,,,,,,,,,,api
-2026-02-17,11.4,1.508,1.14,,,,0.2,0.6,1.0,1.3,1.4,...,api
+
+### Fetching Fresh Telemetry (Requires Plant Account)
+Create `credentials.json` (git-ignored):
+
+```json
+{
+  "username": "your_portal_username",
+  "password": "your_portal_password"
+}
 ```
 
-Rows = days, hourly columns (`h05_kw`–`h19_kw`) = power in kW at that hour.
+Then run the pipeline:
+```bash
+python3 update_data.py
+```
 
-## Dashboard
+---
 
-Single `index.html` deployed on **GitHub Pages** — no build step, no framework.
-Loads `data/dashboard.json` at runtime.
+## 7. Limitations & Known Boundaries
 
-Features: live power display, hourly power curves, 7-day trends, monthly analytics,
-seasonal forecasting, financial ROI tracking, dark/light theme, glassmorphism design,
-animated popup detail cards, responsive layout.
+1. **Authentication Token Lifecycle:** JWT session tokens expire approximately every 2 hours. The client automatically refreshes tokens on expiration.
+2. **Reverse-Engineered Endpoints:** FoxESS Cloud portal changes may require header updates. Current implementation tracks the standard `5245784` client identifier.
+3. **Sensor Granularity:** Cloud polling is restricted to reasonable intervals (5–15 minutes) to avoid vendor rate-limiting.
 
-## Documentation
+---
 
-| Doc | Contents |
-|-----|----------|
-| [01-ARCHITECTURE](docs/01-ARCHITECTURE.md) | System design, data schema v5.0, flow diagrams |
-| [02-API-REFERENCE](docs/02-API-REFERENCE.md) | FoxESS Cloud endpoints, auth, signature algorithm |
-| [03-SETUP-AND-OPERATIONS](docs/03-SETUP-AND-OPERATIONS.md) | Installation, scheduling, troubleshooting |
+## 8. Contributing
 
-## License
+Contributions and bug reports are welcome:
+1. Ensure all physical constraint tests pass: `python3 -m unittest discover -s tests -v`.
+2. Do not commit credentials, tokens, or simulated non-physical readings to `data/`.
+3. Open a Pull Request detailing the changes and test evidence.
 
-Private project. © Bhargav Achary
+---
+
+## 9. License
+
+Released under the [MIT License](LICENSE). Copyright © D K Bhargav Achary.

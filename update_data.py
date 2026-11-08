@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 Solar Intelligence — Data Update Pipeline
 ==========================================
@@ -40,8 +41,10 @@ def fetch_dashboard(client):
     data = build_dashboard_json(client)
     out = os.path.join(BASE, "data", "dashboard.json")
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w") as f:
+    tmp_out = out + ".tmp"
+    with open(tmp_out, "w") as f:
         json.dump(data, f, indent=2, default=str)
+    os.replace(tmp_out, out)
     print(f"✅ data/dashboard.json updated ({data['meta']['generated_at']})")
     return data
 
@@ -76,8 +79,10 @@ def save_energy_log(data):
     log_dir = os.path.join(BASE, "data", "energy_logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f"solar_energy_{today}.json")
-    with open(log_file, "w") as f:
+    tmp_file = log_file + ".tmp"
+    with open(tmp_file, "w") as f:
         json.dump(log, f, indent=2)
+    os.replace(tmp_file, log_file)
     print(f"✅ Energy log: data/energy_logs/solar_energy_{today}.json")
 
 
@@ -155,9 +160,31 @@ def build_csv(data):
                     if col in daily_rows.get(dt, {}):
                         daily_rows[dt][col] = round(float(pw), 3)
 
-    # Write sorted
+    # Reconcile peak_power_kw and avg_power_kw from actual measured hourly power if available
+    for dt, row in daily_rows.items():
+        measured_powers = []
+        for col in hour_cols:
+            val = row.get(col)
+            if val is not None and val != "":
+                try:
+                    p = float(val)
+                    if p > 0:
+                        measured_powers.append(p)
+                except (ValueError, TypeError):
+                    pass
+        if measured_powers:
+            actual_peak = max(measured_powers)
+            curr_peak = float(row.get("peak_power_kw", 0) or 0)
+            if actual_peak > curr_peak:
+                row["peak_power_kw"] = round(actual_peak, 3)
+            curr_avg = float(row.get("avg_power_kw", 0) or 0)
+            if curr_avg == 0:
+                row["avg_power_kw"] = round(sum(measured_powers) / len(measured_powers), 3)
+
+    # Write sorted atomically
     fieldnames = ["date", "yield_kwh", "peak_power_kw", "avg_power_kw"] + hour_cols + ["source"]
-    with open(csv_path, "w", newline="") as f:
+    tmp_csv = csv_path + ".tmp"
+    with open(tmp_csv, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for dt in sorted(daily_rows.keys()):
@@ -166,6 +193,7 @@ def build_csv(data):
                 if col not in row:
                     row[col] = ""
             writer.writerow(row)
+    os.replace(tmp_csv, csv_path)
 
     print(f"✅ CSV table: data/energy_history.csv ({len(daily_rows)} days)")
 
