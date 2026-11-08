@@ -5,7 +5,7 @@
 
 [![Dashboard](https://img.shields.io/badge/dashboard-live%20vanilla%20JS-brightgreen.svg)](index.html)
 [![API Client](https://img.shields.io/badge/api%20client-Python%203.9%2B-blue.svg)](waaree_api_client.py)
-[![Tests](https://img.shields.io/badge/tests-20%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen.svg)](tests/)
 [![Architecture](https://img.shields.io/badge/architecture-Schema%20v5.0-orange.svg)](docs/01-ARCHITECTURE.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -111,6 +111,21 @@ To ensure engineering rigor, this repository explicitly separates measured senso
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### FoxESS / Waaree Cloud API Signature Protocol
+
+Requests to the cloud portal (`/c/v0/...` and `/generic/v0/...`) require an MD5 request signature header alongside the bearer token:
+
+```python
+signature = hashlib.md5(
+    f"{path}\r\n{token}\r\n{lang}\r\n{timestamp}.{CLIENT_ID}".encode("utf-8")
+).hexdigest()
+```
+
+- **`CLIENT_ID`**: Fixed portal identifier `5245784`
+- **`lang`**: Client language code (default: `en`)
+- **`timestamp`**: Epoch timestamp in milliseconds
+- **Headers Sent**: `token`, `timestamp`, `signature`, `lang: en`
+
 ---
 
 ## 6. Quick Start & Setup
@@ -127,6 +142,17 @@ cd solar-intelligence
 pip install -r requirements.txt
 ```
 
+### Developer Commands (`Makefile`)
+
+The repository includes a self-documenting `Makefile` for developer hygiene:
+
+```bash
+make test    # Run full unit test suite (42 tests across schema, math, API)
+make lint    # Validate Python bytecode compilation across all modules
+make demo    # Run update pipeline with simulated telemetry (zero credentials required)
+make serve   # Launch local dashboard server on http://localhost:8080
+```
+
 ### Running Automated Tests
 
 ```bash
@@ -137,13 +163,33 @@ python3 -m unittest discover -s tests -v
 You can inspect the live dashboard immediately with existing archived telemetry:
 
 ```bash
-python3 -m http.server 8080
+make serve
+# Or: python3 -m http.server 8080
 # Open http://localhost:8080 in your browser
 ```
 
-### Fetching Fresh Telemetry (Requires Plant Account)
-Create `credentials.json` (git-ignored):
+### Offline Simulation Mode (No Credentials Needed)
+Anyone can test and run the complete data pipeline without proprietary inverter credentials:
 
+```bash
+# Run pipeline dry-run with mock telemetry:
+python3 update_data.py --mock --dry-run
+
+# Run local API server with mock telemetry:
+python3 scraper_api.py --mock
+```
+
+### Fetching Fresh Live Telemetry (Plant Account Required)
+To fetch real telemetry from an active Waaree / FoxESS inverter, provide credentials via environment variables or a local JSON file:
+
+**Option A (Environment Variables):**
+```bash
+export WAAREE_USERNAME="your_portal_username"
+export WAAREE_PASSWORD="your_portal_password"
+python3 update_data.py
+```
+
+**Option B (`credentials.json`, git-ignored):**
 ```json
 {
   "username": "your_portal_username",
@@ -151,7 +197,6 @@ Create `credentials.json` (git-ignored):
 }
 ```
 
-Then run the pipeline:
 ```bash
 python3 update_data.py
 ```

@@ -54,8 +54,8 @@ launchd-manager.sh
 index_v45_backup.html
 dump_api_data.py
 generate_report.py
-test_*.py
-validate_*.py
+/test_*.py
+/validate_*.py
 scraper_api_old.py
 reports/
 assets/
@@ -66,3 +66,7 @@ SCHEDULED_UPDATES.md
 WORKFLOW_DEPLOYMENT.md
 update.log
 validation_run.log
+
+# Ensure test suite in tests/ is tracked
+!tests/
+!tests/**

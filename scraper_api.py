@@ -27,7 +27,7 @@ import json
 import threading
 from datetime import datetime
 
-from waaree_api_client import WaareeAPIClient, WaareeAPIError
+from waaree_api_client import WaareeAPIClient, MockWaareeAPIClient, WaareeAPIError
 
 app = Flask(__name__)
 CORS(app)
@@ -49,15 +49,37 @@ last_update = {
     "duration_s": None,
 }
 
-_client: WaareeAPIClient | None = None
+_client: WaareeAPIClient | MockWaareeAPIClient | None = None
 
 
-def _get_client() -> WaareeAPIClient:
-    """Get or create a singleton API client."""
+def _get_client():
+    """Get or create a singleton API client (supports credentials or mock mode)."""
     global _client
     if _client is None:
-        with open(CREDENTIALS_FILE) as f:
-            creds = json.load(f)
+        if os.environ.get("WAAREE_MOCK") == "1":
+            _client = MockWaareeAPIClient()
+            return _client
+
+        creds = {}
+        if os.path.exists(CREDENTIALS_FILE):
+            with open(CREDENTIALS_FILE) as f:
+                creds = json.load(f)
+        elif os.environ.get("WAAREE_CREDENTIALS"):
+            try:
+                creds = json.loads(os.environ["WAAREE_CREDENTIALS"])
+            except Exception:
+                pass
+        elif os.environ.get("WAAREE_USERNAME") and os.environ.get("WAAREE_PASSWORD"):
+            creds = {
+                "username": os.environ["WAAREE_USERNAME"],
+                "password": os.environ["WAAREE_PASSWORD"],
+            }
+
+        if not creds.get("username") or not creds.get("password"):
+            # Fallback to simulated offline client for developer friendliness
+            _client = MockWaareeAPIClient()
+            return _client
+
         _client = WaareeAPIClient(
             username=creds["username"],
             password=creds["password"],
@@ -471,6 +493,12 @@ def api_dashboard():
         data = build_dashboard_json(client)
         return jsonify(data)
     except Exception as e:
+        if os.path.exists(DASHBOARD_DATA_FILE):
+            with open(DASHBOARD_DATA_FILE) as f:
+                data = json.load(f)
+            resp = jsonify(data)
+            resp.headers["X-Data-Source"] = "cached_fallback"
+            return resp
         return jsonify({"error": str(e)}), 500
 
 

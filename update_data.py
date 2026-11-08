@@ -78,7 +78,7 @@ def fetch_dashboard(client, data_dir: str | None = None, dry_run: bool = False):
     return data
 
 
-def save_energy_log(data):
+def save_energy_log(data: dict, data_dir: str | None = None, dry_run: bool = False):
     """Save today's energy log with hourly breakdown."""
     live = data.get("live", {})
     meta = data.get("meta", {})
@@ -105,21 +105,30 @@ def save_energy_log(data):
                 "cumulative_kwh": round(rec.get("daily_yield_kwh", 0), 2),
             })
 
-    log_dir = os.path.join(BASE, "data", "energy_logs")
-    os.makedirs(log_dir, exist_ok=True)
+    target_dir = data_dir or os.path.join(BASE, "data")
+    log_dir = os.path.join(target_dir, "energy_logs")
     log_file = os.path.join(log_dir, f"solar_energy_{today}.json")
-    tmp_file = log_file + ".tmp"
-    with open(tmp_file, "w") as f:
-        json.dump(log, f, indent=2)
-    os.replace(tmp_file, log_file)
-    print(f"✅ Energy log: data/energy_logs/solar_energy_{today}.json")
+
+    if not dry_run:
+        os.makedirs(log_dir, exist_ok=True)
+        tmp_file = log_file + ".tmp"
+        with open(tmp_file, "w") as f:
+            json.dump(log, f, indent=2)
+        os.replace(tmp_file, log_file)
+        print(f"✅ Energy log: {os.path.relpath(log_file, BASE)}")
+    else:
+        print(f"🔍 [Dry-Run] Energy log prepared: solar_energy_{today}.json ({len(log['hourly'])} hourly records)")
 
 
-def build_csv(data):
+def build_csv(data: dict, data_dir: str | None = None, dry_run: bool = False):
     """Build/update data/energy_history.csv — one row per day, hourly power columns."""
     daily_rows = {}
     hour_cols = [f"h{h:02d}_kw" for h in range(5, 20)]
     empty_hours = {c: "" for c in hour_cols}
+
+    target_dir = data_dir or os.path.join(BASE, "data")
+    csv_path = os.path.join(target_dir, "energy_history.csv")
+    log_dir = os.path.join(target_dir, "energy_logs")
 
     # From dashboard last_7_days
     for day in data.get("last_7_days", []):
@@ -143,8 +152,7 @@ def build_csv(data):
             if col in daily_rows[today]:
                 daily_rows[today][col] = round(rec.get("current_power_kw", 0), 3)
 
-    # Merge with existing CSV
-    csv_path = os.path.join(BASE, "data", "energy_history.csv")
+    # Merge with existing CSV if present
     if os.path.exists(csv_path):
         with open(csv_path) as f:
             for row in csv.DictReader(f):
@@ -153,13 +161,13 @@ def build_csv(data):
                     daily_rows[dt] = row
 
     # Also incorporate real energy logs
-    log_dir = os.path.join(BASE, "data", "energy_logs")
     if os.path.isdir(log_dir):
         for fn in sorted(os.listdir(log_dir)):
             if not fn.endswith(".json"):
                 continue
             try:
-                log = json.load(open(os.path.join(log_dir, fn)))
+                with open(os.path.join(log_dir, fn), "r", encoding="utf-8") as f:
+                    log = json.load(f)
             except Exception:
                 continue
             src = log.get("meta", {}).get("data_source", log.get("source", ""))
@@ -212,19 +220,22 @@ def build_csv(data):
 
     # Write sorted atomically
     fieldnames = ["date", "yield_kwh", "peak_power_kw", "avg_power_kw"] + hour_cols + ["source"]
-    tmp_csv = csv_path + ".tmp"
-    with open(tmp_csv, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-        writer.writeheader()
-        for dt in sorted(daily_rows.keys()):
-            row = daily_rows[dt]
-            for col in fieldnames:
-                if col not in row:
-                    row[col] = ""
-            writer.writerow(row)
-    os.replace(tmp_csv, csv_path)
-
-    print(f"✅ CSV table: data/energy_history.csv ({len(daily_rows)} days)")
+    if not dry_run:
+        os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+        tmp_csv = csv_path + ".tmp"
+        with open(tmp_csv, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            for dt in sorted(daily_rows.keys()):
+                row = daily_rows[dt]
+                for col in fieldnames:
+                    if col not in row:
+                        row[col] = ""
+                writer.writerow(row)
+        os.replace(tmp_csv, csv_path)
+        print(f"✅ CSV table: {os.path.relpath(csv_path, BASE)} ({len(daily_rows)} days)")
+    else:
+        print(f"🔍 [Dry-Run] CSV history table prepared ({len(daily_rows)} daily rows across {len(fieldnames)} columns)")
 
 
 def git_push():
@@ -244,23 +255,54 @@ def git_push():
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Solar Intelligence — Data Update Pipeline")
+    parser.add_argument("--push", action="store_true", help="Commit and push changes to GitHub Pages")
+    parser.add_argument("--mock", action="store_true", help="Run update pipeline using mock/offline simulation data")
+    parser.add_argument("--dry-run", action="store_true", help="Compute data transformations without writing files to disk")
+    parser.add_argument("--credentials", "-c", help="Path to credentials.json file")
+    parser.add_argument("--data-dir", help="Target data directory (defaults to project data/)")
+    args = parser.parse_args()
+
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("  Solar Intelligence — Data Update")
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
-    creds = load_credentials()
-    token_file = os.path.join(BASE, ".waaree_token.json")
-    client = WaareeAPIClient(creds["username"], creds["password"], token_file=token_file)
-    client.login()
+    use_mock = args.mock or os.environ.get("WAAREE_MOCK") == "1"
 
-    data = fetch_dashboard(client)
-    save_energy_log(data)
-    build_csv(data)
+    if use_mock:
+        print("⚡ Using Mock Waaree API client (offline simulation mode)\n")
+        client = MockWaareeAPIClient()
+    else:
+        creds = load_credentials(args.credentials)
+        if not creds.get("username") or not creds.get("password"):
+            print("❌ Waaree credentials not found.")
+            print("💡 Provide credentials via:")
+            print("   1) credentials.json file in project root")
+            print("   2) WAAREE_CREDENTIALS / WAAREE_USERNAME / WAAREE_PASSWORD environment variables")
+            print("   3) Or run an offline demonstration:")
+            print("      python3 update_data.py --mock\n")
+            return 1
 
-    if "--push" in sys.argv:
-        git_push()
+        token_file = os.path.join(BASE, ".waaree_token.json")
+        client = WaareeAPIClient(creds["username"], creds["password"], token_file=token_file)
+        try:
+            client.login()
+        except Exception as e:
+            print(f"❌ Login failed: {e}")
+            return 1
+
+    data = fetch_dashboard(client, data_dir=args.data_dir, dry_run=args.dry_run)
+    save_energy_log(data, data_dir=args.data_dir, dry_run=args.dry_run)
+    build_csv(data, data_dir=args.data_dir, dry_run=args.dry_run)
+
+    if args.push:
+        if args.dry_run:
+            print("ℹ️  [Dry-Run] Skipped git push")
+        else:
+            git_push()
 
     print("\n━━━ Done ━━━")
+    return 0
 
 
 if __name__ == "__main__":

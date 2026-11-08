@@ -1,1 +1,1 @@
-# Solar Intelligence test suite
+# Solar Intelligence tests
