@@ -17,35 +17,64 @@ import json
 import csv
 import os
 import sys
+import argparse
 import subprocess
 from datetime import datetime
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
-from waaree_api_client import WaareeAPIClient
+from waaree_api_client import WaareeAPIClient, MockWaareeAPIClient
 from scraper_api import build_dashboard_json
 
 
-def load_credentials():
+def load_credentials(custom_path: str | None = None) -> dict:
+    """Load credentials from file, environment variables, or secret payloads."""
+    # 1. Custom path
+    if custom_path and os.path.exists(custom_path):
+        with open(custom_path) as f:
+            return json.load(f)
+
+    # 2. Project credentials.json
     creds_path = os.path.join(BASE, "credentials.json")
-    if not os.path.exists(creds_path):
-        print("❌ credentials.json not found")
-        sys.exit(1)
-    with open(creds_path) as f:
-        return json.load(f)
+    if os.path.exists(creds_path):
+        with open(creds_path) as f:
+            return json.load(f)
+
+    # 3. Environment variable JSON string or file path
+    env_creds = os.environ.get("WAAREE_CREDENTIALS")
+    if env_creds:
+        try:
+            return json.loads(env_creds)
+        except Exception:
+            if os.path.exists(env_creds):
+                with open(env_creds) as f:
+                    return json.load(f)
+
+    # 4. Username / Password environment variables
+    user = os.environ.get("WAAREE_USERNAME")
+    pw = os.environ.get("WAAREE_PASSWORD")
+    if user and pw:
+        return {"username": user, "password": pw}
+
+    return {}
 
 
-def fetch_dashboard(client):
+def fetch_dashboard(client, data_dir: str | None = None, dry_run: bool = False):
     """Fetch all API data and build schema v5.0 dashboard payload."""
     data = build_dashboard_json(client)
-    out = os.path.join(BASE, "data", "dashboard.json")
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    tmp_out = out + ".tmp"
-    with open(tmp_out, "w") as f:
-        json.dump(data, f, indent=2, default=str)
-    os.replace(tmp_out, out)
-    print(f"✅ data/dashboard.json updated ({data['meta']['generated_at']})")
+    target_dir = data_dir or os.path.join(BASE, "data")
+    out = os.path.join(target_dir, "dashboard.json")
+    
+    if not dry_run:
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        tmp_out = out + ".tmp"
+        with open(tmp_out, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+        os.replace(tmp_out, out)
+        print(f"✅ {os.path.relpath(out, BASE)} updated ({data['meta']['generated_at']})")
+    else:
+        print(f"🔍 [Dry-Run] Schema v5.0 payload generated for {data['meta']['location']} ({len(data)} top-level sections)")
     return data
 
 

@@ -424,6 +424,98 @@ class WaareeAPIError(Exception):
     pass
 
 
+class MockWaareeAPIClient:
+    """Mock API client for testing, CI, and offline demonstrations."""
+
+    def __init__(self, username: str = "demo_user", password: str = "demo_pass", token_file: str | None = None):
+        self.username = username
+        self.password = password
+        self.token_file = token_file
+        self._token = "mock_jwt_token_foxess_5245784"
+        self._token_time = datetime.now()
+
+    def login(self) -> str:
+        return self._token
+
+    def get_user_info(self) -> dict:
+        return {
+            "userId": "usr_mock_101",
+            "user": "Bhargav Achary",
+            "email": "demo@example.com",
+            "account": self.username,
+        }
+
+    def get_plants(self) -> list[dict]:
+        return [{
+            "stationID": "mock_plant_berhampur",
+            "name": "2.32 kW Rooftop PV (Berhampur)",
+            "systemCapacity": 2.32,
+            "city": "Berhampur",
+            "country": "India",
+            "postcode": "760001",
+            "timeZone": "Asia/Kolkata",
+        }]
+
+    def get_devices(self) -> list[dict]:
+        return [{
+            "deviceSN": "WAAREE-INV-2026-MOCK",
+            "deviceType": "Inverter",
+            "status": 1,  # 1 = Online
+            "power": 1.485,
+            "generationToday": 9.42,
+            "generationTotal": 4210.8,
+            "dataLatestUploadDate": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }]
+
+    def get_plant_devices(self, station_id: str) -> list[dict]:
+        return self.get_devices()
+
+    def get_hourly_generation(self, station_id: str, target_date: datetime | None = None) -> dict:
+        curve = [
+            (6, 0.05), (7, 0.22), (8, 0.65), (9, 1.15),
+            (10, 1.58), (11, 1.82), (12, 1.95), (13, 1.88),
+            (14, 1.62), (15, 1.25), (16, 0.78), (17, 0.32), (18, 0.08)
+        ]
+        return {
+            "generation": curve,
+            "feedin": [(h, round(k * 0.4, 2)) for h, k in curve],
+            "gridConsumption": [(h, 0.15) for h, _ in curve],
+        }
+
+    def get_daily_generation(self, station_id: str, year: int, month: int) -> list[tuple[int, float]]:
+        now = datetime.now()
+        days_in_month = now.day if (year == now.year and month == now.month) else 28
+        results = []
+        for d in range(1, max(2, days_in_month + 1)):
+            kwh = 9.2 + ((d * 7) % 25) / 10.0
+            results.append((d, round(kwh, 2)))
+        return results
+
+    def get_monthly_generation(self, station_id: str, year: int) -> list[tuple[int, float]]:
+        monthly_yields = [
+            (1, 275.4), (2, 288.1), (3, 318.5), (4, 335.2),
+            (5, 342.0), (6, 290.4), (7, 245.8), (8, 252.3),
+            (9, 280.6), (10, 295.2), (11, 284.5), (12, 270.1)
+        ]
+        now = datetime.now()
+        return [(m, val) for m, val in monthly_yields if m <= now.month]
+
+    def get_dashboard_data(self) -> dict:
+        return {
+            "user": "Bhargav Achary",
+            "device_sn": "WAAREE-INV-2026-MOCK",
+            "device_type": "Inverter",
+            "status": 1,
+            "status_text": "online",
+            "current_power_kw": 1.485,
+            "today_kwh": 9.42,
+            "total_kwh": 4210.8,
+            "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "today_hourly": self.get_hourly_generation("mock_plant_berhampur"),
+            "fetched_at": datetime.now().isoformat(),
+        }
+
+
 # ── CLI Usage ──
 
 def main():
@@ -435,6 +527,8 @@ def main():
     parser.add_argument("--password", "-p", help="Portal password")
     parser.add_argument("--credentials", "-c", default="credentials.json",
                        help="Path to credentials.json")
+    parser.add_argument("--mock", action="store_true",
+                       help="Use mock client with simulated realistic data (no credentials required)")
     parser.add_argument("--output", "-o", help="Output file for dashboard data")
     parser.add_argument("--dashboard", action="store_true",
                        help="Fetch and display dashboard data")
@@ -454,27 +548,48 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
-    
-    # Load credentials
-    username = args.username
-    password = args.password
-    
-    if not username or not password:
-        cred_path = args.credentials
-        if os.path.exists(cred_path):
-            with open(cred_path) as f:
-                creds = json.load(f)
-            username = username or creds.get("username")
-            password = password or creds.get("password")
-    
-    if not username or not password:
-        print("Error: Provide --username and --password, or a credentials.json file")
-        return 1
-    
-    # Create client
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    token_file = os.path.join(script_dir, ".waaree_token.json")
-    client = WaareeAPIClient(username, password, token_file=token_file)
+
+    use_mock = args.mock or os.environ.get("WAAREE_MOCK") == "1"
+
+    if use_mock:
+        client = MockWaareeAPIClient(username=args.username or "demo_user")
+    else:
+        # Load credentials
+        username = args.username or os.environ.get("WAAREE_USERNAME")
+        password = args.password or os.environ.get("WAAREE_PASSWORD")
+        
+        if not username or not password:
+            env_creds = os.environ.get("WAAREE_CREDENTIALS")
+            if env_creds:
+                try:
+                    c = json.loads(env_creds)
+                    username = username or c.get("username")
+                    password = password or c.get("password")
+                except Exception:
+                    pass
+
+        if not username or not password:
+            cred_path = args.credentials
+            if os.path.exists(cred_path):
+                with open(cred_path) as f:
+                    creds = json.load(f)
+                username = username or creds.get("username")
+                password = password or creds.get("password")
+        
+        if not username or not password:
+            print("❌ Error: Waaree credentials not found.")
+            print("💡 Provide credentials via:")
+            print("   --username and --password flags")
+            print("   credentials.json file")
+            print("   WAAREE_CREDENTIALS / WAAREE_USERNAME / WAAREE_PASSWORD environment variables")
+            print("   Or run with --mock for an offline demonstration:")
+            print("   python3 waaree_api_client.py --mock --dashboard")
+            return 1
+        
+        # Create client
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        token_file = os.path.join(script_dir, ".waaree_token.json")
+        client = WaareeAPIClient(username, password, token_file=token_file)
     
     try:
         client.login()
