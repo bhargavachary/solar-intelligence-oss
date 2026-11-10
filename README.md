@@ -5,7 +5,7 @@
 
 [![Dashboard](https://img.shields.io/badge/dashboard-live%20vanilla%20JS-brightgreen.svg)](index.html)
 [![API Client](https://img.shields.io/badge/api%20client-Python%203.9%2B-blue.svg)](waaree_api_client.py)
-[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-45%20passed-brightgreen.svg)](tests/)
 [![Architecture](https://img.shields.io/badge/architecture-Schema%20v5.0-orange.svg)](docs/01-ARCHITECTURE.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -147,7 +147,7 @@ pip install -r requirements.txt
 The repository includes a self-documenting `Makefile` for developer hygiene:
 
 ```bash
-make test    # Run full unit test suite (42 tests across schema, math, API)
+make test    # Run full unit test suite (45 tests across schema, math, API)
 make lint    # Validate Python bytecode compilation across all modules
 make demo    # Run update pipeline with simulated telemetry (zero credentials required)
 make serve   # Launch local dashboard server on http://localhost:8080
@@ -211,12 +211,11 @@ python3 update_data.py
 
 ---
 
-## 8. Contributing
+## 8. Contributing & Security
 
-Contributions and bug reports are welcome:
-1. Ensure all physical constraint tests pass: `python3 -m unittest discover -s tests -v`.
-2. Do not commit credentials, tokens, or simulated non-physical readings to `data/`.
-3. Open a Pull Request detailing the changes and test evidence.
+- **Contributing:** Please read our [Contributing Guide](CONTRIBUTING.md) for details on developer setup, schema constraints, and mock testing.
+- **Security Policy:** Review our [Security Policy](SECURITY.md) for credential safety practices and vulnerability disclosure guidelines.
+- **Changelog:** See [CHANGELOG.md](CHANGELOG.md) for release notes and update history.
 
 ---
 

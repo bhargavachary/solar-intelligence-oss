@@ -81,6 +81,47 @@ class TestWaareeAPIClient(unittest.TestCase):
             self.client._post("/c/v0/plant/list")
         self.assertIn("errno=40101", str(ctx.exception))
 
+    def test_network_error_raises_waaree_api_error(self):
+        """Network drop or timeout during request must raise WaareeAPIError."""
+        import requests
+        self.client._token = "valid_token"
+        self.client._token_time = datetime.now()
+        self.client.session.post = MagicMock(side_effect=requests.exceptions.ConnectionError("Connection refused"))
+        self.client.session.get = MagicMock(side_effect=requests.exceptions.Timeout("Read timeout"))
+
+        with self.assertRaises(WaareeAPIError) as ctx:
+            self.client._post("/c/v0/device/list")
+        self.assertIn("Network error on POST", str(ctx.exception))
+
+        with self.assertRaises(WaareeAPIError) as ctx2:
+            self.client._get("/generic/v0/user/api/get")
+        self.assertIn("Network error on GET", str(ctx2.exception))
+
+    def test_http_error_status_raises_waaree_api_error(self):
+        """Non-200 HTTP status code must raise WaareeAPIError."""
+        self.client._token = "valid_token"
+        self.client._token_time = datetime.now()
+        mock_resp = MagicMock()
+        mock_resp.status_code = 503
+        self.client.session.get = MagicMock(return_value=mock_resp)
+
+        with self.assertRaises(WaareeAPIError) as ctx:
+            self.client._get("/c/v0/status")
+        self.assertIn("HTTP 503", str(ctx.exception))
+
+    def test_malformed_json_raises_waaree_api_error(self):
+        """Malformed JSON from server must raise WaareeAPIError."""
+        self.client._token = "valid_token"
+        self.client._token_time = datetime.now()
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.side_effect = ValueError("No JSON object could be decoded")
+        self.client.session.post = MagicMock(return_value=mock_resp)
+
+        with self.assertRaises(WaareeAPIError) as ctx:
+            self.client._post("/c/v0/plant/list")
+        self.assertIn("Malformed JSON", str(ctx.exception))
+
 
 class TestResilienceAndMocking(unittest.TestCase):
 

@@ -42,16 +42,10 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Create Credentials File
-      # Write the secret content to credentials.json (script expects this file)
-      run: echo '${{ secrets.WAAREE_CREDENTIALS }}' > credentials.json
-
     - name: Run Update Script
+      env:
+        WAAREE_CREDENTIALS: ${{ secrets.WAAREE_CREDENTIALS }}
       run: python update_data.py
-
-    - name: Remove Credentials File
-      # Security best practice: clean up before committing
-      run: rm credentials.json
 
     - name: Commit and Push changes
       uses: stefanzweifel/git-auto-commit-action@v5

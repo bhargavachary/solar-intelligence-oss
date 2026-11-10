@@ -150,18 +150,24 @@ class WaareeAPIClient:
         headers = self._headers(path, "", "en")
         payload = {"user": self.username, "password": self.password_md5}
 
-        response = self.session.post(
-            self.BASE_URL + path,
-            headers=headers,
-            data=json.dumps(payload),
-            timeout=30,
-            verify=False,
-        )
+        try:
+            response = self.session.post(
+                self.BASE_URL + path,
+                headers=headers,
+                data=json.dumps(payload),
+                timeout=30,
+                verify=False,
+            )
+        except requests.exceptions.RequestException as e:
+            raise WaareeAPIError(f"Network error on login {path}: {e}") from e
 
         if response.status_code != 200:
             raise WaareeAPIError(f"Login HTTP error: {response.status_code}")
 
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            raise WaareeAPIError(f"Malformed JSON response on login: {e}") from e
         if data.get("errno") != 0:
             errno = data.get("errno")
             raise WaareeAPIError(f"Login failed: errno={errno}")
@@ -187,16 +193,24 @@ class WaareeAPIClient:
         """Make authenticated POST request."""
         self._ensure_token()
         headers = self._headers(path, self._token, "en")
-        response = self.session.post(
-            self.BASE_URL + path,
-            headers=headers,
-            data=json.dumps(body or {}),
-            timeout=30,
-            verify=False,
-        )
+        try:
+            response = self.session.post(
+                self.BASE_URL + path,
+                headers=headers,
+                data=json.dumps(body or {}),
+                timeout=30,
+                verify=False,
+            )
+        except requests.exceptions.RequestException as e:
+            raise WaareeAPIError(f"Network error on POST {path}: {e}") from e
+
         if response.status_code != 200:
             raise WaareeAPIError(f"HTTP {response.status_code} on POST {path}")
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            raise WaareeAPIError(f"Malformed JSON on POST {path}: {e}") from e
+
         if data.get("errno") != 0:
             raise WaareeAPIError(f"API error on {path}: errno={data.get('errno')}")
         return data.get("result", {})
@@ -205,16 +219,24 @@ class WaareeAPIClient:
         """Make authenticated GET request."""
         self._ensure_token()
         headers = self._headers(path, self._token, "en")
-        response = self.session.get(
-            self.BASE_URL + path,
-            headers=headers,
-            params=params,
-            timeout=30,
-            verify=False,
-        )
+        try:
+            response = self.session.get(
+                self.BASE_URL + path,
+                headers=headers,
+                params=params,
+                timeout=30,
+                verify=False,
+            )
+        except requests.exceptions.RequestException as e:
+            raise WaareeAPIError(f"Network error on GET {path}: {e}") from e
+
         if response.status_code != 200:
             raise WaareeAPIError(f"HTTP {response.status_code} on GET {path}")
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            raise WaareeAPIError(f"Malformed JSON on GET {path}: {e}") from e
+
         if data.get("errno") != 0:
             raise WaareeAPIError(f"API error on {path}: errno={data.get('errno')}")
         return data.get("result", {})

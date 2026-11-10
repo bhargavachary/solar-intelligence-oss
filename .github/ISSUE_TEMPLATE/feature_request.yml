@@ -1,0 +1,19 @@
+name: Feature Request
+description: Suggest an enhancement or new feature for SolarIntelligence
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What challenge or gap does this proposal address?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed feature or enhancement.
+    validations:
+      required: true
